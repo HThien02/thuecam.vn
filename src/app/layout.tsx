@@ -9,7 +9,7 @@ import { constructMetadata } from '@/lib/seo/metadata';
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#FF3877',
+  themeColor: '#6D55C7',
 };
 
 export const metadata: Metadata = constructMetadata({
