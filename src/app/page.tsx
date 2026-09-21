@@ -9,6 +9,7 @@ import {
   getArticles,
 } from '@/lib/data';
 import ProductCard from '@/components/product/ProductCard';
+import HomeHero from '@/components/home/HomeHero';
 import {
   Camera,
   ShieldCheck,
@@ -47,7 +48,9 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-20 pb-20 overflow-hidden">
-      {/* 1. HERO SECTION */}
+      <HomeHero image={featuredProducts[0]?.primary_image} />
+
+      {false && (
       <section className="relative pt-10 pb-16 overflow-hidden bg-gradient-to-b from-pink-100/60 via-rose-50/40 to-transparent">
         {/* Soft pastel ambient glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-r from-pink-400/20 via-rose-300/20 to-amber-200/20 blur-[100px] pointer-events-none -z-10" />
@@ -156,6 +159,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* 2. CATEGORIES OVERVIEW */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

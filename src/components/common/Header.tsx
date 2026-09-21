@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Camera, Search, Phone, Menu, X, Compass, Sparkles, Gift } from 'lucide-react';
+import { Camera, Search, Phone, Menu, X, Compass, Sparkles, Gift, Home, Tag, Clock3, Wrench } from 'lucide-react';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -17,18 +17,18 @@ export default function Header() {
               <Gift className="w-3 h-3" />
               Ưu Đãi Bạn Mới
             </span>
-            <span>Giảm 30% First Bill theo CCCD + Nhận máy Thứ 6 giảm thêm 10%!</span>
+            <span>Ưu đãi cộng dồn đến 40% | First bill -20% theo CCCD | Thứ 6 hằng tuần -10%</span>
           </div>
 
           <div className="flex items-center gap-4 text-white/95 text-xs">
             <span className="hidden sm:inline text-pink-100">🛵 Giao hỏa tốc 30 phút TP.HCM & Hà Nội</span>
             <span className="hidden sm:inline text-white/40">|</span>
             <a
-              href="tel:0901234567"
+              href="tel:0932501411"
               className="flex items-center gap-1 font-black hover:underline"
             >
               <Phone className="w-3 h-3" />
-              0901.234.567 (Zalo)
+              0932.501.411 (Zalo)
             </a>
           </div>
         </div>
@@ -53,9 +53,29 @@ export default function Header() {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-6 text-sm font-bold text-slate-700">
+          <nav className="hidden xl:flex items-center gap-4 text-sm font-bold text-slate-700">
+            <Link href="/" className="flex items-center gap-1.5 hover:text-[#FF3877] transition-colors py-1">
+              <Home className="size-4" />
+              <span>Trang chủ</span>
+            </Link>
+
             <Link href="/thiet-bi" className="hover:text-[#FF3877] transition-colors py-1">
               Kho Thiết Bị
+            </Link>
+
+            <Link href="/bang-gia" className="flex items-center gap-1.5 hover:text-[#FF3877] transition-colors py-1">
+              <Tag className="size-4" />
+              <span>Bảng giá</span>
+            </Link>
+
+            <Link href="/thue-theo-gio" className="flex items-center gap-1.5 hover:text-[#FF3877] transition-colors py-1">
+              <Clock3 className="size-4" />
+              <span>Theo giờ</span>
+            </Link>
+
+            <Link href="/cong-thuc-setup" className="flex items-center gap-1.5 hover:text-[#FF3877] transition-colors py-1">
+              <Wrench className="size-4" />
+              <span>Công thức setup</span>
             </Link>
 
             <Link href="/thue-camera-du-lich" className="flex items-center gap-1.5 text-[#FF3877] hover:text-[#e02462] transition-colors py-1">
@@ -198,7 +218,7 @@ export default function Header() {
               Đặt Thuê Online Nhận Máy Ngay
             </Link>
             <a
-              href="tel:0901234567"
+              href="tel:0932501411"
               className="w-full py-2.5 rounded-2xl bg-pink-50 text-[#FF3877] text-center font-bold flex items-center justify-center gap-2"
             >
               <Phone className="w-4 h-4" />

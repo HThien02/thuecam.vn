@@ -23,7 +23,7 @@
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: Arial, "Helvetica Neue", sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
 }
