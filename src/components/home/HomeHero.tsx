@@ -2,53 +2,59 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Clock3, Home, MapPin, Phone, Tag, Wrench } from 'lucide-react';
+import { Camera, MapPin, ShieldCheck, Sparkles, Store } from 'lucide-react';
 
 type HomeHeroProps = { image?: string };
 
 const brands = [
-  { name: 'Sony', slug: 'sony', className: 'bg-[#eef2ff] border-[#c7d2fe] text-[#3730a3]' },
-  { name: 'Canon', slug: 'canon', className: 'bg-[#fff1f2] border-[#fecdd3] text-[#be123c]' },
-  { name: 'Fuji', slug: 'fujifilm', className: 'bg-[#f0fdf4] border-[#bbf7d0] text-[#166534]' },
-  { name: 'Pocket', slug: 'pocket-camera', className: 'bg-[#fff7ed] border-[#fed7aa] text-[#c2410c]' },
+  { name: 'SONY', slug: 'sony', className: 'bg-white border-slate-800 text-slate-900' },
+  { name: 'CANON', slug: 'canon', className: 'bg-[#fff0f5] border-slate-800 text-slate-900' },
+  { name: 'FUJI', slug: 'fujifilm', className: 'bg-[#eef9ff] border-slate-800 text-slate-900' },
+  { name: 'POCKET', slug: 'pocket-camera', className: 'bg-[#ffe77d] border-slate-800 text-slate-900' },
+];
+
+const gear = [
+  { name: 'DJI', className: 'bg-[#fff4f8]' },
+  { name: 'DJI', className: 'bg-[#fff0f6]' },
+  { name: 'Insta360', className: 'bg-[#eafbff]' },
+  { name: 'Fujifilm', className: 'bg-[#fff4cf]' },
 ];
 
 export default function HomeHero({ image }: HomeHeroProps) {
   return (
-    <section className="bg-[#fff9fa] px-4 pb-14 pt-5 sm:px-6 lg:px-8 lg:pt-8">
-      <div className="mx-auto grid max-w-7xl items-stretch gap-5 lg:grid-cols-10">
-        <div className="relative min-h-[300px] overflow-hidden rounded-[15px] bg-slate-200 lg:col-span-4 lg:min-h-[510px]">
-          {image ? <Image src={image} alt="Máy ảnh cho thuê tại THUECAM" fill className="object-cover" priority /> : null}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/50 via-transparent to-transparent" />
-          <span className="absolute bottom-5 left-5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-black text-slate-800 backdrop-blur">Máy xịn, sẵn sàng cho chuyến đi</span>
+    <section className="bg-[#fffafb] px-4 pb-10 pt-5 sm:px-6 lg:px-8 lg:pt-6">
+      <div className="mx-auto grid max-w-[1260px] gap-5 lg:grid-cols-[0.95fr_1.35fr]">
+        <div className="relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-[34px] border border-[#ffd5df] bg-white p-7 shadow-[0_18px_50px_rgba(255,91,145,0.12)] sm:p-10 lg:min-h-[550px]">
+          <div className="absolute -bottom-16 -left-10 size-64 rounded-full bg-[#ffdbe7] blur-[1px]" />
+          <div className="relative">
+            <span className="inline-flex -rotate-1 rounded-xl bg-[#ff4d91] px-5 py-3 text-sm font-black text-white shadow-[0_8px_18px_rgba(255,77,145,0.22)]">ƯU ĐÃI CỘNG DỒN</span>
+            <p className="mt-5 text-[84px] font-black leading-none tracking-[-0.08em] text-[#ff4d91] sm:text-[104px]">40<span className="text-[56px] align-top tracking-normal">%</span></p>
+            <h2 className="max-w-sm text-2xl font-black leading-tight text-[#141a3a] sm:text-3xl">Giảm tối đa tiền thuê</h2>
+            <p className="mt-3 max-w-sm text-base font-extrabold leading-7 text-[#141a3a]">First bill -30% theo CCCD<br />+ nhận máy Thứ 6 -10%.</p>
+          </div>
+          <div className="relative mt-8">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-black text-[#141a3a] shadow-[0_8px_25px_rgba(23,29,62,0.08)]"><Sparkles className="size-4 text-[#ff4d91]" /> Hệ thống tự tính khi đặt thuê</div>
+            <Link href="/thue-camera-du-lich" className="block w-fit rounded-full bg-[#ff4d91] px-7 py-4 text-sm font-black text-white shadow-[0_10px_24px_rgba(255,77,145,0.25)] transition hover:-translate-y-0.5">Đặt thuê ngay</Link>
+          </div>
         </div>
 
-        <div className="flex flex-col justify-center rounded-[15px] border border-pink-100 bg-white p-6 shadow-cute sm:p-10 lg:col-span-6">
-          <div className="mb-5 flex w-fit items-center gap-2 rounded-full bg-pink-50 px-3 py-1.5 text-xs font-black text-[#d92d68]"><MapPin className="size-3.5" /> Tân Sơn, Hồ Chí Minh</div>
-          <h1 className="max-w-2xl text-4xl font-black leading-[1.08] tracking-tight text-slate-950 sm:text-6xl">Có máy khi cần,<br /><span className="text-gradient">có shot khi muốn</span></h1>
-          <p className="mt-5 max-w-xl text-sm font-medium leading-7 text-slate-600 sm:text-base">Ship tận tay TP HCM, kèm hướng dẫn sử dụng khi giao máy. Chọn thiết bị phù hợp và bắt đầu tạo những khung hình đáng nhớ.</p>
-
-          <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-            <p className="text-sm font-black text-slate-900">Ưu đãi cộng dồn đến <strong className="text-2xl text-[#d92d68]">40%</strong></p>
-            <p className="mt-1 text-xs font-bold text-slate-600">First bill -20% theo CCCD <span className="text-[#d92d68]">|</span> Thứ 6 hằng tuần -10%</p>
-          </div>
-
-          <div className="mt-6 flex flex-wrap gap-2">
-            {brands.map((brand) => <Link key={brand.slug} href={`/thuong-hieu/${brand.slug}`} className={`rounded-full border px-3 py-1.5 text-xs font-black ${brand.className}`}>{brand.name}</Link>)}
-          </div>
-
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link href="/thue-camera-du-lich" className="inline-flex items-center gap-2 rounded-full bg-gradient-candy px-6 py-3.5 text-sm font-black text-white shadow-cute transition hover:opacity-90">Đặt thuê ngay <ArrowRight className="size-4" /></Link>
-            <a href="tel:0932501411" className="inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white px-5 py-3.5 text-sm font-black text-[#d92d68] hover:bg-pink-50"><Phone className="size-4" /> 0932501411</a>
+        <div className="relative overflow-hidden rounded-[34px] bg-gradient-to-br from-[#fff5dc] via-[#fff0e4] to-[#ffe8ec] p-7 sm:p-10 lg:min-h-[550px]">
+          <div className="absolute -bottom-16 -right-14 size-64 rounded-full bg-[#b7f2e6] opacity-80" />
+          <div className="relative z-10">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-[#141a3a] shadow-sm"><MapPin className="size-4 text-[#ff4d91]" /> Cần Thơ, Biên Hòa, Bình Dương</div>
+            <h1 className="max-w-2xl text-4xl font-black leading-[1.1] tracking-[-0.04em] text-[#141a3a] sm:text-6xl">Thuê máy xịn<br />Chụp chill hết ý!</h1>
+            <p className="mt-5 max-w-xl text-sm font-bold leading-6 text-[#68708b] sm:text-base">Ship tận tay tại 3 khu vực, kèm hướng dẫn sử dụng khi giao máy.</p>
+            <div className="mt-5 flex flex-wrap gap-2">{brands.map((brand) => <Link key={brand.slug} href={`/thuong-hieu/${brand.slug}`} className={`rounded-full border-2 px-4 py-1.5 text-xs font-black ${brand.className}`}>{brand.name}</Link>)}</div>
+            <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {gear.map((item, index) => <div key={`${item.name}-${index}`} className={`relative flex h-44 flex-col items-center justify-between rounded-t-[80px] rounded-b-xl border-2 border-[#ffb8cf] p-3 ${item.className}`}><span className="rounded-full border-2 border-slate-700 bg-white px-3 py-1 text-[10px] font-black">{item.name}</span>{image ? <Image src={image} alt={`${item.name} cho thuê`} width={110} height={105} className="h-24 w-24 object-contain mix-blend-multiply" /> : <Camera className="size-16 text-slate-700" />}<span className="absolute -bottom-2 left-1/2 size-4 -translate-x-1/2 rotate-45 bg-[#ffb8cf]" /> </div>)}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mx-auto mt-5 grid max-w-7xl grid-cols-2 gap-2 sm:grid-cols-4">
-        <Link href="/" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs font-black text-slate-700"><Home className="size-4 text-[#d92d68]" /> Trang chủ</Link>
-        <Link href="/bang-gia" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs font-black text-slate-700"><Tag className="size-4 text-[#d92d68]" /> Bảng giá</Link>
-        <Link href="/thue-theo-gio" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs font-black text-slate-700"><Clock3 className="size-4 text-[#d92d68]" /> Theo giờ</Link>
-        <Link href="/cong-thuc-setup" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs font-black text-slate-700"><Wrench className="size-4 text-[#d92d68]" /> Công thức setup</Link>
+      <div className="mx-auto mt-5 grid max-w-[1260px] gap-5 md:grid-cols-2">
+        <div className="flex items-center gap-5 rounded-[28px] border border-[#ffc8d8] bg-[#fff5fa] p-6"><div className="rounded-2xl bg-white p-4 text-[#ff4d91] shadow-sm"><ShieldCheck className="size-9" /></div><div><p className="text-xs font-black uppercase text-[#ff4d91]">Cọc linh hoạt</p><h2 className="mt-1 text-2xl font-black text-[#141a3a]">Thương lượng qua tin nhắn</h2><p className="mt-1 text-sm font-medium text-slate-500">Shop xác nhận theo thiết bị, giấy tờ và lịch thuê.</p></div></div>
+        <div className="flex items-center gap-5 rounded-[28px] border border-[#cbe7f5] bg-[#f0f9ff] p-6"><div className="rounded-2xl bg-white p-4 text-[#1689cc] shadow-sm"><Store className="size-9" /></div><div><p className="text-xs font-black uppercase text-[#1689cc]">Điểm hẹn nhận máy</p><h2 className="mt-1 text-2xl font-black text-[#141a3a]">Gần ĐH FPT và Bcons City</h2><p className="mt-1 text-sm font-medium text-slate-500">Có thể nhận tại điểm hẹn hoặc ship tận tay.</p></div></div>
       </div>
     </section>
   );
