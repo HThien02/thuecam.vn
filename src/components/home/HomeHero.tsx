@@ -56,7 +56,7 @@ export default function HomeHero({ image }: HomeHeroProps) {
 
       <div className="mx-auto mt-5 grid max-w-[1260px] gap-5 md:grid-cols-2">
         <div className="flex items-center gap-5 rounded-[30px] border-2 border-[#bfe8d5] bg-[#eef8f4] p-6"><div className="rounded-2xl bg-white p-4 text-[#438e72] shadow-sm"><ShieldCheck className="size-9" /></div><div><p className="text-xs font-black uppercase text-[#438e72]">Cọc linh hoạt</p><h2 className="mt-1 text-2xl font-black text-[#17352e]">Tư vấn nhanh, rõ ràng</h2><p className="mt-1 text-sm font-medium text-[#527268]">Shop xác nhận theo thiết bị, giấy tờ và lịch thuê.</p></div></div>
-        <div className="flex items-center gap-5 rounded-[30px] border-2 border-[#d6caff] bg-[#f2edff] p-6"><div className="rounded-2xl bg-white p-4 text-[#6d55c7] shadow-sm"><Store className="size-9" /></div><div><p className="text-xs font-black uppercase text-[#6d55c7]">Điểm hẹn nhận máy</p><h2 className="mt-1 text-2xl font-black text-[#17352e]">Gần ĐH FPT và Bcons City</h2><p className="mt-1 text-sm font-medium text-[#527268]">Có thể nhận tại điểm hẹn hoặc ship tận tay.</p></div></div>
+        <div className="flex items-center gap-5 rounded-[30px] border-2 border-[#d6caff] bg-[#f2edff] p-6"><div className="rounded-2xl bg-white p-4 text-[#6d55c7] shadow-sm"><Store className="size-9" /></div><div><p className="text-xs font-black uppercase text-[#6d55c7]">Điểm hẹn nhận máy</p><h2 className="mt-1 text-2xl font-black text-[#17352e]">ETown, Tân Bình, TP HCM</h2><p className="mt-1 text-sm font-medium text-[#527268]">Có thể nhận tại điểm hẹn hoặc ship tận tay.</p></div></div>
       </div>
     </section>
   );

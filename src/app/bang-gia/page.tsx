@@ -49,9 +49,9 @@ export default async function PricingPage() {
           <p className="px-2 pb-3 text-[11px] font-black uppercase tracking-[0.16em] text-[#718981]">Danh mục</p>
           <nav className="flex flex-wrap gap-2 lg:flex-col">
             {categories.map((category) => (
-              <Link key={category.id} href={`/danh-muc/${category.slug}`} className="rounded-2xl bg-[#fbfaf4] px-3 py-2 text-sm font-bold text-[#527268] transition-colors hover:bg-[#f2edff] hover:text-[#6d55c7]">
+              <a key={category.id} href={`#${category.slug}`} className="rounded-2xl bg-[#fbfaf4] px-3 py-2 text-sm font-bold text-[#527268] transition-colors hover:bg-[#f2edff] hover:text-[#6d55c7]">
                 {category.name}
-              </Link>
+              </a>
             ))}
           </nav>
           <div className="mt-5 rounded-2xl bg-[#dff3eb] p-3 text-xs leading-5 text-[#438e72]">
@@ -94,7 +94,7 @@ export default async function PricingPage() {
                         <div className="hidden text-sm font-bold text-[#527268] md:block">{product.rental_price_per_day.toLocaleString('vi-VN')}đ</div>
                         <div className="hidden text-sm font-bold text-[#527268] md:block">{Math.round(product.rental_price_per_day * 0.9).toLocaleString('vi-VN')}đ</div>
                         <div className="hidden text-sm font-bold text-[#527268] md:block">{Math.round(product.rental_price_per_day * 0.8).toLocaleString('vi-VN')}đ</div>
-                        <Link href={`/thiet-bi/${product.slug}`} className="inline-flex items-center gap-1 text-xs font-black text-[#f09b45] hover:underline">Xem giá <ArrowRight className="size-3" /></Link>
+                        <Link href={`/thiet-bi/${product.slug}`} className="inline-flex items-center gap-1 text-xs font-black text-[#f09b45] hover:underline">Đặt thuê ngay <ArrowRight className="size-3" /></Link>
                       </div>
                     ))}
                   </div>

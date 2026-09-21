@@ -2,20 +2,20 @@
 @import "tailwindcss";
 
 :root {
-  --bg-primary: #fbfaf4;
-  --bg-secondary: #fffdf5;
+  --bg-primary: #f3f9fd;
+  --bg-secondary: #fafdff;
   --bg-card: #ffffff;
-  --bg-card-hover: #f2edff;
-  --bg-glass: rgba(255, 253, 245, 0.9);
-  --border-subtle: #e5defc;
-  --border-focus: #6d55c7;
-  --text-primary: #17352e;
-  --text-secondary: #527268;
-  --text-muted: #718981;
-  --accent-primary: #6d55c7;
-  --accent-secondary: #f09b45;
-  --accent-soft: #dff3eb;
-  --accent-lavender: #f2edff;
+  --bg-card-hover: #eaf6ff;
+  --bg-glass: rgba(250, 253, 255, 0.92);
+  --border-subtle: #cfe7f7;
+  --border-focus: #1976b9;
+  --text-primary: #142b45;
+  --text-secondary: #47647f;
+  --text-muted: #718aa0;
+  --accent-primary: #1976b9;
+  --accent-secondary: #f1b84b;
+  --accent-soft: #e3f4ff;
+  --accent-lavender: #edf7ff;
 }
 
 body {
@@ -41,7 +41,7 @@ body {
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, #6d55c7 0%, #438e72 52%, #f09b45 100%);
+  background: linear-gradient(135deg, #1976b9 0%, #55aee8 52%, #f1b84b 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -50,8 +50,8 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-.bg-gradient-candy { background: linear-gradient(135deg, #6d55c7 0%, #438e72 100%); }
-.bg-gradient-soft { background: linear-gradient(180deg, #f2edff 0%, #fbfaf4 100%); }
+.bg-gradient-candy { background: linear-gradient(135deg, #1976b9 0%, #55aee8 100%); }
+.bg-gradient-soft { background: linear-gradient(180deg, #eaf6ff 0%, #f3f9fd 100%); }
 
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: #f5f2ff; }
