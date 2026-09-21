@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next';
-import { Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
@@ -7,17 +6,10 @@ import AnalyticsScript from '@/components/analytics/AnalyticsScript';
 import { JsonLdScript, generateLocalBusinessJsonLd } from '@/lib/seo/jsonld';
 import { constructMetadata } from '@/lib/seo/metadata';
 
-const fontSans = Plus_Jakarta_Sans({
-  subsets: ['latin', 'vietnamese'],
-  weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-sans',
-  display: 'swap',
-});
-
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#FF3877',
+  themeColor: '#6D55C7',
 };
 
 export const metadata: Metadata = constructMetadata({
@@ -35,7 +27,7 @@ export default function RootLayout({
   const organizationJsonLd = generateLocalBusinessJsonLd();
 
   return (
-    <html lang="vi" className={`${fontSans.variable} font-sans scroll-smooth`}>
+    <html lang="vi" className="scroll-smooth">
       <head>
         <JsonLdScript data={organizationJsonLd} />
       </head>

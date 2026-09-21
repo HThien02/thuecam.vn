@@ -1,34 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=Comfortaa:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
-  --bg-primary: #FFF9FA;
-  --bg-secondary: #FFFFFF;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #FFF0F4;
-  --bg-glass: rgba(255, 255, 255, 0.88);
-  --border-subtle: #FCE7ED;
-  --border-focus: #FF4F93;
-  
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-muted: #64748B;
-  
-  --accent-pink: #FF4F93;
-  --accent-coral: #FF6584;
-  --accent-peach: #FF8E53;
-  --accent-purple: #A855F7;
-  --accent-cyan: #06B6D4;
+  --bg-primary: #f3f9fd;
+  --bg-secondary: #fafdff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #eaf6ff;
+  --bg-glass: rgba(250, 253, 255, 0.92);
+  --border-subtle: #cfe7f7;
+  --border-focus: #1976b9;
+  --text-primary: #142b45;
+  --text-secondary: #47647f;
+  --text-muted: #718aa0;
+  --accent-primary: #1976b9;
+  --accent-secondary: #f1b84b;
+  --accent-soft: #e3f4ff;
+  --accent-lavender: #edf7ff;
 }
 
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: "Comfortaa", "Be Vietnam Pro", "DejaVu Sans", Arial, sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
 }
 
-/* Glassmorphism & Soft Cards */
 .glass-panel {
   background: var(--bg-glass);
   backdrop-filter: blur(16px);
@@ -36,98 +33,40 @@ body {
   border: 1px solid var(--border-subtle);
 }
 
-.card-hover {
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
+.card-hover { transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 .card-hover:hover {
   transform: translateY(-5px);
-  border-color: #FFB5C5;
-  box-shadow: 0 16px 36px -12px rgba(255, 79, 147, 0.18);
+  border-color: #b6a8f0;
+  box-shadow: 0 16px 36px -12px rgba(109, 85, 199, 0.2);
 }
 
-/* Cute Gradients */
 .text-gradient {
-  background: linear-gradient(135deg, #FF3877 0%, #FF6584 50%, #FF8E53 100%);
+  background: linear-gradient(135deg, #1976b9 0%, #55aee8 52%, #f1b84b 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-
 .text-gradient-purple {
-  background: linear-gradient(135deg, #FF4F93 0%, #A855F7 100%);
+  background: linear-gradient(135deg, #6d55c7 0%, #438e72 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+.bg-gradient-candy { background: linear-gradient(135deg, #1976b9 0%, #55aee8 100%); }
+.bg-gradient-soft { background: linear-gradient(180deg, #eaf6ff 0%, #f3f9fd 100%); }
 
-.bg-gradient-candy {
-  background: linear-gradient(135deg, #FF3877 0%, #FF6584 60%, #FF8E53 100%);
-}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #f5f2ff; }
+::-webkit-scrollbar-thumb { background: #cfc3ff; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #6d55c7; }
 
-.bg-gradient-soft {
-  background: linear-gradient(180deg, #FFF0F4 0%, #FFF9FA 100%);
-}
-
-/* Custom Soft Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #FFF5F7;
-}
-::-webkit-scrollbar-thumb {
-  background: #FBCFE8;
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #F472B6;
-}
-
-/* Cute Badges */
-.badge-rental {
+.badge-rental, .badge-verified, .badge-tag {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.35rem 0.75rem;
   border-radius: 9999px;
-  font-size: 0.75rem;
   font-weight: 700;
-  background: #FFF0F4;
-  color: #FF3877;
-  border: 1px solid #FFCCD8;
 }
-
-.badge-verified {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  background: #F0FDF4;
-  color: #15803D;
-  border: 1px solid #BBF7D0;
-}
-
-.badge-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.65rem;
-  border-radius: 9999px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  background: #F8FAFC;
-  color: #475569;
-  border: 1px solid #E2E8F0;
-}
-
-/* Soft cute shadows */
-.shadow-cute {
-  box-shadow: 0 10px 30px -5px rgba(255, 79, 147, 0.12);
-}
-
-.shadow-cute-lg {
-  box-shadow: 0 20px 40px -10px rgba(255, 79, 147, 0.2);
-}
+.badge-rental { padding: 0.35rem 0.75rem; font-size: 0.75rem; background: #f2edff; color: #6d55c7; border: 1px solid #d6caff; }
+.badge-verified { padding: 0.35rem 0.75rem; font-size: 0.75rem; background: #eef8f4; color: #438e72; border: 1px solid #bfe8d5; }
+.badge-tag { padding: 0.25rem 0.65rem; font-size: 0.7rem; background: #fffdf5; color: #527268; border: 1px solid #e5defc; }
+.shadow-cute { box-shadow: 0 10px 30px -5px rgba(109, 85, 199, 0.14); }
+.shadow-cute-lg { box-shadow: 0 20px 40px -10px rgba(109, 85, 199, 0.22); }

@@ -37,6 +37,14 @@ export default function AdminLayout({
           {/* Nav Items */}
           <nav className="space-y-1 text-xs font-medium">
             <Link
+              href="/admin"
+              className="flex items-center gap-2.5 rounded-xl bg-sky-500/10 px-3 py-2.5 text-sky-300 transition-colors hover:bg-sky-500/20"
+            >
+              <Camera className="h-4 w-4 text-sky-400" />
+              <span>Dashboard tổng quan</span>
+            </Link>
+
+            <Link
               href="/admin/seo"
               className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
             >
