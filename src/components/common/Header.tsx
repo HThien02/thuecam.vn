@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Camera, Search, Phone, Menu, X, Compass, Sparkles, Gift, Home, Tag, Clock3, Wrench } from 'lucide-react';
+import { Camera, Search, Phone, Menu, X, Sparkles, Gift, Home, Tag, Clock3, Wrench } from 'lucide-react';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -17,11 +17,11 @@ export default function Header() {
               <Gift className="w-3 h-3" />
               Ưu Đãi Bạn Mới
             </span>
-            <span>Ưu đãi cộng dồn đến 40% | First bill -20% theo CCCD | Thứ 6 hằng tuần -10%</span>
+            <span className="font-bold">Ưu đãi cộng dồn đến <strong className="rounded-md bg-white/30 px-1.5 py-0.5 text-white">40%</strong> | First bill -20% theo CCCD | Thứ 6 hằng tuần -10%</span>
           </div>
 
           <div className="flex items-center gap-4 text-white/95 text-xs">
-            <span className="hidden sm:inline text-pink-100">🛵 Giao hỏa tốc 30 phút TP.HCM & Hà Nội</span>
+            <span className="hidden sm:inline text-pink-100">Giao hỏa tốc 30 phút TP.HCM & Hà Nội</span>
             <span className="hidden sm:inline text-white/40">|</span>
             <a
               href="tel:0932501411"
@@ -58,53 +58,17 @@ export default function Header() {
               <Home className="size-4" />
               <span>Trang chủ</span>
             </Link>
-
-            <Link href="/thiet-bi" className="hover:text-[#FF3877] transition-colors py-1">
-              Kho Thiết Bị
-            </Link>
-
             <Link href="/bang-gia" className="flex items-center gap-1.5 hover:text-[#FF3877] transition-colors py-1">
               <Tag className="size-4" />
               <span>Bảng giá</span>
             </Link>
-
             <Link href="/thue-theo-gio" className="flex items-center gap-1.5 hover:text-[#FF3877] transition-colors py-1">
               <Clock3 className="size-4" />
               <span>Theo giờ</span>
             </Link>
-
             <Link href="/cong-thuc-setup" className="flex items-center gap-1.5 hover:text-[#FF3877] transition-colors py-1">
               <Wrench className="size-4" />
               <span>Công thức setup</span>
-            </Link>
-
-            <Link href="/thue-camera-du-lich" className="flex items-center gap-1.5 text-[#FF3877] hover:text-[#e02462] transition-colors py-1">
-              <Compass className="w-4 h-4" />
-              <span>Camera Du Lịch</span>
-            </Link>
-
-            <Link href="/danh-muc/pocket-camera" className="hover:text-[#FF3877] transition-colors py-1">
-              DJI Pocket
-            </Link>
-
-            <Link href="/danh-muc/action-camera" className="hover:text-[#FF3877] transition-colors py-1">
-              Action Cam
-            </Link>
-
-            <Link href="/nhu-cau/quay-vlog" className="hover:text-[#FF3877] transition-colors py-1">
-              Quay Vlog
-            </Link>
-
-            <Link href="/nhu-cau/quay-tiktok" className="hover:text-[#FF3877] transition-colors py-1">
-              Quay TikTok
-            </Link>
-
-            <Link href="/blog" className="hover:text-[#FF3877] transition-colors py-1">
-              Cẩm Nang & So Sánh
-            </Link>
-
-            <Link href="/dia-diem/tphcm" className="hover:text-[#FF3877] transition-colors py-1">
-              Chi Nhánh
             </Link>
           </nav>
 
@@ -150,63 +114,21 @@ export default function Header() {
       {/* Mobile Menu dropdown */}
       {mobileMenuOpen && (
         <div className="lg:hidden px-4 pt-3 pb-6 border-t border-pink-100 bg-white shadow-xl space-y-2 text-sm font-bold text-slate-800">
-          <Link
-            href="/thiet-bi"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center justify-between p-3 rounded-xl hover:bg-pink-50 hover:text-[#FF3877]"
-          >
-            <span>Tất Cả Thiết Bị Cho Thuê</span>
-            <span className="text-xs text-[#FF3877] font-extrabold">Hot 🔥</span>
+          <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-3 rounded-xl hover:bg-pink-50 hover:text-[#FF3877]">
+            <Home className="size-4" />
+            Trang chủ
           </Link>
-          <Link
-            href="/thue-camera-du-lich"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2 p-3 rounded-xl bg-pink-50/80 text-[#FF3877]"
-          >
-            <Compass className="w-4 h-4" />
-            <span>Camera Du Lịch (Pillar)</span>
+          <Link href="/bang-gia" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-3 rounded-xl hover:bg-pink-50 hover:text-[#FF3877]">
+            <Tag className="size-4" />
+            Bảng giá
           </Link>
-          <Link
-            href="/danh-muc/pocket-camera"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block p-3 rounded-xl hover:bg-pink-50 hover:text-[#FF3877]"
-          >
-            DJI Pocket 4 / Pocket 3
+          <Link href="/thue-theo-gio" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-3 rounded-xl hover:bg-pink-50 hover:text-[#FF3877]">
+            <Clock3 className="size-4" />
+            Theo giờ
           </Link>
-          <Link
-            href="/danh-muc/action-camera"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block p-3 rounded-xl hover:bg-pink-50 hover:text-[#FF3877]"
-          >
-            GoPro & Action Cam Đi Biển
-          </Link>
-          <Link
-            href="/nhu-cau/quay-vlog"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block p-3 rounded-xl hover:bg-pink-50 hover:text-[#FF3877]"
-          >
-            Thiết Bị Quay Vlog Đời Sống
-          </Link>
-          <Link
-            href="/nhu-cau/quay-tiktok"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block p-3 rounded-xl hover:bg-pink-50 hover:text-[#FF3877]"
-          >
-            Máy Quay TikTok & Reels Dọc
-          </Link>
-          <Link
-            href="/blog"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block p-3 rounded-xl hover:bg-pink-50 hover:text-[#FF3877]"
-          >
-            Cẩm Nang & So Sánh Máy
-          </Link>
-          <Link
-            href="/dia-diem/tphcm"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block p-3 rounded-xl hover:bg-pink-50 hover:text-[#FF3877]"
-          >
-            Chi Nhánh Showroom
+          <Link href="/cong-thuc-setup" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-3 rounded-xl hover:bg-pink-50 hover:text-[#FF3877]">
+            <Wrench className="size-4" />
+            Công thức setup
           </Link>
 
           <div className="pt-3 border-t border-pink-100 flex flex-col gap-2">
