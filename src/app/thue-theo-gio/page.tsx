@@ -16,13 +16,13 @@ export default async function HourlyRentalPage() {
   const products = (await getProducts()).filter((product) => product.status === 'ACTIVE');
 
   return (
-    <main className="min-h-screen bg-[#fffaf7] text-slate-900">
-      <section className="border-b border-[#d9eee8] bg-[#f2fbf7]">
+    <main className="min-h-screen bg-[#f3f9fd] text-[#142b45]">
+      <section className="border-b border-[#cfe7f7] bg-[#eaf6ff]">
         <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
           <span className="inline-flex items-center gap-2 rounded-full bg-[#d9f4e9] px-3 py-1 text-xs font-black uppercase tracking-[0.16em] text-[#168267]"><Clock3 className="size-3.5" /> Thuê theo giờ</span>
           <h1 className="mt-5 max-w-3xl text-4xl font-black tracking-tight sm:text-6xl">Thuê máy theo giờ, quay nhanh vẫn thật vui</h1>
           <p className="mt-5 max-w-2xl text-base leading-8 text-slate-600">Chọn thiết bị phù hợp cho buổi quay ngắn, review sản phẩm, TikTok hoặc sự kiện. Giá minh bạch, nhận máy gọn gàng.</p>
-          <div className="mt-7 flex flex-wrap gap-3 text-sm font-black"><span className="rounded-full bg-white px-4 py-2 shadow-sm">Từ 200.000đ / 6 tiếng</span><span className="rounded-full bg-white px-4 py-2 shadow-sm"><MapPin className="mr-1 inline size-4 text-[#ff6b9a]" />Cần Thơ · Biên Hòa · Bình Dương</span></div>
+          <div className="mt-7 flex flex-wrap gap-3 text-sm font-black"><span className="rounded-full bg-white px-4 py-2 shadow-sm">Từ 200.000đ / 6 tiếng</span><span className="rounded-full bg-white px-4 py-2 shadow-sm"><MapPin className="mr-1 inline size-4 text-[#ff6b9a]" />ETown, Tân Bình, TP HCM</span></div>
         </div>
       </section>
 

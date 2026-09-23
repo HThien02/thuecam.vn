@@ -94,7 +94,7 @@ export default async function PricingPage() {
                         <div className="hidden text-sm font-bold text-[#527268] md:block">{product.rental_price_per_day.toLocaleString('vi-VN')}đ</div>
                         <div className="hidden text-sm font-bold text-[#527268] md:block">{Math.round(product.rental_price_per_day * 0.9).toLocaleString('vi-VN')}đ</div>
                         <div className="hidden text-sm font-bold text-[#527268] md:block">{Math.round(product.rental_price_per_day * 0.8).toLocaleString('vi-VN')}đ</div>
-                        <Link href={`/thiet-bi/${product.slug}`} className="inline-flex items-center gap-1 text-xs font-black text-[#f09b45] hover:underline">Đặt thuê ngay <ArrowRight className="size-3" /></Link>
+                        <Link href={`/dat-thue?product=${product.slug}`} className="inline-flex items-center gap-1 rounded-full bg-[#1976b9] px-3 py-2 text-xs font-black text-white shadow-sm transition hover:bg-[#125e95]">Đặt thuê ngay <ArrowRight className="size-3" /></Link>
                       </div>
                     ))}
                   </div>

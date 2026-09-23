@@ -18,7 +18,8 @@ export default function RentalRequestForm({ products, initialProduct }: { produc
   const availableDates = useMemo(() => Array.from({ length: 21 }, (_, index) => { const date = new Date(); date.setDate(date.getDate() + index); return toDateKey(date); }), []);
   const reservedDates = useMemo(() => availableDates.filter((_, index) => index === 4 || index === 11 || (index > 14 && index % 3 === 0)), [availableDates]);
   const isAvailable = (date: string) => !reservedDates.includes(date);
-  const rangeAvailable = startDate && endDate ? availableDates.filter((date) => date >= startDate && date <= endDate).every(isAvailable) : true;
+  const selectedRange = startDate && endDate ? availableDates.filter((date) => date >= startDate && date <= endDate) : [];
+  const rangeAvailable = startDate && endDate ? selectedRange.length > 0 && selectedRange.every(isAvailable) : true;
   const estimatedDays = startDate && endDate ? Math.max(1, Math.ceil((new Date(`${endDate}T12:00:00`).getTime() - new Date(`${startDate}T12:00:00`).getTime()) / 86400000) + 1) : 1;
 
   if (submitted) return <div className="rounded-[2rem] bg-[#e3f4ff] p-10 text-center"><CheckCircle2 className="mx-auto size-12 text-[#1976b9]" /><h2 className="mt-4 text-2xl font-black">Đã nhận thông tin của bạn</h2><p className="mx-auto mt-2 max-w-lg text-slate-600">THUECAM sẽ liên hệ qua số điện thoại hoặc Zalo để xác nhận lịch, giá thuê và cách nhận máy.</p></div>;
