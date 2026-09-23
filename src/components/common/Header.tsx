@@ -36,14 +36,14 @@ export default function Header() {
 
       {/* Main navigation */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-18">
+        <div className="flex min-h-16 items-center justify-between gap-5 py-2">
           {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link href="/" className="flex shrink-0 items-center gap-2.5 group">
             <div className="w-11 h-11 rounded-2xl bg-gradient-candy flex items-center justify-center shadow-cute group-hover:scale-105 transition-transform">
               <Camera className="w-6 h-6 text-white" />
             </div>
             <div>
-              <span className="text-2xl font-black tracking-tight text-slate-900 block leading-none">
+              <span className="text-xl font-black tracking-tight text-slate-900 block leading-none sm:text-[22px]">
                 THUECAM<span className="text-[#0284c7]">.VN</span>
               </span>
 
@@ -51,31 +51,31 @@ export default function Header() {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden xl:flex items-center gap-2 whitespace-nowrap text-[13px] font-bold text-slate-700">
-            <Link href="/" className="flex items-center gap-1.5 whitespace-nowrap rounded-xl border border-sky-200 bg-sky-50/70 px-3 py-2 hover:border-sky-500 hover:bg-sky-100 hover:text-[#0284c7] transition-colors">
-              <Home className="size-4 rounded-md border-2 border-sky-400 p-0.5 text-sky-600" />
+          <nav className="hidden xl:flex min-w-0 flex-1 items-center justify-center gap-4 whitespace-nowrap text-[13px] font-bold text-slate-700">
+            <Link href="/" className="flex items-center gap-2 whitespace-nowrap px-1 py-2 text-slate-700 hover:text-[#0284c7] transition-colors">
+              <Home className="size-[18px] stroke-[2.75] text-sky-600" />
               <span>Trang chủ</span>
             </Link>
-            <Link href="/bang-gia" className="flex items-center gap-1.5 whitespace-nowrap rounded-xl border border-sky-200 bg-sky-50/70 px-3 py-2 hover:border-sky-500 hover:bg-sky-100 hover:text-[#0284c7] transition-colors">
-              <Tag className="size-4 rounded-md border-2 border-sky-400 p-0.5 text-sky-600" />
+            <Link href="/bang-gia" className="flex items-center gap-2 whitespace-nowrap px-1 py-2 text-slate-700 hover:text-[#0284c7] transition-colors">
+              <Tag className="size-[18px] stroke-[2.75] text-sky-600" />
               <span>Bảng giá</span>
             </Link>
-            <Link href="/dat-thue" className="flex items-center gap-1.5 whitespace-nowrap rounded-xl border border-sky-200 bg-sky-50/70 px-3 py-2 hover:border-sky-500 hover:bg-sky-100 hover:text-[#0284c7] transition-colors">
-              <Clock3 className="size-4 rounded-md border-2 border-sky-400 p-0.5 text-sky-600" />
+            <Link href="/dat-thue" className="flex items-center gap-2 whitespace-nowrap px-1 py-2 text-slate-700 hover:text-[#0284c7] transition-colors">
+              <Clock3 className="size-[18px] stroke-[2.75] text-sky-600" />
               <span>Lịch máy trống</span>
             </Link>
-            <Link href="/thue-theo-gio" className="flex items-center gap-1.5 whitespace-nowrap rounded-xl border border-sky-200 bg-sky-50/70 px-3 py-2 hover:border-sky-500 hover:bg-sky-100 hover:text-[#0284c7] transition-colors">
-              <Clock3 className="size-4 rounded-md border-2 border-sky-400 p-0.5 text-sky-600" />
+            <Link href="/thue-theo-gio" className="flex items-center gap-2 whitespace-nowrap px-1 py-2 text-slate-700 hover:text-[#0284c7] transition-colors">
+              <Clock3 className="size-[18px] stroke-[2.75] text-sky-600" />
               <span>Theo giờ</span>
             </Link>
-            <Link href="/cong-thuc-setup" className="flex items-center gap-1.5 whitespace-nowrap rounded-xl border border-sky-200 bg-sky-50/70 px-3 py-2 hover:border-sky-500 hover:bg-sky-100 hover:text-[#0284c7] transition-colors">
-              <Wrench className="size-4 rounded-md border-2 border-sky-400 p-0.5 text-sky-600" />
+            <Link href="/cong-thuc-setup" className="flex items-center gap-2 whitespace-nowrap px-1 py-2 text-slate-700 hover:text-[#0284c7] transition-colors">
+              <Wrench className="size-[18px] stroke-[2.75] text-sky-600" />
               <span>Công thức setup</span>
             </Link>
           </nav>
 
           {/* Right Action Tools */}
-          <div className="hidden sm:flex items-center gap-3">
+          <div className="hidden shrink-0 items-center gap-2 lg:flex">
             <Link
               href="/admin"
               className="px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-200"
@@ -95,7 +95,7 @@ export default function Header() {
 
             <Link
               href="/thue-camera-du-lich"
-              className="whitespace-nowrap px-5 py-2.5 rounded-full bg-gradient-candy hover:opacity-95 text-white font-extrabold text-xs shadow-cute hover:shadow-cute-lg transition-all flex items-center gap-1.5 hover:scale-[1.02] active:scale-95"
+              className="whitespace-nowrap px-4 py-2 rounded-full bg-gradient-candy hover:opacity-95 text-white font-extrabold text-xs shadow-cute hover:shadow-cute-lg transition-all flex items-center gap-1.5 hover:scale-[1.02] active:scale-95"
             >
               <Sparkles className="w-4 h-4" />
               <span>Đặt Thuê Nhanh</span>
@@ -126,23 +126,23 @@ export default function Header() {
       {mobileMenuOpen && (
         <div className="lg:hidden px-4 pt-3 pb-6 border-t border-sky-100 bg-white shadow-xl space-y-2 text-sm font-bold text-slate-800">
           <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-3 rounded-xl hover:bg-sky-50 hover:text-[#0284c7]">
-            <Home className="size-4 rounded-md border-2 border-sky-400 p-0.5 text-sky-600" />
+            <Home className="size-[18px] stroke-[2.75] text-sky-600" />
             Trang chủ
           </Link>
           <Link href="/bang-gia" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-3 rounded-xl hover:bg-sky-50 hover:text-[#0284c7]">
-            <Tag className="size-4 rounded-md border-2 border-sky-400 p-0.5 text-sky-600" />
+            <Tag className="size-[18px] stroke-[2.75] text-sky-600" />
             Bảng giá (Cuộn nhanh)
           </Link>
           <Link href="/dat-thue" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-3 rounded-xl hover:bg-sky-50 hover:text-[#0284c7]">
-            <Clock3 className="size-4 rounded-md border-2 border-sky-400 p-0.5 text-sky-600" />
+            <Clock3 className="size-[18px] stroke-[2.75] text-sky-600" />
             Lịch máy trống & Đặt thuê
           </Link>
           <Link href="/thue-theo-gio" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-3 rounded-xl hover:bg-sky-50 hover:text-[#0284c7]">
-            <Clock3 className="size-4 rounded-md border-2 border-sky-400 p-0.5 text-sky-600" />
+            <Clock3 className="size-[18px] stroke-[2.75] text-sky-600" />
             Theo giờ
           </Link>
           <Link href="/cong-thuc-setup" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-3 rounded-xl hover:bg-sky-50 hover:text-[#0284c7]">
-            <Wrench className="size-4 rounded-md border-2 border-sky-400 p-0.5 text-sky-600" />
+            <Wrench className="size-[18px] stroke-[2.75] text-sky-600" />
             Công thức setup
           </Link>
           <Link href="/admin" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-3 rounded-xl hover:bg-sky-50 hover:text-[#0284c7]">
