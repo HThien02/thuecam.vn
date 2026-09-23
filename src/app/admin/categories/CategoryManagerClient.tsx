@@ -51,8 +51,8 @@ export default function CategoryManagerClient({
     setEditingCategory(c);
     setName(c.name);
     setSlug(c.slug);
-    setDescription(c.description);
-    setIcon(c.icon);
+    setDescription(c.description || c.intro_content);
+    setIcon(c.icon || 'Camera');
     setDisplayOrder(c.display_order);
     setIsModalOpen(true);
   };

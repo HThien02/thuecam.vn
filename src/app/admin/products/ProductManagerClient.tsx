@@ -46,7 +46,7 @@ export default function ProductManagerClient({
   const [depositAmount, setDepositAmount] = useState<number>(3000000);
   const [primaryImage, setPrimaryImage] = useState('');
   const [excerpt, setExcerpt] = useState('');
-  const [status, setStatus] = useState<'ACTIVE' | 'INACTIVE' | 'MAINTENANCE'>('ACTIVE');
+  const [status, setStatus] = useState<'ACTIVE' | 'INACTIVE' | 'MAINTENANCE' | 'ARCHIVED'>('ACTIVE');
   const [toastMsg, setToastMsg] = useState('');
 
   // Sync from localStorage on mount and listen to changes
@@ -83,8 +83,8 @@ export default function ProductManagerClient({
     setEditingProduct(prod);
     setName(prod.name);
     setSlug(prod.slug);
-    setCategoryId(prod.category_id);
-    setBrandId(prod.brand_id);
+    setCategoryId(prod.category_id || '');
+    setBrandId(prod.brand_id || '');
     setRentalPrice(prod.rental_price_per_day);
     setDepositAmount(prod.deposit_amount);
     setPrimaryImage(prod.primary_image);
@@ -103,6 +103,7 @@ export default function ProductManagerClient({
       id: editingProduct ? editingProduct.id : `prod-${Date.now()}`,
       slug: finalSlug,
       name,
+      sku: editingProduct?.sku || `SKU-${Date.now()}`,
       category_id: categoryId,
       brand_id: brandId,
       category,
@@ -114,7 +115,9 @@ export default function ProductManagerClient({
       excerpt,
       description: editingProduct?.description || excerpt,
       features: editingProduct?.features || ['Cảm biến 1-inch', 'Chống rung 3 trục', 'Tặng thẻ 128GB'],
+      accessories_included: editingProduct?.accessories_included || editingProduct?.included_accessories || ['Thẻ nhớ SanDisk Extreme 128GB', '2x Pin sạc đầy', 'Hộp chống sốc'],
       included_accessories: editingProduct?.included_accessories || ['Thẻ nhớ SanDisk Extreme 128GB', '2x Pin sạc đầy', 'Hộp chống sốc'],
+      inventory_count: editingProduct?.inventory_count || 1,
       specs: editingProduct?.specs || { 'Độ phân giải': '4K/60fps', 'Cảm biến': '1 inch CMOS', 'Trọng lượng': '179g' },
       status,
       indexable: true,
@@ -216,7 +219,7 @@ export default function ProductManagerClient({
                 <th className="px-4 py-3.5">Giá 1 ngày</th>
                 <th className="px-4 py-3.5">Giá 3 ngày (-10%)</th>
                 <th className="px-4 py-3.5">Tiền cọc</th>
-                <th className="px-4 py-3.5">Trạng thái</th>
+                <th className="px-4 py-3.5">Trạng th��i</th>
                 <th className="px-4 py-3.5 text-right">Thao tác</th>
               </tr>
             </thead>
