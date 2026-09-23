@@ -4,6 +4,8 @@ export interface Category {
   name: string;
   h1: string;
   intro_content: string;
+  description?: string;
+  icon?: string;
   seo_title?: string;
   seo_description?: string;
   og_image?: string;
@@ -62,13 +64,17 @@ export interface Product {
   description: string;
   specs: Record<string, string>;
   accessories_included: string[];
+  included_accessories?: string[];
+  features?: string[];
   rental_price_per_day: number;
   deposit_amount: number;
   primary_image: string;
   gallery_images: string[];
   three_d_model_url?: string;
   inventory_count: number;
-  status: 'ACTIVE' | 'MAINTENANCE' | 'ARCHIVED';
+  status: 'ACTIVE' | 'MAINTENANCE' | 'ARCHIVED' | 'INACTIVE';
+  created_at?: string;
+  updated_at?: string;
   
   // SEO fields
   seo_title?: string;
