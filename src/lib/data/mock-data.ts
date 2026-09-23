@@ -226,15 +226,15 @@ export const LOCATIONS: Location[] = [
     id: 'loc-tphcm',
     slug: 'tphcm',
     name: 'TP. Hồ Chí Minh',
-    address: '123 Nguyễn Thị Minh Khai, Phường Bến Thành, Quận 1, TP. Hồ Chí Minh',
-    phone: '0901.234.567',
+    address: 'ETown Cộng Hòa, 364 Cộng Hòa, Phường 13, Quận Tân Bình, TP. Hồ Chí Minh',
+    phone: '0932.501.411',
     email: 'hcm@thuecam.vn',
-    google_maps_url: 'https://maps.google.com/?q=THUECAM+TPHCM',
+    google_maps_url: 'https://maps.google.com/?q=ETown+Tan+Binh+TPHCM',
     intro_content:
-      'Showroom trung tâm Quận 1 và kho kỹ thuật Tân Bình phục vụ giao nhận máy hỏa tốc trong 30 phút toàn TP.HCM. Hỗ trợ test máy trực tiếp, hướng dẫn sử dụng 1-1.',
-    seo_title: 'Thuê Camera TPHCM Giá Rẻ | Nhận Máy Ngay 30 Phút | THUECAM',
+      'Điểm hẹn nhận máy ETown Tân Bình và dịch vụ giao nhận máy hỏa tốc trong 30 phút toàn TP.HCM. Hỗ trợ test máy trực tiếp, hướng dẫn sử dụng 1-1 tận tình.',
+    seo_title: 'Thuê Camera TPHCM Giá Rẻ | Nhận Máy Ngay Tại ETown Tân Bình | THUECAM',
     seo_description:
-      'Dịch vụ cho thuê camera, máy ảnh, gimbal, mic thu âm tại TPHCM. Showroom Quận 1 & Tân Bình, thủ tục nhanh gọn chỉ cần CCCD hoặc cọc linh hoạt.',
+      'Dịch vụ cho thuê camera, máy ảnh, gimbal, mic thu âm tại TPHCM. Nhận máy trực tiếp tại ETown Tân Bình, thủ tục nhanh gọn chỉ cần CCCD hoặc cọc linh hoạt.',
     indexable: true,
   },
   {

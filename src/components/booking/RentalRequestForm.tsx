@@ -1,40 +1,318 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { Product } from '@/types';
-import { CalendarDays, CheckCircle2, Clock3, Send } from 'lucide-react';
+import { CheckCircle2, Clock3, CalendarDays, Send, MapPin, Truck } from 'lucide-react';
+import AvailabilityCalendarTable from './AvailabilityCalendarTable';
 
-const toDateKey = (date: Date) => date.toISOString().slice(0, 10);
-const formatDate = (key: string) => new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit' }).format(new Date(`${key}T12:00:00`));
-
-export default function RentalRequestForm({ products, initialProduct }: { products: Product[]; initialProduct?: Product }) {
+export default function RentalRequestForm({
+  products,
+  initialProduct,
+}: {
+  products: Product[];
+  initialProduct?: Product;
+}) {
   const [submitted, setSubmitted] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(initialProduct?.slug ?? products[0]?.slug ?? '');
-  const [duration, setDuration] = useState<'hourly' | 'daily'>('hourly');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const product = products.find((item) => item.slug === selectedProduct) ?? initialProduct ?? products[0];
-  const today = toDateKey(new Date());
-  const availableDates = useMemo(() => Array.from({ length: 21 }, (_, index) => { const date = new Date(); date.setDate(date.getDate() + index); return toDateKey(date); }), []);
-  const reservedDates = useMemo(() => availableDates.filter((_, index) => index === 4 || index === 11 || (index > 14 && index % 3 === 0)), [availableDates]);
-  const isAvailable = (date: string) => !reservedDates.includes(date);
-  const rangeAvailable = startDate && endDate ? availableDates.filter((date) => date >= startDate && date <= endDate).every(isAvailable) : true;
-  const estimatedDays = startDate && endDate ? Math.max(1, Math.ceil((new Date(`${endDate}T12:00:00`).getTime() - new Date(`${startDate}T12:00:00`).getTime()) / 86400000) + 1) : 1;
+  const [selectedProduct, setSelectedProduct] = useState(
+    initialProduct?.slug ?? products[0]?.slug ?? ''
+  );
+  const [duration, setDuration] = useState<'hourly' | 'daily'>('daily');
+  const [pickupMethod, setPickupMethod] = useState<'STORE' | 'DELIVERY'>('STORE');
 
-  if (submitted) return <div className="rounded-[2rem] bg-[#e3f4ff] p-10 text-center"><CheckCircle2 className="mx-auto size-12 text-[#1976b9]" /><h2 className="mt-4 text-2xl font-black">Đã nhận thông tin của bạn</h2><p className="mx-auto mt-2 max-w-lg text-slate-600">THUECAM sẽ liên hệ qua số điện thoại hoặc Zalo để xác nhận lịch, giá thuê và cách nhận máy.</p></div>;
+  const todayStr = new Date().toISOString().split('T')[0];
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 2);
+  const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
-  return <form onSubmit={(event) => { event.preventDefault(); if (!rangeAvailable) return; setSubmitted(true); }} className="rounded-[2rem] bg-white p-5 shadow-[0_18px_45px_-30px_rgba(31,41,55,.55)] sm:p-8">
-    <div className="grid gap-5 sm:grid-cols-2">
-      <label className="text-sm font-bold">Họ và tên<input required className="mt-2 w-full rounded-2xl border-0 bg-[#f2f7fb] px-4 py-3 outline-none ring-[#55aee8] focus:ring-2" placeholder="Nguyễn Văn A" /></label>
-      <label className="text-sm font-bold">Số điện thoại / Zalo<input required type="tel" className="mt-2 w-full rounded-2xl border-0 bg-[#f2f7fb] px-4 py-3 outline-none ring-[#55aee8] focus:ring-2" placeholder="09xx xxx xxx" /></label>
-      <label className="text-sm font-bold">Email<input type="email" className="mt-2 w-full rounded-2xl border-0 bg-[#f2f7fb] px-4 py-3 outline-none ring-[#55aee8] focus:ring-2" placeholder="ban@example.com" /></label>
-      <label className="text-sm font-bold">Thiết bị<select value={selectedProduct} onChange={(event) => setSelectedProduct(event.target.value)} className="mt-2 w-full rounded-2xl border-0 bg-[#f2f7fb] px-4 py-3 outline-none ring-[#55aee8] focus:ring-2">{products.map((item) => <option key={item.id} value={item.slug}>{item.name}</option>)}</select></label>
-      <div className="sm:col-span-2"><p className="text-sm font-bold">Bạn muốn thuê trong bao lâu?</p><div className="mt-2 flex flex-wrap gap-2"><button type="button" onClick={() => setDuration('hourly')} className={`rounded-full px-4 py-2 text-sm font-black ${duration === 'hourly' ? 'bg-[#1976b9] text-white' : 'bg-[#e3f4ff] text-[#1976b9]'}`}><Clock3 className="mr-1 inline size-4" />Theo giờ</button><button type="button" onClick={() => setDuration('daily')} className={`rounded-full px-4 py-2 text-sm font-black ${duration === 'daily' ? 'bg-[#1976b9] text-white' : 'bg-[#e3f4ff] text-[#1976b9]'}`}><CalendarDays className="mr-1 inline size-4" />Theo ngày</button></div></div>
-      <div className="sm:col-span-2 rounded-3xl bg-[#f3f9fd] p-4"><div className="flex flex-wrap items-center justify-between gap-2"><p className="text-sm font-black">Lịch máy còn trống</p><div className="flex gap-3 text-xs font-semibold"><span className="text-emerald-600">● Còn máy</span><span className="text-slate-400">● Đã kín</span></div></div><div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-7">{availableDates.map((date) => <button key={date} type="button" disabled={!isAvailable(date)} onClick={() => !startDate || (startDate && endDate) ? (setStartDate(date), setEndDate('')) : setEndDate(date)} className={`rounded-xl px-2 py-2 text-xs font-bold ${!isAvailable(date) ? 'cursor-not-allowed bg-slate-200 text-slate-400 line-through' : date === startDate || date === endDate ? 'bg-[#1976b9] text-white' : 'bg-white text-slate-700 ring-1 ring-[#c8e5f7] hover:bg-[#e3f4ff]'}`}>{formatDate(date)}<span className="mt-1 block text-[10px] font-medium">{isAvailable(date) ? 'Còn' : 'Kín'}</span></button>)}</div><p className="mt-3 text-xs text-slate-500">Chọn ngày nhận trước, sau đó chọn ngày trả. Ngày kín được đánh dấu để bạn dễ đổi lịch.</p></div>
-      <label className="text-sm font-bold">Ngày nhận<input required min={today} value={startDate} onChange={(event) => setStartDate(event.target.value)} type="date" className="mt-2 w-full rounded-2xl border-0 bg-[#f2f7fb] px-4 py-3 outline-none ring-[#55aee8] focus:ring-2" /></label>
-      <label className="text-sm font-bold">Ngày trả<input required min={startDate || today} value={endDate} onChange={(event) => setEndDate(event.target.value)} type="date" className="mt-2 w-full rounded-2xl border-0 bg-[#f2f7fb] px-4 py-3 outline-none ring-[#55aee8] focus:ring-2" /></label>
-      <label className="text-sm font-bold sm:col-span-2">Ghi chú<textarea className="mt-2 min-h-28 w-full rounded-2xl border-0 bg-[#f2f7fb] px-4 py-3 outline-none ring-[#55aee8] focus:ring-2" placeholder="Bạn cần thêm phụ kiện hoặc giao máy ở đâu?" /></label>
-    </div>
-    <div className={`mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl p-4 ${rangeAvailable ? 'bg-[#e3f4ff]' : 'bg-rose-50'}`}><p className="text-sm text-slate-600">Thiết bị: <strong>{product?.name}</strong><br />{startDate && endDate ? <>Lịch đã chọn: <strong>{formatDate(startDate)} – {formatDate(endDate)} ({estimatedDays} ngày)</strong></> : <>Chọn ngày để xem lịch và giá thuê</>}</p><button type="submit" disabled={!rangeAvailable} className="inline-flex items-center gap-2 rounded-full bg-[#1976b9] px-6 py-3 font-black text-white shadow-lg shadow-blue-200 hover:bg-[#125e95] disabled:cursor-not-allowed disabled:bg-slate-300">{rangeAvailable ? 'Gửi yêu cầu thuê' : 'Vui lòng đổi ngày'} <Send className="size-4" /></button></div>
-  </form>;
+  const [startDate, setStartDate] = useState(todayStr);
+  const [endDate, setEndDate] = useState(tomorrowStr);
+
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [address, setAddress] = useState('');
+  const [notes, setNotes] = useState('');
+
+  const product =
+    products.find((item) => item.slug === selectedProduct) ??
+    initialProduct ??
+    products[0];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const code = `TC${Math.floor(100000 + Math.random() * 900000)}`;
+
+    // Store in admin bookings table
+    if (typeof window !== 'undefined') {
+      try {
+        const existing = localStorage.getItem('thuecam_bookings');
+        const list = existing ? JSON.parse(existing) : [];
+        list.unshift({
+          id: code,
+          customer_name: fullName,
+          customer_phone: phone,
+          customer_email: email,
+          product_id: product?.id,
+          product_name: product?.name,
+          start_date: startDate,
+          end_date: endDate,
+          total_days: Math.max(
+            1,
+            Math.round(
+              (new Date(endDate).getTime() - new Date(startDate).getTime()) /
+                (1000 * 60 * 60 * 24)
+            ) + 1
+          ),
+          total_price: (product?.rental_price_per_day || 150000) * 2,
+          deposit_amount: product?.deposit_amount || 2000000,
+          pickup_method:
+            pickupMethod === 'STORE'
+              ? 'ETown Tân Bình'
+              : `Giao tận nơi: ${address}`,
+          status: 'PENDING',
+          notes: notes,
+          created_at: new Date().toISOString(),
+        });
+        localStorage.setItem('thuecam_bookings', JSON.stringify(list));
+      } catch {
+        // ignore
+      }
+    }
+
+    setSubmitted(true);
+  };
+
+  if (submitted) {
+    return (
+      <div className="rounded-[32px] border-2 border-sky-100 bg-white p-8 sm:p-12 text-center shadow-cute">
+        <div className="size-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+          <CheckCircle2 className="size-9" />
+        </div>
+        <h2 className="text-2xl font-black text-slate-900">
+          Đã nhận yêu cầu thuê thiết bị! 🎉
+        </h2>
+        <p className="mx-auto mt-2 max-w-lg text-slate-600 text-sm">
+          THUECAM sẽ liên hệ qua SĐT/Zalo <strong>{phone}</strong> trong vòng 10 phút để xác nhận lịch máy và hướng dẫn bạn nhận máy tại <strong>ETown Tân Bình</strong> hoặc giao hỏa tốc.
+        </p>
+        <div className="mt-6 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setSubmitted(false)}
+            className="rounded-full bg-[#0284c7] px-6 py-2.5 text-xs font-black text-white hover:bg-[#0369a1]"
+          >
+            Gửi yêu cầu thuê khác
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-[32px] border-2 border-sky-100 bg-white p-5 sm:p-8 shadow-cute space-y-6"
+    >
+      <div className="grid gap-5 sm:grid-cols-2">
+        {/* Device select */}
+        <label className="text-xs font-bold text-slate-700 sm:col-span-2">
+          Chọn thiết bị bạn muốn thuê:
+          <select
+            value={selectedProduct}
+            onChange={(e) => setSelectedProduct(e.target.value)}
+            className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-3 text-sm font-black text-slate-900 outline-none focus:border-[#0284c7]"
+          >
+            {products.map((item) => (
+              <option key={item.id} value={item.slug}>
+                {item.name} — {item.rental_price_per_day.toLocaleString('vi-VN')}đ/ngày
+              </option>
+            ))}
+          </select>
+        </label>
+
+        {/* Schedule Calendar Table Section */}
+        <div className="sm:col-span-2">
+          <AvailabilityCalendarTable
+            productId={product?.id}
+            productName={product?.name}
+            dailyPrice={product?.rental_price_per_day}
+            depositAmount={product?.deposit_amount}
+            startDate={startDate}
+            endDate={endDate}
+            onDateChange={(start, end) => {
+              setStartDate(start);
+              setEndDate(end);
+            }}
+          />
+        </div>
+
+        {/* Start / End Date pickers */}
+        <label className="text-xs font-bold text-slate-700">
+          Ngày nhận máy:
+          <input
+            required
+            type="date"
+            min={todayStr}
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-sm font-bold text-slate-900 outline-none focus:border-[#0284c7]"
+          />
+        </label>
+
+        <label className="text-xs font-bold text-slate-700">
+          Ngày trả máy:
+          <input
+            required
+            type="date"
+            min={startDate || todayStr}
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-sm font-bold text-slate-900 outline-none focus:border-[#0284c7]"
+          />
+        </label>
+
+        {/* Customer Details */}
+        <label className="text-xs font-bold text-slate-700">
+          Họ và tên của bạn: *
+          <input
+            required
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-sm font-medium outline-none focus:border-[#0284c7]"
+            placeholder="Ví dụ: Nguyễn Văn A"
+          />
+        </label>
+
+        <label className="text-xs font-bold text-slate-700">
+          Số điện thoại / Zalo: *
+          <input
+            required
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-sm font-medium outline-none focus:border-[#0284c7]"
+            placeholder="09xx xxx xxx"
+          />
+        </label>
+
+        <label className="text-xs font-bold text-slate-700">
+          Email nhận phiếu thuê: *
+          <input
+            required
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-sm font-medium outline-none focus:border-[#0284c7]"
+            placeholder="ban@example.com"
+          />
+        </label>
+
+        {/* Rental mode */}
+        <div>
+          <span className="block text-xs font-bold text-slate-700 mb-1.5">Hình thức thuê:</span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setDuration('daily')}
+              className={`flex-1 rounded-2xl py-2.5 text-xs font-black transition-all ${
+                duration === 'daily'
+                  ? 'bg-[#0284c7] text-white shadow-sm'
+                  : 'bg-sky-50 text-slate-700 hover:bg-sky-100'
+              }`}
+            >
+              <CalendarDays className="mr-1 inline size-3.5" /> Theo ngày (24h)
+            </button>
+            <button
+              type="button"
+              onClick={() => setDuration('hourly')}
+              className={`flex-1 rounded-2xl py-2.5 text-xs font-black transition-all ${
+                duration === 'hourly'
+                  ? 'bg-[#0284c7] text-white shadow-sm'
+                  : 'bg-sky-50 text-slate-700 hover:bg-sky-100'
+              }`}
+            >
+              <Clock3 className="mr-1 inline size-3.5" /> Theo giờ (Trong ngày)
+            </button>
+          </div>
+        </div>
+
+        {/* Pickup Method */}
+        <div className="sm:col-span-2">
+          <span className="block text-xs font-bold text-slate-700 mb-1.5">
+            Điểm nhận máy:
+          </span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setPickupMethod('STORE')}
+              className={`rounded-2xl border p-3 text-left transition-all font-bold flex items-center gap-2.5 ${
+                pickupMethod === 'STORE'
+                  ? 'bg-sky-50 border-[#0284c7] text-[#0284c7]'
+                  : 'bg-white border-slate-200 text-slate-600 hover:border-sky-200'
+              }`}
+            >
+              <MapPin className="size-4 shrink-0 text-[#0284c7]" />
+              <div>
+                <span className="block text-xs font-black">Nhận máy tại ETown Tân Bình</span>
+                <span className="block text-[11px] text-slate-500 font-normal">Cộng Hòa, Tân Bình, TP HCM</span>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setPickupMethod('DELIVERY')}
+              className={`rounded-2xl border p-3 text-left transition-all font-bold flex items-center gap-2.5 ${
+                pickupMethod === 'DELIVERY'
+                  ? 'bg-sky-50 border-[#0284c7] text-[#0284c7]'
+                  : 'bg-white border-slate-200 text-slate-600 hover:border-sky-200'
+              }`}
+            >
+              <Truck className="size-4 shrink-0 text-[#0284c7]" />
+              <div>
+                <span className="block text-xs font-black">Giao hỏa tốc 30 phút</span>
+                <span className="block text-[11px] text-slate-500 font-normal">Ship tận tay nội thành TP.HCM</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {pickupMethod === 'DELIVERY' && (
+          <label className="text-xs font-bold text-slate-700 sm:col-span-2">
+            Địa chỉ nhận máy: *
+            <input
+              required
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-sm font-medium outline-none focus:border-[#0284c7]"
+              placeholder="Số nhà, tên đường, phường, quận..."
+            />
+          </label>
+        )}
+
+        <label className="text-xs font-bold text-slate-700 sm:col-span-2">
+          Ghi chú thêm:
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            className="mt-1.5 min-h-20 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-sm font-medium outline-none focus:border-[#0284c7]"
+            placeholder="Bạn cần thêm chân máy, kính lọc, pin phụ hoặc yêu cầu giờ giao máy cụ thể?"
+          />
+        </label>
+      </div>
+
+      <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-sky-100">
+        <p className="text-xs text-slate-500">
+          Sau khi gửi, THUECAM sẽ liên hệ xác nhận lịch và giữ máy cho bạn ngay.
+        </p>
+
+        <button
+          type="submit"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#0284c7] hover:bg-[#0369a1] px-8 py-3.5 text-sm font-black text-white shadow-cute transition-all hover:scale-105"
+        >
+          <span>Gửi Yêu Cầu Thuê Ngay</span>
+          <Send className="size-4" />
+        </button>
+      </div>
+    </form>
+  );
 }

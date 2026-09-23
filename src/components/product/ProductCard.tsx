@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Star, Sparkles, ArrowRight, Check } from 'lucide-react';
+import { Star, Sparkles, ArrowRight } from 'lucide-react';
 import { Product } from '@/types';
 
 interface ProductCardProps {
@@ -17,9 +17,9 @@ export function formatVND(amount: number) {
 
 export default function ProductCard({ product }: ProductCardProps) {
   return (
-    <article className="group rounded-3xl overflow-hidden card-hover flex flex-col bg-white border border-pink-100 shadow-cute">
+    <article className="group rounded-[28px] overflow-hidden card-hover flex flex-col bg-white border-2 border-sky-100 shadow-cute">
       {/* Product Image Container */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-pink-50/50">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-sky-50/60">
         <Image
           src={product.primary_image}
           alt={`${product.name} cho thuê tại THUECAM`}
@@ -32,11 +32,11 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Badges overlay */}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
           <span className="badge-rental shadow-sm">
-            <Sparkles className="w-3 h-3" />
+            <Sparkles className="w-3 h-3 text-[#0284c7]" />
             Cho Thuê
           </span>
           {product.brand && (
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/90 text-slate-700 backdrop-blur-md shadow-sm border border-pink-100">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/95 text-slate-700 backdrop-blur-md shadow-sm border border-sky-100">
               {product.brand.name}
             </span>
           )}
@@ -61,14 +61,14 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.category && (
             <Link
               href={`/danh-muc/${product.category.slug}`}
-              className="text-[11px] font-extrabold text-[#FF3877] hover:text-[#e02462] uppercase tracking-wider block mb-1"
+              className="text-[11px] font-extrabold text-[#0284c7] hover:text-[#0369a1] uppercase tracking-wider block mb-1"
             >
               {product.category.name}
             </Link>
           )}
 
           {/* Product Title */}
-          <h3 className="font-extrabold text-base text-slate-900 group-hover:text-[#FF3877] transition-colors line-clamp-1">
+          <h3 className="font-extrabold text-base text-slate-900 group-hover:text-[#0284c7] transition-colors line-clamp-1">
             <Link href={`/thiet-bi/${product.slug}`}>{product.name}</Link>
           </h3>
 
@@ -79,11 +79,11 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Pricing & CTA */}
-        <div className="pt-3 border-t border-pink-100 flex items-end justify-between">
+        <div className="pt-3 border-t border-sky-100 flex items-end justify-between">
           <div>
             <span className="text-[11px] font-medium text-slate-400 block">Giá thuê ngày:</span>
             <div className="flex items-baseline gap-1">
-              <span className="text-lg font-black text-[#FF3877]">
+              <span className="text-lg font-black text-[#0284c7]">
                 {formatVND(product.rental_price_per_day)}
               </span>
               <span className="text-xs text-slate-500 font-bold">/ngày</span>
@@ -92,7 +92,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           <Link
             href={`/thiet-bi/${product.slug}`}
-            className="px-4 py-2 rounded-full bg-pink-50 text-[#FF3877] group-hover:bg-gradient-candy group-hover:text-white text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-sm group-hover:shadow-cute"
+            className="px-4 py-2 rounded-full bg-sky-50 text-[#0284c7] group-hover:bg-gradient-candy group-hover:text-white text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-sm group-hover:shadow-cute"
             aria-label={`Xem chi tiết và thuê ${product.name}`}
           >
             <span>Thuê Ngay</span>

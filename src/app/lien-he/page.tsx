@@ -36,8 +36,8 @@ export default function LienHePage() {
               Chi Nhánh TP. Hồ Chí Minh
             </h2>
             <div className="space-y-2 text-xs text-slate-300">
-              <p><strong>Địa chỉ:</strong> 123 Nguyễn Thị Minh Khai, Phường Bến Thành, Quận 1, TP.HCM</p>
-              <p><strong>Hotline / Zalo:</strong> <span className="text-cyan-400 font-bold">0901.234.567</span></p>
+              <p><strong>Địa chỉ:</strong> ETown Cộng Hòa, 364 Cộng Hòa, Phường 13, Quận Tân Bình, TP.HCM</p>
+              <p><strong>Hotline / Zalo:</strong> <span className="text-cyan-400 font-bold">0932.501.411</span></p>
               <p><strong>Email:</strong> hcm@thuecam.vn</p>
               <p><strong>Giờ mở cửa:</strong> 08:00 - 21:30 (Thứ 2 - Chủ Nhật)</p>
             </div>

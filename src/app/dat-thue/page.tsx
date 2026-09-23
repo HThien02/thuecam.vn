@@ -2,13 +2,45 @@ import type { Metadata } from 'next';
 import { getProducts } from '@/lib/data';
 import { constructMetadata } from '@/lib/seo/metadata';
 import RentalRequestForm from '@/components/booking/RentalRequestForm';
+import { Sparkles, MapPin } from 'lucide-react';
 
-export const metadata: Metadata = constructMetadata({ title: 'Đặt thuê thiết bị | THUECAM', description: 'Gửi thông tin để THUECAM xác nhận lịch thuê thiết bị.', canonicalPath: '/dat-thue' });
+export const metadata: Metadata = constructMetadata({
+  title: 'Đặt Thuê Thiết Bị & Kiểm Tra Lịch Máy Trống | THUECAM',
+  description:
+    'Kiểm tra lịch máy còn trống và gửi thông tin đặt thuê trực tuyến. Nhận máy tại ETown Tân Bình hoặc giao hỏa tốc 30 phút.',
+  canonicalPath: '/dat-thue',
+});
 
-export default async function RentalPage({ searchParams }: { searchParams: Promise<{ product?: string; duration?: string }> }) {
+export default async function RentalPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ product?: string; duration?: string }>;
+}) {
   const [products, params] = await Promise.all([getProducts(), searchParams]);
   const activeProducts = products.filter((product) => product.status === 'ACTIVE');
   const initialProduct = activeProducts.find((product) => product.slug === params.product);
 
-  return <main className="min-h-screen bg-[#fffaf7] px-4 py-12 text-slate-900 sm:px-6 lg:px-8"><div className="mx-auto max-w-4xl"><div className="mb-8 text-center"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#ff6b9a]">Đặt thuê online</p><h1 className="mt-3 text-4xl font-black sm:text-5xl">Gửi thông tin thuê thiết bị</h1><p className="mx-auto mt-4 max-w-2xl text-slate-600">Không cần tạo tài khoản. Điền nhanh thông tin, shop sẽ xác nhận lịch và mức giá phù hợp qua tin nhắn.</p></div><RentalRequestForm products={activeProducts} initialProduct={initialProduct} /></div></main>;
+  return (
+    <main className="min-h-screen bg-[#f0f7ff] px-4 py-12 text-slate-900 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl space-y-8">
+        <div className="text-center">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-4 py-1 text-xs font-black uppercase text-[#0284c7] border border-sky-200">
+            <Sparkles className="size-3.5" /> Đặt thuê online nhanh chóng
+          </div>
+          <h1 className="mt-4 text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
+            Lịch Máy Còn Trống & Đặt Thuê
+          </h1>
+          <p className="mx-auto mt-3 max-w-2xl text-slate-600 text-sm sm:text-base leading-relaxed">
+            Xem ngay bảng lịch thiết bị còn trống bên dưới. Không cần tạo tài khoản rườm rà. Chọn ngày nhận & trả, THUECAM sẽ chuẩn bị máy kèm phụ kiện đầy đủ cho bạn!
+          </p>
+          <div className="mt-3 flex items-center justify-center gap-2 text-xs font-bold text-sky-800">
+            <MapPin className="size-4 text-[#0284c7]" />
+            <span>Điểm nhận máy: <strong>ETown, Tân Bình, TP HCM</strong> (hoặc ship tận tay)</span>
+          </div>
+        </div>
+
+        <RentalRequestForm products={activeProducts} initialProduct={initialProduct} />
+      </div>
+    </main>
+  );
 }

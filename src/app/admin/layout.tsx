@@ -38,11 +38,71 @@ export default function AdminLayout({
           <nav className="space-y-1 text-xs font-medium">
             <Link
               href="/admin"
-              className="flex items-center gap-2.5 rounded-xl bg-sky-500/10 px-3 py-2.5 text-sky-300 transition-colors hover:bg-sky-500/20"
+              className="flex items-center gap-2.5 rounded-xl bg-sky-500/10 px-3 py-2.5 text-sky-300 transition-colors hover:bg-sky-500/20 font-bold"
             >
               <Camera className="h-4 w-4 text-sky-400" />
               <span>Dashboard tổng quan</span>
             </Link>
+
+            <div className="pt-2 pb-1 px-3 text-[10px] font-black uppercase text-slate-500 tracking-wider">
+              Quản trị vận hành
+            </div>
+
+            <Link
+              href="/admin/products"
+              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <Camera className="w-4 h-4 text-sky-400" />
+              <span>Thiết Bị & Bảng Giá</span>
+            </Link>
+
+            <Link
+              href="/admin/categories"
+              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <Sliders className="w-4 h-4 text-indigo-400" />
+              <span>Danh Mục Thiết Bị</span>
+            </Link>
+
+            <Link
+              href="/admin/bookings"
+              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <Activity className="w-4 h-4 text-emerald-400" />
+              <span>Đơn Thuê & Lịch Máy</span>
+            </Link>
+
+            <div className="pt-2 pb-1 px-3 text-[10px] font-black uppercase text-slate-500 tracking-wider">
+              Nội dung & Đánh giá
+            </div>
+
+            <Link
+              href="/admin/content"
+              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <FileEdit className="w-4 h-4 text-blue-400" />
+              <span>Nội Dung CMS & Blog</span>
+            </Link>
+
+            <Link
+              href="/admin/reviews"
+              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <Star className="w-4 h-4 text-yellow-400" />
+              <span>Duyệt Đánh Giá Khách</span>
+            </Link>
+
+            <Link
+              href="/admin/settings"
+              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <Sliders className="w-4 h-4 text-cyan-400" />
+              <span>Cài Đặt & Địa Điểm ETown</span>
+            </Link>
+
+            <div className="pt-2 pb-1 px-3 text-[10px] font-black uppercase text-slate-500 tracking-wider">
+              Kỹ thuật SEO
+            </div>
 
             <Link
               href="/admin/seo"
@@ -61,27 +121,11 @@ export default function AdminLayout({
             </Link>
 
             <Link
-              href="/admin/content"
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
-            >
-              <FileEdit className="w-4 h-4 text-blue-400" />
-              <span>Quản Lý Nội Dung CMS</span>
-            </Link>
-
-            <Link
               href="/admin/redirects"
               className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
             >
               <CornerDownRight className="w-4 h-4 text-amber-400" />
-              <span>Điều Hướng 301 Redirects</span>
-            </Link>
-
-            <Link
-              href="/admin/reviews"
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
-            >
-              <Star className="w-4 h-4 text-yellow-400" />
-              <span>Duyệt Đánh Giá Khách</span>
+              <span>301 Redirects</span>
             </Link>
           </nav>
         </div>
