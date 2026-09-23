@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Camera, Search, Phone, Menu, X, Sparkles, Gift, Home, Tag, Clock3, Wrench, Shield } from 'lucide-react';
+import { Camera, Search, Phone, Menu, X, Sparkles, Gift, Home, Tag, Clock3, Wrench } from 'lucide-react';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -43,7 +43,7 @@ export default function Header() {
               <Camera className="w-6 h-6 text-white" />
             </div>
             <div>
-              <span className="text-xl font-black tracking-tight text-slate-900 block leading-none sm:text-[22px]">
+              <span className="text-lg font-black tracking-tight text-slate-900 block leading-none sm:text-xl">
                 THUECAM<span className="text-[#0284c7]">.VN</span>
               </span>
 
@@ -70,21 +70,12 @@ export default function Header() {
             </Link>
             <Link href="/cong-thuc-setup" className="flex items-center gap-2 whitespace-nowrap px-1 py-2 text-slate-700 hover:text-[#0284c7] transition-colors">
               <Wrench className="size-[18px] stroke-[2.75] text-sky-600" />
-              <span>Công thức setup</span>
+              <span>Công thức</span>
             </Link>
           </nav>
 
           {/* Right Action Tools */}
           <div className="hidden shrink-0 items-center gap-2 lg:flex">
-            <Link
-              href="/admin"
-              className="px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-200"
-              title="Khu vực quản trị"
-            >
-              <Shield className="w-3.5 h-3.5 text-sky-600" />
-              <span>Admin</span>
-            </Link>
-
             <Link
               href="/search"
               className="whitespace-nowrap px-3.5 py-2 rounded-full bg-sky-50 hover:bg-sky-100 text-[#0284c7] border border-sky-200/80 transition-all flex items-center gap-2 text-xs font-bold"
@@ -143,11 +134,7 @@ export default function Header() {
           </Link>
           <Link href="/cong-thuc-setup" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-3 rounded-xl hover:bg-sky-50 hover:text-[#0284c7]">
             <Wrench className="size-[18px] stroke-[2.75] text-sky-600" />
-            Công thức setup
-          </Link>
-          <Link href="/admin" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-3 rounded-xl hover:bg-sky-50 hover:text-[#0284c7]">
-            <Shield className="size-4" />
-            Admin Dashboard
+            Công thức
           </Link>
 
           <div className="pt-3 border-t border-sky-100 flex flex-col gap-2">

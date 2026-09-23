@@ -15,7 +15,6 @@ import {
   ArrowRight,
   HelpCircle,
   Star,
-  CheckCircle2,
   Flame,
 } from 'lucide-react';
 
@@ -167,9 +166,9 @@ export default async function HomePage() {
             <div className="w-13 h-13 rounded-2xl bg-gradient-candy text-white font-black text-lg flex items-center justify-center mx-auto shadow-cute">
               2
             </div>
-            <h3 className="font-black text-slate-900 text-base">Quét VietQR & Cọc Linh Hoạt</h3>
+            <h3 className="font-black text-slate-900 text-base">Liên hệ & Cọc Linh Hoạt</h3>
             <p className="text-xs text-slate-500 leading-relaxed font-medium">
-              Thanh toán tự động qua SePay VietQR. Hỗ trợ cọc bằng CCCD gắn chip nhanh chóng, không giữ tiền nhiều.
+              Liên hệ shop để được tư vấn nhanh. Hỗ trợ cọc bằng CCCD gắn chip hoặc cọc tiền linh hoạt theo thiết bị.
             </p>
           </div>
 
@@ -217,12 +216,7 @@ export default async function HomePage() {
 
               <div className="pt-3 border-t border-sky-100 flex items-center justify-between">
                 <span className="font-black text-slate-900">{rev.user_name}</span>
-                {rev.rental_verified && (
-                  <span className="badge-verified">
-                    <CheckCircle2 className="w-3 h-3" />
-                    Đã Thuê Thật
-                  </span>
-                )}
+
               </div>
             </div>
           ))}

@@ -4,7 +4,8 @@ import { Camera, MapPin, Phone, Mail, Clock, ShieldCheck, Sparkles } from 'lucid
 
 export default function Footer() {
   return (
-    <footer className="bg-gradient-to-b from-white to-[#f0f8ff] border-t border-sky-100/80 pt-16 pb-12 text-slate-600 text-sm">
+    <>
+      <footer className="bg-gradient-to-b from-white to-[#f0f8ff] border-t border-sky-100/80 pt-16 pb-12 text-slate-600 text-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-sky-100">
           {/* Col 1: Brand & Verified Business */}
@@ -198,11 +199,6 @@ export default function Footer() {
                   Liên Hệ & Bản Đồ ETown
                 </Link>
               </li>
-              <li>
-                <Link href="/admin" className="hover:text-[#0284c7] transition-colors text-sky-600 font-bold">
-                  Trang Quản Trị (Admin)
-                </Link>
-              </li>
             </ul>
           </div>
         </div>
@@ -225,5 +221,7 @@ export default function Footer() {
         </div>
       </div>
     </footer>
+      <Link href="/admin" aria-label="Khu vực quản trị" className="sr-only">Khu vực quản trị</Link>
+    </>
   );
 }
