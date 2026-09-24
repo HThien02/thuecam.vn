@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 
 const fields = {
   products: ['id', 'slug', 'name', 'sku', 'brand_id', 'category_id', 'excerpt', 'description', 'specs', 'accessories_included', 'rental_price_per_day', 'deposit_amount', 'primary_image', 'gallery_images', 'three_d_model_url', 'inventory_count', 'status', 'seo_title', 'seo_description', 'seo_keywords', 'canonical_url', 'og_title', 'og_description', 'og_image', 'indexable', 'created_at', 'updated_at'],
+  brands: ['id', 'slug', 'name', 'logo_url', 'description', 'seo_title', 'seo_description', 'indexable', 'created_at'],
   categories: ['id', 'slug', 'name', 'h1', 'intro_content', 'description', 'icon', 'seo_title', 'seo_description', 'og_image', 'display_order', 'indexable', 'created_at'],
   articles: ['id', 'slug', 'type', 'title', 'excerpt', 'content', 'featured_image', 'author_name', 'author_avatar', 'author_bio', 'reviewer_name', 'pillar_slug', 'related_product_ids', 'faq', 'status', 'seo_title', 'seo_description', 'canonical_url', 'og_image', 'indexable', 'published_at', 'updated_at'],
   reviews: ['id', 'product_id', 'user_name', 'rating', 'comment', 'rental_verified', 'status', 'created_at'],
@@ -18,7 +19,7 @@ const fields = {
 type AdminTable = keyof typeof fields;
 const tableNames = new Set<string>(Object.keys(fields));
 const sortColumns: Record<AdminTable, string> = {
-  products: 'created_at', categories: 'display_order', articles: 'published_at',
+  products: 'created_at', brands: 'name', categories: 'display_order', articles: 'published_at',
   reviews: 'created_at', redirects: 'created_at', bookings: 'created_at',
   blocked_dates: 'date', site_settings: 'id', seo_settings: 'id',
 };
@@ -65,7 +66,9 @@ export async function POST(request: NextRequest) {
     return responseError('Invalid request body.');
   }
   if (!isAdminTable(body.table ?? null)) return responseError('Unsupported data collection.');
-  const table = body.table;
+  const tableName = body.table ?? null;
+  if (!isAdminTable(tableName)) return responseError('Unsupported data collection.');
+  const table: AdminTable = tableName;
   const record = pickAllowedFields(table, body.record);
   if (!record || Object.keys(record).length === 0) return responseError('No valid record fields were provided.');
 

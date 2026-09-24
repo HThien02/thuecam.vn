@@ -619,7 +619,7 @@ export default function ProductManagerClient({
                   <label className="block font-bold text-slate-300 mb-1">Trạng thái:</label>
                   <select
                     value={status}
-                    onChange={(e) => setStatus(e.target.value as any)}
+                    onChange={(e) => setStatus(e.target.value as Product['status'])}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white outline-none focus:border-sky-500 font-bold"
                   >
                     <option value="ACTIVE">ACTIVE (Sẵn sàng cho thuê)</option>

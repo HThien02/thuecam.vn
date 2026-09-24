@@ -2,7 +2,7 @@
 
 export async function saveAdminRecord<T>(
   table: string,
-  record: Record<string, unknown>,
+  record: object,
   operation?: 'create' | 'update',
 ): Promise<T> {
   const response = await fetch('/api/admin/data', {

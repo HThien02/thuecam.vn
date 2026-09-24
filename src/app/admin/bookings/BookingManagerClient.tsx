@@ -316,7 +316,7 @@ export default function BookingManagerClient({
                     <td className="px-4 py-3">
                       <select
                         value={b.status}
-                        onChange={(e) => handleChangeStatus(b.id, e.target.value as any)}
+                        onChange={(e) => handleChangeStatus(b.id, e.target.value as BookingRecord['status'])}
                         className={`rounded-full px-2.5 py-1 text-[10px] font-black border outline-none cursor-pointer ${badgeClass} bg-slate-900`}
                       >
                         <option value="PENDING">Chờ duyệt</option>
@@ -522,7 +522,7 @@ export default function BookingManagerClient({
                   <label className="block font-bold text-slate-300 mb-1">Trạng thái đơn:</label>
                   <select
                     value={status}
-                    onChange={(e) => setStatus(e.target.value as any)}
+                    onChange={(e) => setStatus(e.target.value as BookingRecord['status'])}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white outline-none focus:border-emerald-500 font-bold"
                   >
                     <option value="PENDING">Chờ duyệt (PENDING)</option>

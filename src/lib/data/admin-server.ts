@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 
 export type AdminTable =
   | 'products'
+  | 'brands'
   | 'categories'
   | 'articles'
   | 'reviews'
@@ -15,6 +16,7 @@ export type AdminTable =
 
 const sortColumns: Record<AdminTable, string> = {
   products: 'created_at',
+  brands: 'name',
   categories: 'display_order',
   articles: 'published_at',
   reviews: 'created_at',
