@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import Header from '@/components/common/Header';
-import Footer from '@/components/common/Footer';
-import AnalyticsScript from '@/components/analytics/AnalyticsScript';
+import PublicChrome from '@/components/common/PublicChrome';
 import { JsonLdScript, generateLocalBusinessJsonLd } from '@/lib/seo/jsonld';
 import { constructMetadata } from '@/lib/seo/metadata';
 
@@ -32,10 +30,8 @@ export default function RootLayout({
         <JsonLdScript data={organizationJsonLd} />
       </head>
       <body className="min-h-screen flex flex-col bg-[#FFF8F9] text-slate-900 selection:bg-pink-400 selection:text-white antialiased">
-        <Header />
+        <PublicChrome />
         <main className="flex-1">{children}</main>
-        <Footer />
-        <AnalyticsScript />
       </body>
     </html>
   );

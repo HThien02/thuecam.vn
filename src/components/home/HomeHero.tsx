@@ -64,7 +64,7 @@ export default function HomeHero({ image }: HomeHeroProps) {
               <MapPin className="size-4 text-[#0284c7]" /> Nhận máy nhanh tại ETown Tân Bình
             </div>
             <h1 className="max-w-2xl text-4xl font-black leading-[1.1] tracking-[-0.04em] text-[#0c2340] sm:text-6xl">
-              Bấm máy thật vui 📸<br />Lưu chuyến đi thật xinh
+              Bấm máy thật vui<br />Lưu chuyến đi thật xinh
             </h1>
             <p className="mt-5 max-w-xl text-sm font-bold leading-6 text-[#334e68] sm:text-base">
               Máy gọn, dễ dùng, phụ kiện đủ đầy cho mọi cuộc hẹn và chuyến đi khám phá.
