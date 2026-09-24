@@ -1,5 +1,8 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   Sliders,
   Activity,
@@ -11,11 +14,17 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
-export default async function AdminLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+
   return (
     <div className="min-h-screen bg-[#070b14] text-slate-100 flex flex-col md:flex-row">
       {/* Sidebar */}
