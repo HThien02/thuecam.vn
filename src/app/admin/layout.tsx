@@ -43,8 +43,8 @@ export default function AdminLayout({
     const active = isNavActive(href);
     return `flex items-center gap-2.5 rounded-xl px-3 py-2.5 transition-all text-xs font-bold ${
       active
-        ? 'bg-gradient-to-r from-sky-500/25 to-cyan-500/10 text-cyan-300 border-l-4 border-cyan-400 ring-1 ring-cyan-400/30 shadow-md shadow-cyan-950/50'
-        : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+        ? 'bg-sky-100 text-sky-800 border-l-4 border-sky-500 ring-1 ring-sky-200 shadow-sm'
+        : 'text-slate-500 hover:text-sky-800 hover:bg-sky-50'
     }`;
   };
 
@@ -55,14 +55,14 @@ export default function AdminLayout({
     } catch {
       // Ignore network errors on logout
     } finally {
-      window.location.href = '/admin/login';
+      router.replace('/admin/login');
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#070b14] text-slate-100 flex flex-col md:flex-row">
+    <div className="admin-shell min-h-screen bg-[#f0f7ff] text-[#0c2340] flex flex-col md:flex-row">
       {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-[#0c1220] border-r border-slate-800 p-5 flex flex-col justify-between shrink-0">
+      <aside className="w-full md:w-64 md:sticky md:top-0 md:h-screen md:overflow-y-auto bg-white border-r border-sky-100 p-5 flex flex-col justify-between shrink-0">
         <div className="space-y-6">
           {/* Admin brand */}
           <Link href="/admin" className="flex items-center gap-2.5 group">
