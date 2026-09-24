@@ -20,6 +20,10 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const navClass = (href: string) => {
+    const isActive = href === '/admin' ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
+    return `flex items-center gap-2.5 rounded-xl px-3 py-2.5 transition-colors ${isActive ? 'bg-sky-500/15 text-sky-200 font-bold ring-1 ring-sky-400/30' : 'text-slate-300 hover:text-white hover:bg-slate-800'}`;
+  };
 
   if (pathname === '/admin/login') {
     return <>{children}</>;
@@ -47,7 +51,7 @@ export default function AdminLayout({
           <nav className="space-y-1 text-xs font-medium">
             <Link
               href="/admin"
-              className="flex items-center gap-2.5 rounded-xl bg-sky-500/10 px-3 py-2.5 text-sky-300 transition-colors hover:bg-sky-500/20 font-bold"
+              className={navClass('/admin')}
             >
               <Camera className="h-4 w-4 text-sky-400" />
               <span>Dashboard tổng quan</span>
@@ -59,7 +63,7 @@ export default function AdminLayout({
 
             <Link
               href="/admin/products"
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+              className={navClass('/admin/products')}
             >
               <Camera className="w-4 h-4 text-sky-400" />
               <span>Thiết Bị & Bảng Giá</span>
@@ -67,7 +71,7 @@ export default function AdminLayout({
 
             <Link
               href="/admin/categories"
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+              className={navClass('/admin/products')}
             >
               <Sliders className="w-4 h-4 text-indigo-400" />
               <span>Danh Mục Thiết Bị</span>
@@ -75,7 +79,7 @@ export default function AdminLayout({
 
             <Link
               href="/admin/bookings"
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+              className={navClass('/admin/products')}
             >
               <Activity className="w-4 h-4 text-emerald-400" />
               <span>Đơn Thuê & Lịch Máy</span>
@@ -87,7 +91,7 @@ export default function AdminLayout({
 
             <Link
               href="/admin/content"
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+              className={navClass('/admin/products')}
             >
               <FileEdit className="w-4 h-4 text-blue-400" />
               <span>Nội Dung CMS & Blog</span>
@@ -95,7 +99,7 @@ export default function AdminLayout({
 
             <Link
               href="/admin/reviews"
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+              className={navClass('/admin/products')}
             >
               <Star className="w-4 h-4 text-yellow-400" />
               <span>Duyệt Đánh Giá Khách</span>
@@ -103,7 +107,7 @@ export default function AdminLayout({
 
             <Link
               href="/admin/settings"
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+              className={navClass('/admin/products')}
             >
               <Sliders className="w-4 h-4 text-cyan-400" />
               <span>Cài Đặt & Địa Điểm ETown</span>
@@ -115,7 +119,7 @@ export default function AdminLayout({
 
             <Link
               href="/admin/seo"
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+              className={navClass('/admin/products')}
             >
               <Sliders className="w-4 h-4 text-cyan-400" />
               <span>Quản Trị SEO & SERP</span>
@@ -123,7 +127,7 @@ export default function AdminLayout({
 
             <Link
               href="/admin/seo/health"
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+              className={navClass('/admin/products')}
             >
               <Activity className="w-4 h-4 text-emerald-400" />
               <span>Sức Khỏe SEO (Audit)</span>
@@ -131,7 +135,7 @@ export default function AdminLayout({
 
             <Link
               href="/admin/redirects"
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+              className={navClass('/admin/products')}
             >
               <CornerDownRight className="w-4 h-4 text-amber-400" />
               <span>301 Redirects</span>
