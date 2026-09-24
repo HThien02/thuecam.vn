@@ -1,5 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
 import {
   Sliders,
   Activity,
@@ -16,6 +18,14 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: admin } = user?.email
+    ? await supabase.from('admin_users').select('email').eq('email', user.email.toLowerCase()).eq('is_active', true).maybeSingle()
+    : { data: null };
+
+  if (!user || !admin) redirect('/admin/login');
+
   return (
     <div className="min-h-screen bg-[#070b14] text-slate-100 flex flex-col md:flex-row">
       {/* Sidebar */}
