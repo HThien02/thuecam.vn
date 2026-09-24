@@ -87,7 +87,7 @@ function LoginFormContent() {
                   required
                   type="email"
                   autoComplete="username"
-                  placeholder="ten@congty.com"
+                  placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full rounded-xl border border-slate-700 bg-slate-950/80 pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition"
@@ -106,7 +106,7 @@ function LoginFormContent() {
                   type="password"
                   autoComplete="current-password"
                   minLength={16}
-                  placeholder="Nhập mật khẩu quản trị"
+                  placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full rounded-xl border border-slate-700 bg-slate-950/80 pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition"
