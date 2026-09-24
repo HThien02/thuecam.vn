@@ -22,6 +22,8 @@ export default function RentalRequestForm({
   initialProduct?: Product;
 }) {
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [bookingCode, setBookingCode] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(
     initialProduct?.slug ?? products[0]?.slug ?? ''
   );
@@ -48,20 +50,14 @@ export default function RentalRequestForm({
     initialProduct ??
     products[0];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
 
     const newErrors: Record<string, string> = {};
-    if (!isValidName(fullName)) {
-      newErrors.fullName = NAME_VALIDATION_ERROR;
-    }
-    if (!isValidVietnamPhone(phone)) {
-      newErrors.phone = PHONE_VALIDATION_ERROR;
-    }
-    if (!isValidEmail(email)) {
-      newErrors.email = EMAIL_VALIDATION_ERROR;
-    }
+    if (!isValidName(fullName)) newErrors.fullName = NAME_VALIDATION_ERROR;
+    if (!isValidVietnamPhone(phone)) newErrors.phone = PHONE_VALIDATION_ERROR;
+    if (!isValidEmail(email)) newErrors.email = EMAIL_VALIDATION_ERROR;
     if (pickupMethod === 'DELIVERY' && (!address || address.trim().length < 5)) {
       newErrors.address = 'Vui lòng nhập địa chỉ giao máy cụ thể (tối thiểu 5 ký tự).';
     }
@@ -73,47 +69,37 @@ export default function RentalRequestForm({
       setErrors(newErrors);
       return;
     }
+    if (!product) {
+      setErrors({ submit: 'Vui lòng chọn thiết bị cần thuê.' });
+      return;
+    }
 
-    const code = `TC${Math.floor(100000 + Math.random() * 900000)}`;
-
-    // Store in admin bookings table
-    if (typeof window !== 'undefined') {
-      try {
-        const existing = localStorage.getItem('thuecam_bookings');
-        const list = existing ? JSON.parse(existing) : [];
-        list.unshift({
-          id: code,
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product_id: product.id,
+          start_date: startDate,
+          end_date: endDate,
           customer_name: fullName,
           customer_phone: phone,
           customer_email: email,
-          product_id: product?.id,
-          product_name: product?.name,
-          start_date: startDate,
-          end_date: endDate,
-          total_days: Math.max(
-            1,
-            Math.round(
-              (new Date(endDate).getTime() - new Date(startDate).getTime()) /
-                (1000 * 60 * 60 * 24)
-            ) + 1
-          ),
-          total_price: (product?.rental_price_per_day || 150000) * 2,
-          deposit_amount: product?.deposit_amount || 2000000,
-          pickup_method:
-            pickupMethod === 'STORE'
-              ? 'ETown Tân Bình'
-              : `Giao tận nơi: ${address}`,
-          status: 'PENDING',
-          notes: notes,
-          created_at: new Date().toISOString(),
-        });
-        localStorage.setItem('thuecam_bookings', JSON.stringify(list));
-      } catch {
-        // ignore
-      }
+          pickup_method: pickupMethod,
+          delivery_address: address,
+          note: notes,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? 'Không thể gửi yêu cầu thuê.');
+      setBookingCode(result.booking_code);
+      setSubmitted(true);
+    } catch (error) {
+      setErrors({ submit: error instanceof Error ? error.message : 'Không thể gửi yêu cầu thuê.' });
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setSubmitted(true);
   };
 
   if (submitted) {
@@ -128,10 +114,14 @@ export default function RentalRequestForm({
         <p className="mx-auto mt-2 max-w-lg text-slate-600 text-sm">
           THUECAM sẽ liên hệ qua SĐT/Zalo <strong>{phone}</strong> trong vòng 10 phút để xác nhận lịch máy và hướng dẫn bạn nhận máy tại <strong>ETown Tân Bình</strong> hoặc giao hỏa tốc.
         </p>
+        <p className="mt-4 text-sm font-bold text-sky-800">Mã yêu cầu: {bookingCode}</p>
         <div className="mt-6 flex justify-center">
           <button
             type="button"
-            onClick={() => setSubmitted(false)}
+            onClick={() => {
+              setSubmitted(false);
+              setBookingCode('');
+            }}
             className="rounded-full bg-[#0284c7] px-6 py-2.5 text-xs font-black text-white hover:bg-[#0369a1]"
           >
             Gửi yêu cầu thuê khác
@@ -374,9 +364,11 @@ export default function RentalRequestForm({
           Sau khi gửi, THUECAM sẽ liên hệ xác nhận lịch và giữ máy cho bạn ngay.
         </p>
 
-        <SafeButton
-          type="submit"
-          loadingText="Đang gửi yêu cầu..."
+      {errors.submit && <p role="alert" className="text-sm font-semibold text-rose-600">{errors.submit}</p>}
+      <SafeButton
+        type="submit"
+        disabled={isSubmitting || !product}
+        loadingText="Đang gửi yêu cầu..."
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#0284c7] hover:bg-[#0369a1] px-8 py-3.5 text-sm font-black text-white shadow-cute transition-all hover:scale-105"
         >
           <span>Gửi Yêu Cầu Thuê Ngay</span>

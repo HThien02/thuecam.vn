@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Review, Product } from '@/types';
 import { Star, CheckCircle2, XCircle, ShieldCheck, Trash2, Filter } from 'lucide-react';
+import { deleteAdminRecord, saveAdminRecord } from '@/lib/data/admin-api';
 
 interface Props {
   initialReviews: Review[];
@@ -21,21 +22,25 @@ export default function ReviewModerationClient({
     return true;
   });
 
-  const handleApprove = (id: string) => {
-    setReviews(
-      reviews.map((r) => (r.id === id ? { ...r, status: 'APPROVED' } : r))
-    );
+  const handleStatusChange = async (id: string, status: Review['status']) => {
+    try {
+      await saveAdminRecord('reviews', { id, status }, 'update');
+      setReviews((current) => current.map((review) => review.id === id ? { ...review, status } : review));
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Không thể cập nhật đánh giá.');
+    }
   };
 
-  const handleReject = (id: string) => {
-    setReviews(
-      reviews.map((r) => (r.id === id ? { ...r, status: 'REJECTED' } : r))
-    );
-  };
+  const handleApprove = (id: string) => handleStatusChange(id, 'APPROVED');
+  const handleReject = (id: string) => handleStatusChange(id, 'REJECTED');
 
-  const handleDelete = (id: string) => {
-    if (confirm('Bạn có chắc muốn xóa đánh giá này?')) {
-      setReviews(reviews.filter((r) => r.id !== id));
+  const handleDelete = async (id: string) => {
+    if (!confirm('Bạn có chắc muốn xóa đánh giá này?')) return;
+    try {
+      await deleteAdminRecord('reviews', id);
+      setReviews((current) => current.filter((review) => review.id !== id));
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Không thể xóa đánh giá.');
     }
   };
 

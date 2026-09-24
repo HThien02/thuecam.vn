@@ -18,7 +18,7 @@ import {
   Loader2,
   Check,
 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { deleteAdminRecord, saveAdminRecord } from '@/lib/data/admin-api';
 import { compressImageToBase64 } from '@/lib/utils/image-compress';
 import SafeButton from '@/components/common/SafeButton';
 import { isValidPositiveNumber } from '@/lib/security/validation';
@@ -53,7 +53,6 @@ export default function ProductManagerClient({
   const [isDragging, setIsDragging] = useState(false);
   const [validationError, setValidationError] = useState('');
 
-  const supabase = createClient();
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -187,50 +186,52 @@ export default function ProductManagerClient({
     };
 
     try {
-      const result = editingProduct
-        ? await supabase.from('products').update(payload).eq('id', editingProduct.id).select().single()
-        : await supabase.from('products').insert(payload).select().single();
-
-      if (result.data) {
-        setProducts((current) => editingProduct
-          ? current.map((item) => item.id === editingProduct.id ? { ...item, ...result.data } as Product : item)
-          : [{ ...productData, ...result.data } as Product, ...current]);
-      } else {
-        setProducts((current) => editingProduct
-          ? current.map((item) => item.id === editingProduct.id ? { ...item, ...payload } as Product : item)
-          : [productData, ...current]);
-      }
-    } catch {
-      // Fallback in case of network or offline dummy db
+      const saved = await saveAdminRecord<Product>('products', {
+        ...payload,
+        id: productData.id,
+        description: productData.description,
+        specs: productData.specs,
+        accessories_included: productData.accessories_included,
+        seo_title: productData.seo_title,
+        seo_description: productData.seo_description,
+        canonical_url: productData.canonical_url,
+        og_title: productData.og_title,
+        og_description: productData.og_description,
+        og_image: productData.og_image,
+        created_at: productData.created_at,
+        updated_at: productData.updated_at,
+      });
+      const savedProduct = { ...productData, ...saved, brand, category } as Product;
       setProducts((current) => editingProduct
-        ? current.map((item) => item.id === editingProduct.id ? { ...item, ...payload } as Product : item)
-        : [productData, ...current]);
+        ? current.map((item) => item.id === editingProduct.id ? savedProduct : item)
+        : [savedProduct, ...current]);
+      setIsModalOpen(false);
+      showToast(editingProduct ? `Đã cập nhật máy "${name}"` : `Đã thêm mới thiết bị "${name}"`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể lưu thiết bị.');
     }
-
-    setIsModalOpen(false);
-    showToast(editingProduct ? `Đã cập nhật máy "${name}" (Đã lưu ảnh trong DB)` : `Đã thêm mới thiết bị "${name}" (Đã lưu ảnh trong DB)`);
   };
 
   const handleDelete = async (id: string, prodName: string) => {
     if (!confirm(`Bạn có chắc muốn xóa thiết bị "${prodName}" khỏi hệ thống?`)) return;
-    const { error } = await supabase.from('products').delete().eq('id', id);
-    if (error) {
-      showToast(`Không thể xóa thiết bị: ${error.message}`);
-      return;
+    try {
+      await deleteAdminRecord('products', id);
+      setProducts((current) => current.filter((item) => item.id !== id));
+      showToast(`Đã xóa thiết bị "${prodName}"`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể xóa thiết bị.');
     }
-    setProducts((current) => current.filter((item) => item.id !== id));
-    showToast(`Đã xóa thiết bị "${prodName}"`);
   };
 
   const handleToggleStatus = async (prod: Product) => {
     const nextStatus = prod.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-    const { error } = await supabase.from('products').update({ status: nextStatus }).eq('id', prod.id);
-    if (error) {
-      showToast(`Không thể đổi trạng thái: ${error.message}`);
-      return;
+    try {
+      await saveAdminRecord('products', { id: prod.id, status: nextStatus }, 'update');
+      setProducts((current) => current.map((item) => item.id === prod.id ? { ...item, status: nextStatus } : item));
+      showToast(`Đã chuyển trạng thái sang ${nextStatus}`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể đổi trạng thái.');
     }
-    setProducts((current) => current.map((item) => item.id === prod.id ? { ...item, status: nextStatus } : item));
-    showToast(`Đã chuyển trạng thái sang ${nextStatus}`);
   };
 
   // Filter products

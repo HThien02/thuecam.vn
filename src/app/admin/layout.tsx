@@ -41,10 +41,10 @@ export default function AdminLayout({
 
   const navClass = (href: string) => {
     const active = isNavActive(href);
-    return `flex items-center gap-2.5 rounded-xl px-3 py-2.5 transition-all text-xs font-bold ${
+      return `flex items-center gap-2.5 rounded-xl px-3 py-2.5 transition-all text-xs font-bold ${
       active
-        ? 'bg-sky-100 text-sky-800 border-l-4 border-sky-500 ring-1 ring-sky-200 shadow-sm'
-        : 'text-slate-500 hover:text-sky-800 hover:bg-sky-50'
+        ? 'bg-sky-500/15 text-sky-200 border-l-4 border-sky-400 ring-1 ring-sky-400/20 shadow-sm'
+        : 'text-slate-400 hover:text-sky-200 hover:bg-sky-500/10'
     }`;
   };
 
@@ -60,9 +60,9 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="admin-shell min-h-screen bg-[#f0f7ff] text-[#0c2340] flex flex-col md:flex-row">
+    <div className="admin-shell min-h-screen bg-[#071426] text-slate-100 flex flex-col md:flex-row">
       {/* Sidebar */}
-      <aside className="w-full md:w-64 md:sticky md:top-0 md:h-screen md:overflow-y-auto bg-white border-r border-sky-100 p-5 flex flex-col justify-between shrink-0">
+      <aside className="w-full md:w-64 md:sticky md:top-0 md:h-screen md:overflow-y-auto bg-[#0b1c31] border-r border-slate-800 p-5 flex flex-col justify-between shrink-0">
         <div className="space-y-6">
           {/* Admin brand */}
           <Link href="/admin" className="flex items-center gap-2.5 group">

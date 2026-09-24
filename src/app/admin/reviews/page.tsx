@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import { getAllReviewsForAdmin, getProducts } from '@/lib/data';
+import { getAdminRows } from '@/lib/data/admin-server';
+import type { Product, Review } from '@/types';
 import ReviewModerationClient from './ReviewModerationClient';
 
 export const metadata: Metadata = {
@@ -9,8 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminReviewsPage() {
-  const reviews = await getAllReviewsForAdmin();
-  const products = await getProducts();
+  const [reviews, products] = await Promise.all([
+    getAdminRows<Review>('reviews'),
+    getAdminRows<Product>('products'),
+  ]);
 
   return (
     <div className="space-y-8">

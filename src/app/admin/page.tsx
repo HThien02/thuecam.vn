@@ -2,12 +2,8 @@ import React from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getAdminSession } from '@/lib/security/session';
-import {
-  getArticles,
-  getCategories,
-  getProducts,
-  getAllReviewsForAdmin,
-} from '@/lib/data';
+import { getAdminRows } from '@/lib/data/admin-server';
+import type { Product, Category, Article, Review } from '@/types';
 import {
   Camera,
   Layers,
@@ -31,10 +27,10 @@ export default async function AdminDashboardPage() {
   if (!session) redirect('/admin/login');
 
   const [products, categories, articles, reviews] = await Promise.all([
-    getProducts(),
-    getCategories(),
-    getArticles(),
-    getAllReviewsForAdmin(),
+    getAdminRows<Product>('products'),
+    getAdminRows<Category>('categories'),
+    getAdminRows<Article>('articles'),
+    getAdminRows<Review>('reviews'),
   ]);
 
   const pendingReviews = reviews.filter((r) => r.status === 'PENDING');

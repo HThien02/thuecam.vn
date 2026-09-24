@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Plus,
   Trash2,
@@ -15,16 +15,19 @@ import {
   Search,
   Filter,
 } from 'lucide-react';
-import {
-  BookingRecord,
-  getStoredBookings,
-  saveStoredBooking,
-  deleteStoredBooking,
-  updateBookingStatus,
-} from '@/lib/data/admin-store';
+import { saveAdminRecord, deleteAdminRecord } from '@/lib/data/admin-api';
+import type { BookingRecord, BlockedDate } from '@/lib/data/admin-types';
 
-export default function BookingManagerClient() {
-  const [bookings, setBookings] = useState<BookingRecord[]>([]);
+export { type BookingRecord } from '@/lib/data/admin-types';
+
+export default function BookingManagerClient({
+  initialBookings,
+  initialBlockedDates,
+}: {
+  initialBookings: BookingRecord[];
+  initialBlockedDates: BlockedDate[];
+}) {
+  const [bookings, setBookings] = useState<BookingRecord[]>(initialBookings);
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,29 +47,9 @@ export default function BookingManagerClient() {
   const [toastMsg, setToastMsg] = useState('');
 
   // Blocked dates list for calendar
-  const [blockedDates, setBlockedDates] = useState<{ date: string; reason: string }[]>([]);
+  const [blockedDates, setBlockedDates] = useState<BlockedDate[]>(initialBlockedDates);
   const [blockDateInput, setBlockDateInput] = useState('');
   const [blockReasonInput, setBlockReasonInput] = useState('Bảo trì thiết bị');
-
-  useEffect(() => {
-    setBookings(getStoredBookings());
-
-    // Load blocked dates
-    try {
-      const stored = localStorage.getItem('thuecam_blocked_dates');
-      if (stored) {
-        setBlockedDates(JSON.parse(stored));
-      }
-    } catch {
-      // ignore
-    }
-
-    const handleDataChanged = () => {
-      setBookings(getStoredBookings());
-    };
-    window.addEventListener('thuecam_data_changed', handleDataChanged);
-    return () => window.removeEventListener('thuecam_data_changed', handleDataChanged);
-  }, []);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -105,7 +88,7 @@ export default function BookingManagerClient() {
     setIsModalOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     const daysCount = Math.max(
       1,
@@ -114,59 +97,116 @@ export default function BookingManagerClient() {
           (1000 * 60 * 60 * 24)
       ) + 1
     );
+    const bookingCode = editingBooking?.id ?? `TC${Math.floor(100000 + Math.random() * 900000)}`;
+    const delivery = pickupMethod.toLocaleLowerCase('vi').startsWith('giao');
 
-    const bookingData: BookingRecord = {
-      id: editingBooking ? editingBooking.id : `TC${Math.floor(100000 + Math.random() * 900000)}`,
-      customer_name: customerName,
-      customer_phone: customerPhone,
-      product_name: productName,
-      start_date: startDate,
-      end_date: endDate,
-      total_days: daysCount,
-      total_price: Number(totalPrice),
-      deposit_amount: Number(depositAmount),
-      pickup_method: pickupMethod,
-      status: status,
-      notes: notes,
-      created_at: editingBooking?.created_at || new Date().toISOString(),
-    };
-
-    const updated = saveStoredBooking(bookingData);
-    setBookings(updated);
-    setIsModalOpen(false);
-    showToast(editingBooking ? `Đã cập nhật đơn ${bookingData.id}` : `Đã tạo đơn ${bookingData.id}`);
-  };
-
-  const handleDelete = (id: string) => {
-    if (confirm(`Bạn có chắc muốn xóa đơn thuê ${id}?`)) {
-      const updated = deleteStoredBooking(id);
-      setBookings(updated);
-      showToast(`Đã xóa đơn ${id}`);
+    try {
+      const saved = await saveAdminRecord<Record<string, unknown>>(
+        'bookings',
+        {
+          ...(editingBooking?.database_id ? { id: editingBooking.database_id } : {}),
+          booking_code: bookingCode,
+          customer_name: customerName.trim(),
+          customer_phone: customerPhone.trim(),
+          customer_email: editingBooking?.customer_email ?? null,
+          product_id: editingBooking?.product_id ?? null,
+          product_name: productName.trim(),
+          start_date: startDate,
+          end_date: endDate,
+          total_days: daysCount,
+          daily_price: editingBooking?.daily_price ?? Math.round(Number(totalPrice) / daysCount),
+          total_price: Number(totalPrice),
+          deposit_amount: Number(depositAmount),
+          pickup_method: delivery ? 'DELIVERY' : 'STORE',
+          delivery_address: delivery ? pickupMethod : null,
+          note: notes.trim() || null,
+          status,
+        },
+        editingBooking ? 'update' : 'create',
+      );
+      const bookingData: BookingRecord = {
+        id: String(saved.booking_code),
+        database_id: String(saved.id),
+        customer_name: String(saved.customer_name),
+        customer_phone: String(saved.customer_phone),
+        customer_email: typeof saved.customer_email === 'string' ? saved.customer_email : undefined,
+        product_id: typeof saved.product_id === 'string' ? saved.product_id : undefined,
+        product_name: String(saved.product_name),
+        start_date: String(saved.start_date),
+        end_date: String(saved.end_date),
+        total_days: Number(saved.total_days),
+        daily_price: Number(saved.daily_price),
+        total_price: Number(saved.total_price),
+        deposit_amount: Number(saved.deposit_amount),
+        pickup_method: saved.pickup_method === 'DELIVERY'
+          ? String(saved.delivery_address ?? 'Giao tận nơi')
+          : 'ETown Tân Bình',
+        status: status,
+        notes: typeof saved.note === 'string' ? saved.note : undefined,
+        created_at: String(saved.created_at),
+      };
+      setBookings((current) => editingBooking
+        ? current.map((booking) => booking.id === editingBooking.id ? bookingData : booking)
+        : [bookingData, ...current]);
+      setIsModalOpen(false);
+      showToast(editingBooking ? `Đã cập nhật đơn ${bookingData.id}` : `Đã tạo đơn ${bookingData.id}`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể lưu đơn thuê.');
     }
   };
 
-  const handleChangeStatus = (id: string, newStatus: BookingRecord['status']) => {
-    const updated = updateBookingStatus(id, newStatus);
-    setBookings(updated);
-    showToast(`Đơn ${id} chuyển sang: ${newStatus}`);
+  const handleDelete = async (id: string) => {
+    if (!confirm(`Bạn có chắc muốn xóa đơn thuê ${id}?`)) return;
+    try {
+      await deleteAdminRecord('bookings', id);
+      setBookings((current) => current.filter((booking) => booking.id !== id));
+      showToast(`Đã xóa đơn ${id}`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể xóa đơn thuê.');
+    }
+  };
+
+  const handleChangeStatus = async (id: string, newStatus: BookingRecord['status']) => {
+    const booking = bookings.find((item) => item.id === id);
+    if (!booking) return;
+    try {
+      await saveAdminRecord('bookings', {
+        id: booking.database_id,
+        booking_code: booking.id,
+        status: newStatus,
+      }, 'update');
+      setBookings((current) => current.map((item) => item.id === id ? { ...item, status: newStatus } : item));
+      showToast(`Đơn ${id} chuyển sang: ${newStatus}`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể cập nhật trạng thái đơn.');
+    }
   };
 
   // Block a date
-  const handleAddBlockedDate = (e: React.FormEvent) => {
+  const handleAddBlockedDate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!blockDateInput) return;
-    const updated = [...blockedDates, { date: blockDateInput, reason: blockReasonInput }];
-    setBlockedDates(updated);
-    localStorage.setItem('thuecam_blocked_dates', JSON.stringify(updated));
-    setBlockDateInput('');
-    showToast(`Đã khóa ngày ${blockDateInput} trên lịch máy trống`);
+    try {
+      const saved = await saveAdminRecord<BlockedDate>('blocked_dates', {
+        date: blockDateInput,
+        reason: blockReasonInput.trim(),
+      });
+      setBlockedDates((current) => [...current.filter((item) => item.date !== saved.date), saved]);
+      setBlockDateInput('');
+      showToast(`Đã khóa ngày ${saved.date} trên lịch máy trống`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể khóa ngày này.');
+    }
   };
 
-  const handleRemoveBlockedDate = (dateStr: string) => {
-    const updated = blockedDates.filter((b) => b.date !== dateStr);
-    setBlockedDates(updated);
-    localStorage.setItem('thuecam_blocked_dates', JSON.stringify(updated));
-    showToast(`Đã mở lại ngày ${dateStr}`);
+  const handleRemoveBlockedDate = async (dateStr: string) => {
+    try {
+      await deleteAdminRecord('blocked_dates', dateStr);
+      setBlockedDates((current) => current.filter((item) => item.date !== dateStr));
+      showToast(`Đã mở lại ngày ${dateStr}`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể mở lại ngày này.');
+    }
   };
 
   const filteredBookings = bookings.filter((b) => {

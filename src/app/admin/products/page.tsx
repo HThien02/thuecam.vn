@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import { getProducts, getCategories, getBrands } from '@/lib/data';
+import { getAdminRows } from '@/lib/data/admin-server';
+import type { Product, Category, Brand } from '@/types';
 import ProductManagerClient from './ProductManagerClient';
 
 export const metadata: Metadata = {
@@ -10,9 +11,9 @@ export const metadata: Metadata = {
 
 export default async function AdminProductsPage() {
   const [products, categories, brands] = await Promise.all([
-    getProducts(),
-    getCategories(),
-    getBrands(),
+    getAdminRows<Product>('products'),
+    getAdminRows<Category>('categories'),
+    getAdminRows<Brand>('brands'),
   ]);
 
   return (

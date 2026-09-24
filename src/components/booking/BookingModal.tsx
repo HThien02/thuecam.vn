@@ -58,6 +58,9 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
   const [bookingCode, setBookingCode] = useState('');
   const [copied, setCopied] = useState(false);
   const [paymentVerified, setPaymentVerified] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmedTotalPrice, setConfirmedTotalPrice] = useState<number | null>(null);
+  const [submissionError, setSubmissionError] = useState('');
 
   if (!isOpen) return null;
 
@@ -72,7 +75,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
   const discountAmount = Math.round(baseRentalPrice * discountRate);
   const totalRentalPrice = baseRentalPrice - discountAmount;
   const deposit = product.deposit_amount;
-  const totalDueNow = totalRentalPrice; // Customer pays rental fee; deposit settled upon pickup or CCCD
+  const totalDueNow = confirmedTotalPrice ?? totalRentalPrice;
 
   const handleStartBooking = () => {
     trackEvent({
@@ -97,79 +100,65 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
     setStep('CUSTOMER_INFO');
   };
 
-  const handleCreateBooking = (e: React.FormEvent) => {
+  const handleCreateBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+    setSubmissionError('');
 
     const newErrors: Record<string, string> = {};
-    if (!isValidName(customerName)) {
-      newErrors.customerName = NAME_VALIDATION_ERROR;
-    }
-    if (!isValidVietnamPhone(customerPhone)) {
-      newErrors.customerPhone = PHONE_VALIDATION_ERROR;
-    }
-    if (!isValidEmail(customerEmail)) {
-      newErrors.customerEmail = EMAIL_VALIDATION_ERROR;
-    }
+    if (!isValidName(customerName)) newErrors.customerName = NAME_VALIDATION_ERROR;
+    if (!isValidVietnamPhone(customerPhone)) newErrors.customerPhone = PHONE_VALIDATION_ERROR;
+    if (!isValidEmail(customerEmail)) newErrors.customerEmail = EMAIL_VALIDATION_ERROR;
     if (pickupMethod === 'DELIVERY' && (!address || address.trim().length < 5)) {
       newErrors.address = 'Vui lòng nhập địa chỉ giao nhận cụ thể (tối thiểu 5 ký tự).';
     }
-
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
-    const generatedCode = `TC${Math.floor(100000 + Math.random() * 900000)}`;
-    setBookingCode(generatedCode);
-
-    // Save booking to admin storage so admin dashboard displays it in table immediately!
-    if (typeof window !== 'undefined') {
-      try {
-        const existing = localStorage.getItem('thuecam_bookings');
-        const bookingsList = existing ? JSON.parse(existing) : [];
-        bookingsList.unshift({
-          id: generatedCode,
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product_id: product.id,
+          start_date: startDate,
+          end_date: endDate,
           customer_name: customerName,
           customer_phone: customerPhone,
           customer_email: customerEmail,
-          product_id: product.id,
-          product_name: product.name,
-          start_date: startDate,
-          end_date: endDate,
-          total_days: totalDays,
-          total_price: totalDueNow,
-          deposit_amount: deposit,
-          pickup_method: pickupMethod === 'STORE' ? 'ETown Tân Bình' : `Giao: ${address}`,
-          status: 'PENDING',
-          created_at: new Date().toISOString(),
-        });
-        localStorage.setItem('thuecam_bookings', JSON.stringify(bookingsList));
-      } catch {
-        // ignore
-      }
+          pickup_method: pickupMethod,
+          delivery_address: address,
+        }),
+      });
+      const booking = await response.json();
+      if (!response.ok) throw new Error(booking.error ?? 'Không thể tạo đơn thuê.');
+
+      const generatedCode = String(booking.booking_code);
+      const serverTotalPrice = Number(booking.total_price);
+      setBookingCode(generatedCode);
+      setConfirmedTotalPrice(serverTotalPrice);
+      trackEvent({
+        action: 'booking_created',
+        params: {
+          booking_code: generatedCode,
+          item_id: product.id,
+          total_days: Number(booking.total_days),
+          total_price: serverTotalPrice,
+        },
+      });
+      trackEvent({
+        action: 'payment_started',
+        params: { booking_code: generatedCode, amount: serverTotalPrice, method: 'SePay_VietQR' },
+      });
+      setStep('PAYMENT_SEPAY');
+    } catch (error) {
+      setSubmissionError(error instanceof Error ? error.message : 'Không thể tạo đơn thuê.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    trackEvent({
-      action: 'booking_created',
-      params: {
-        booking_code: generatedCode,
-        item_id: product.id,
-        total_days: totalDays,
-        total_price: totalDueNow,
-      },
-    });
-
-    trackEvent({
-      action: 'payment_started',
-      params: {
-        booking_code: generatedCode,
-        amount: totalDueNow,
-        method: 'SePay_VietQR',
-      },
-    });
-
-    setStep('PAYMENT_SEPAY');
   };
 
   const handleCopyContent = () => {
@@ -439,6 +428,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
               )}
             </div>
 
+            {submissionError && <p role="alert" className="text-xs font-semibold text-rose-600">{submissionError}</p>}
             <div className="flex gap-3 pt-3">
               <button
                 type="button"
@@ -449,6 +439,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
               </button>
               <SafeButton
                 type="submit"
+                disabled={isSubmitting}
                 loadingText="Đang tạo đơn..."
                 className="w-2/3 py-3 rounded-full bg-gradient-candy hover:opacity-95 text-white font-black text-xs shadow-cute flex items-center justify-center gap-1.5"
               >

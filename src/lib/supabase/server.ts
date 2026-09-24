@@ -4,9 +4,15 @@ import { cookies } from 'next/headers';
 export async function createClient() {
   const cookieStore = await cookies();
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Supabase public credentials are not configured.');
+  }
+
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://dummy-thuecam.supabase.co',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'dummy-anon-key',
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll() {

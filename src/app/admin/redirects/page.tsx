@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import { getRedirectRules } from '@/lib/data';
+import { getAdminRows } from '@/lib/data/admin-server';
+import type { RedirectRule } from '@/types';
 import RedirectManagerClient from './RedirectManagerClient';
 
 export const metadata: Metadata = {
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminRedirectsPage() {
-  const redirects = await getRedirectRules();
+  const redirects = await getAdminRows<RedirectRule>('redirects');
 
   return (
     <div className="space-y-8">

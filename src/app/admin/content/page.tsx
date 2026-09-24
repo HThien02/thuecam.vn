@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import { getArticles } from '@/lib/data';
+import { getAdminRows } from '@/lib/data/admin-server';
+import type { Article } from '@/types';
 import ContentManagerClient from './ContentManagerClient';
 
 export const metadata: Metadata = {
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminContentPage() {
-  const articles = await getArticles();
+  const articles = await getAdminRows<Article>('articles');
 
   return (
     <div className="space-y-8">

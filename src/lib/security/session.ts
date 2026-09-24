@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import crypto from 'crypto';
 
 const SESSION_COOKIE_NAME = 'thuecam_admin_session';
-const SESSION_SECRET = process.env.ADMIN_SESSION_SECRET || 'thuecam_admin_super_secret_session_key_2026_safe';
+const SESSION_SECRET = process.env.ADMIN_SESSION_SECRET;
 const SESSION_DURATION_SECONDS = 60 * 60 * 24; // 24 hours
 
 export interface AdminSession {
@@ -16,6 +16,9 @@ export interface AdminSession {
  * Sign a payload with HMAC-SHA256
  */
 export function signSession(payload: Omit<AdminSession, 'iat' | 'exp'>): string {
+  if (!SESSION_SECRET || SESSION_SECRET.length < 32) {
+    throw new Error('ADMIN_SESSION_SECRET must contain at least 32 characters.');
+  }
   const iat = Math.floor(Date.now() / 1000);
   const exp = iat + SESSION_DURATION_SECONDS;
   const sessionData: AdminSession = { ...payload, iat, exp };
@@ -33,7 +36,7 @@ export function signSession(payload: Omit<AdminSession, 'iat' | 'exp'>): string 
  * Verify HMAC-SHA256 session token
  */
 export function verifySession(token: string | undefined | null): AdminSession | null {
-  if (!token) return null;
+  if (!token || !SESSION_SECRET || SESSION_SECRET.length < 32) return null;
   const parts = token.split('.');
   if (parts.length !== 2) return null;
 
@@ -44,7 +47,9 @@ export function verifySession(token: string | undefined | null): AdminSession | 
     .digest('base64url');
 
   // Constant-time comparison to prevent timing attacks
-  if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
+  const suppliedSignature = Buffer.from(signature);
+  const expectedSignatureBuffer = Buffer.from(expectedSignature);
+  if (suppliedSignature.length !== expectedSignatureBuffer.length || !crypto.timingSafeEqual(suppliedSignature, expectedSignatureBuffer)) {
     return null;
   }
 
@@ -53,8 +58,15 @@ export function verifySession(token: string | undefined | null): AdminSession | 
       Buffer.from(encodedData, 'base64url').toString('utf-8')
     );
     const now = Math.floor(Date.now() / 1000);
-    if (sessionData.exp < now) {
-      return null; // Expired
+    if (
+      sessionData.role !== 'admin' ||
+      typeof sessionData.email !== 'string' ||
+      typeof sessionData.iat !== 'number' ||
+      typeof sessionData.exp !== 'number' ||
+      sessionData.exp <= now ||
+      sessionData.iat > now
+    ) {
+      return null;
     }
     return sessionData;
   } catch {

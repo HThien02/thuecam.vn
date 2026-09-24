@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Metadata } from 'next';
+import { getAdminRow } from '@/lib/data/admin-server';
 import SettingsManagerClient from './SettingsManagerClient';
 
 export const metadata: Metadata = {
@@ -7,7 +8,28 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function AdminSettingsPage() {
+export default async function AdminSettingsPage() {
+  const row = await getAdminRow<{
+    site_name: string;
+    pickup_address: string;
+    hotline: string;
+    zalo: string;
+    email: string;
+    open_hours: string;
+    promo_banner: string;
+    deposit_policy: string;
+  }>('site_settings', 'global');
+  const initialSettings = {
+    siteName: row?.site_name ?? 'THUECAM.VN',
+    pickupAddress: row?.pickup_address ?? '',
+    hotline: row?.hotline ?? '',
+    zalo: row?.zalo ?? '',
+    email: row?.email ?? '',
+    openHours: row?.open_hours ?? '',
+    promoBanner: row?.promo_banner ?? '',
+    depositPolicy: row?.deposit_policy ?? '',
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -22,7 +44,7 @@ export default function AdminSettingsPage() {
         </p>
       </div>
 
-      <SettingsManagerClient />
+      <SettingsManagerClient initialSettings={initialSettings} />
     </div>
   );
 }

@@ -1,10 +1,38 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { REDIRECTS } from '@/lib/data/mock-data';
 import { enforceApiRateLimit } from '@/lib/security/rate-limit';
 import { verifySession, SESSION_COOKIE_NAME } from '@/lib/security/session';
 
-export function proxy(request: NextRequest) {
+interface PublicRedirect {
+  old_url: string;
+  new_url: string;
+  status_code: 301 | 302;
+  is_active: boolean;
+}
+
+async function getPublicRedirect(pathname: string, fullPath: string): Promise<PublicRedirect | null> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseKey) return null;
+
+  try {
+    const endpoint = new URL('/rest/v1/redirects', supabaseUrl);
+    endpoint.searchParams.set('select', 'old_url,new_url,status_code,is_active');
+    endpoint.searchParams.set('is_active', 'eq.true');
+    endpoint.searchParams.set('limit', '1000');
+    const response = await fetch(endpoint, {
+      headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` },
+      next: { revalidate: 60 },
+    });
+    if (!response.ok) return null;
+    const redirects = await response.json() as PublicRedirect[];
+    return redirects.find((rule) => rule.old_url === pathname || rule.old_url === fullPath) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const host = request.headers.get('host') || '';
 
@@ -65,9 +93,9 @@ export function proxy(request: NextRequest) {
 
   // 6. Configured 301 Redirect Rules (e.g. /thue-pocket-4 -> /thiet-bi/dji-pocket-4-creator)
   const fullPath = `${pathname}${search}`;
-  const matchedRedirect = REDIRECTS.find(
-    (rule) => rule.is_active && (rule.old_url === pathname || rule.old_url === fullPath)
-  );
+  const matchedRedirect = pathname.startsWith('/admin') || pathname.startsWith('/api/')
+    ? null
+    : await getPublicRedirect(pathname, fullPath);
 
   if (matchedRedirect) {
     const targetUrl = matchedRedirect.new_url.startsWith('http')

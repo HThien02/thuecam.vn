@@ -1,33 +1,37 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import {
-  SiteSettings,
-  getStoredSettings,
-  saveStoredSettings,
-} from '@/lib/data/admin-store';
+import React, { useState } from 'react';
+import type { SiteSettings } from '@/lib/data/admin-types';
+import { saveAdminRecord } from '@/lib/data/admin-api';
 import { Save, CheckCircle2, Sliders, MapPin, Phone, Clock, Gift, ShieldAlert } from 'lucide-react';
 
-export default function SettingsManagerClient() {
-  const [settings, setSettings] = useState<SiteSettings>(getStoredSettings());
+export default function SettingsManagerClient({ initialSettings }: { initialSettings: SiteSettings }) {
+  const [settings, setSettings] = useState<SiteSettings>(initialSettings);
   const [toastMsg, setToastMsg] = useState('');
-
-  useEffect(() => {
-    setSettings(getStoredSettings());
-    const handleDataChanged = () => setSettings(getStoredSettings());
-    window.addEventListener('thuecam_data_changed', handleDataChanged);
-    return () => window.removeEventListener('thuecam_data_changed', handleDataChanged);
-  }, []);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(''), 3000);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    saveStoredSettings(settings);
-    showToast('Đã lưu cấu hình website thành công!');
+    try {
+      await saveAdminRecord('site_settings', {
+        id: 'global',
+        site_name: settings.siteName,
+        pickup_address: settings.pickupAddress,
+        hotline: settings.hotline,
+        zalo: settings.zalo,
+        email: settings.email,
+        open_hours: settings.openHours,
+        promo_banner: settings.promoBanner,
+        deposit_policy: settings.depositPolicy,
+      }, 'update');
+      showToast('Đã lưu cấu hình website thành công!');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể lưu cấu hình.');
+    }
   };
 
   return (

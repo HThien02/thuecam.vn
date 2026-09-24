@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import useSWR from 'swr';
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -29,41 +30,12 @@ const formatDateKey = (d: Date) => {
   return `${year}-${month}-${day}`;
 };
 
-// Generate mock reserved dates deterministically based on productId if given
-const getReservedDatesForProduct = (productId?: string) => {
-  const seed = (productId || 'default').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const reservedSet = new Set<string>();
-  const today = new Date();
-
-  // Pick deterministic busy days within the next 45 days
-  for (let i = 1; i <= 45; i++) {
-    const d = new Date();
-    d.setDate(today.getDate() + i);
-    // e.g. every 5th or 6th day based on seed
-    if ((i + seed) % 6 === 0 || (i + seed) % 11 === 0) {
-      reservedSet.add(formatDateKey(d));
-    }
-  }
-
-  // Also check if admin stored any blocked dates in localStorage
-  if (typeof window !== 'undefined') {
-    try {
-      const stored = localStorage.getItem('thuecam_blocked_dates');
-      if (stored) {
-        const parsed = JSON.parse(stored) as { productId?: string; date: string }[];
-        parsed.forEach((item) => {
-          if (!item.productId || item.productId === productId) {
-            reservedSet.add(item.date);
-          }
-        });
-      }
-    } catch {
-      // ignore
-    }
-  }
-
-  return reservedSet;
-};
+async function fetchAvailability(url: string): Promise<{ reservedDates: string[] }> {
+  const response = await fetch(url);
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error ?? 'Không thể tải lịch trống.');
+  return result;
+}
 
 const DAY_NAMES = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
 
@@ -92,10 +64,16 @@ export default function AvailabilityCalendarTable({
     return new Intl.DateTimeFormat('vi-VN', { month: 'long', year: 'numeric' }).format(viewingDate);
   }, [viewingDate]);
 
-  // Set of dates already booked/full
-  const reservedDates = useMemo(() => {
-    return getReservedDatesForProduct(productId);
-  }, [productId]);
+  const firstVisibleDate = formatDateKey(new Date(viewingDate.getFullYear(), viewingDate.getMonth(), -6));
+  const lastVisibleDate = formatDateKey(new Date(viewingDate.getFullYear(), viewingDate.getMonth() + 1, 7));
+  const availabilityQuery = productId
+    ? `/api/availability?${new URLSearchParams({ productId, startDate: firstVisibleDate, endDate: lastVisibleDate })}`
+    : null;
+  const { data: availability } = useSWR(availabilityQuery, fetchAvailability, {
+    revalidateOnFocus: false,
+    keepPreviousData: true,
+  });
+  const reservedDates = useMemo(() => new Set(availability?.reservedDates ?? []), [availability?.reservedDates]);
 
   // Generate calendar days for the viewing month
   const calendarDays = useMemo(() => {
@@ -388,7 +366,7 @@ export default function AvailabilityCalendarTable({
                   </strong>
                   {rangeInfo.discountAmount > 0 && (
                     <span className="block text-[10px] text-emerald-600 font-bold">
-                      Đã giảm {rangeInfo.discountAmount.toLocaleString('vi-VN')}đ (-{rangeInfo.discountRate * 100}%)
+                      ��ã giảm {rangeInfo.discountAmount.toLocaleString('vi-VN')}đ (-{rangeInfo.discountRate * 100}%)
                     </span>
                   )}
                 </div>

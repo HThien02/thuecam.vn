@@ -14,6 +14,7 @@ import {
   Eye,
   ExternalLink,
 } from 'lucide-react';
+import { deleteAdminRecord, saveAdminRecord } from '@/lib/data/admin-api';
 
 interface Props {
   initialArticles: Article[];
@@ -78,60 +79,48 @@ export default function ContentManagerClient({ initialArticles }: Props) {
     setIsEditorOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     const now = new Date().toISOString();
-
-    if (editingArticle) {
-      // Update
-      const updated: Article = {
-        ...editingArticle,
-        title,
-        slug,
-        type,
-        excerpt,
-        content,
-        featured_image: featuredImage,
-        author_name: authorName,
-        reviewer_name: reviewerName,
-        status,
-        pillar_slug: pillarSlug,
-        seo_title: seoTitle,
-        seo_description: seoDescription,
-        updated_at: now,
-      };
-
-      setArticles(articles.map((a) => (a.id === editingArticle.id ? updated : a)));
-    } else {
-      // Create new
-      const newArticle: Article = {
+    const article: Article = {
+      ...(editingArticle ?? {
         id: `art-${Date.now()}`,
-        title,
-        slug,
-        type,
-        excerpt,
-        content,
-        featured_image: featuredImage,
-        author_name: authorName,
-        reviewer_name: reviewerName,
-        status,
-        pillar_slug: pillarSlug,
-        seo_title: seoTitle,
-        seo_description: seoDescription,
         indexable: true,
         published_at: now,
-        updated_at: now,
-      };
+      }),
+      title: title.trim(),
+      slug: slug.trim(),
+      type,
+      excerpt: excerpt.trim(),
+      content,
+      featured_image: featuredImage,
+      author_name: authorName.trim(),
+      reviewer_name: reviewerName.trim() || undefined,
+      status,
+      pillar_slug: pillarSlug.trim() || undefined,
+      seo_title: seoTitle.trim() || undefined,
+      seo_description: seoDescription.trim() || undefined,
+      updated_at: now,
+    };
 
-      setArticles([newArticle, ...articles]);
+    try {
+      const saved = await saveAdminRecord<Article>('articles', article as unknown as Record<string, unknown>);
+      setArticles((current) => editingArticle
+        ? current.map((item) => item.id === saved.id ? saved : item)
+        : [saved, ...current]);
+      setIsEditorOpen(false);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Không thể lưu bài viết.');
     }
-
-    setIsEditorOpen(false);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm('Bạn có chắc muốn xóa bài viết này?')) {
-      setArticles(articles.filter((a) => a.id !== id));
+  const handleDelete = async (id: string) => {
+    if (!confirm('Bạn có chắc muốn xóa bài viết này?')) return;
+    try {
+      await deleteAdminRecord('articles', id);
+      setArticles((current) => current.filter((article) => article.id !== id));
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Không thể xóa bài viết.');
     }
   };
 
