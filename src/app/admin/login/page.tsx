@@ -65,16 +65,7 @@ function LoginFormContent() {
           className="space-y-6 rounded-3xl border border-slate-800 bg-slate-900/90 p-8 shadow-2xl backdrop-blur-xl"
         >
           <div className="text-center space-y-2">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 mb-1">
-              <ShieldCheck className="h-6 w-6" />
-            </div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-400">
-              THUECAM SECURITY
-            </p>
             <h1 className="text-2xl font-black text-white">Đăng Nhập Quản Trị</h1>
-            <p className="text-xs text-slate-400">
-              Phiên bảo mật HttpOnly Session Cookie (Không sử dụng LocalStorage).
-            </p>
           </div>
 
           {error && (
@@ -87,7 +78,7 @@ function LoginFormContent() {
           <div className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                Email quản trị viên: *
+                Email quản trị viên:
               </label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
@@ -104,7 +95,7 @@ function LoginFormContent() {
 
             <div>
               <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                Mật khẩu: *
+                Mật khẩu:
               </label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
@@ -129,10 +120,6 @@ function LoginFormContent() {
             <span>Đăng Nhập Quản Trị</span>
             <ArrowRight className="w-4 h-4" />
           </SafeButton>
-
-          <p className="text-[11px] text-center text-slate-500">
-            Hệ thống tự động kích hoạt Rate Limiting và khóa IP nếu nhập sai quá 5 lần liên tiếp.
-          </p>
         </form>
       </div>
     </main>
