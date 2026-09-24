@@ -2,8 +2,17 @@
 
 import React, { useState } from 'react';
 import { Product } from '@/types';
-import { CheckCircle2, Clock3, CalendarDays, Send, MapPin, Truck } from 'lucide-react';
+import { CheckCircle2, Clock3, CalendarDays, Send, MapPin, Truck, AlertCircle } from 'lucide-react';
 import AvailabilityCalendarTable from './AvailabilityCalendarTable';
+import SafeButton from '@/components/common/SafeButton';
+import {
+  isValidVietnamPhone,
+  isValidEmail,
+  isValidName,
+  PHONE_VALIDATION_ERROR,
+  EMAIL_VALIDATION_ERROR,
+  NAME_VALIDATION_ERROR,
+} from '@/lib/security/validation';
 
 export default function RentalRequestForm({
   products,
@@ -32,6 +41,7 @@ export default function RentalRequestForm({
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
   const [notes, setNotes] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const product =
     products.find((item) => item.slug === selectedProduct) ??
@@ -40,6 +50,29 @@ export default function RentalRequestForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+
+    const newErrors: Record<string, string> = {};
+    if (!isValidName(fullName)) {
+      newErrors.fullName = NAME_VALIDATION_ERROR;
+    }
+    if (!isValidVietnamPhone(phone)) {
+      newErrors.phone = PHONE_VALIDATION_ERROR;
+    }
+    if (!isValidEmail(email)) {
+      newErrors.email = EMAIL_VALIDATION_ERROR;
+    }
+    if (pickupMethod === 'DELIVERY' && (!address || address.trim().length < 5)) {
+      newErrors.address = 'Vui lòng nhập địa chỉ giao máy cụ thể (tối thiểu 5 ký tự).';
+    }
+    if (new Date(endDate).getTime() < new Date(startDate).getTime()) {
+      newErrors.endDate = 'Ngày trả máy không thể trước ngày nhận máy.';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
 
     const code = `TC${Math.floor(100000 + Math.random() * 900000)}`;
 
@@ -177,22 +210,46 @@ export default function RentalRequestForm({
           <input
             required
             value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-sm font-medium outline-none focus:border-[#0284c7]"
+            onChange={(e) => {
+              setFullName(e.target.value);
+              if (errors.fullName) setErrors((prev) => ({ ...prev, fullName: '' }));
+            }}
+            className={`mt-1.5 w-full rounded-2xl border px-4 py-2.5 text-sm font-medium outline-none transition ${
+              errors.fullName
+                ? 'border-rose-400 bg-rose-50/40 text-rose-900 focus:border-rose-500'
+                : 'border-sky-200 bg-sky-50/50 focus:border-[#0284c7]'
+            }`}
             placeholder="Ví dụ: Nguyễn Văn A"
           />
+          {errors.fullName && (
+            <span className="mt-1 text-[11px] text-rose-500 font-bold block">
+              {errors.fullName}
+            </span>
+          )}
         </label>
 
         <label className="text-xs font-bold text-slate-700">
-          Số điện thoại / Zalo: *
+          Số điện thoại / Zalo (Bắt đầu từ 0, đủ 10 số): *
           <input
             required
             type="tel"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-sm font-medium outline-none focus:border-[#0284c7]"
+            onChange={(e) => {
+              setPhone(e.target.value);
+              if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
+            }}
+            className={`mt-1.5 w-full rounded-2xl border px-4 py-2.5 text-sm font-medium outline-none transition ${
+              errors.phone
+                ? 'border-rose-400 bg-rose-50/40 text-rose-900 focus:border-rose-500'
+                : 'border-sky-200 bg-sky-50/50 focus:border-[#0284c7]'
+            }`}
             placeholder="09xx xxx xxx"
           />
+          {errors.phone && (
+            <span className="mt-1 text-[11px] text-rose-500 font-bold block">
+              {errors.phone}
+            </span>
+          )}
         </label>
 
         <label className="text-xs font-bold text-slate-700">
@@ -201,10 +258,22 @@ export default function RentalRequestForm({
             required
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-sm font-medium outline-none focus:border-[#0284c7]"
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
+            }}
+            className={`mt-1.5 w-full rounded-2xl border px-4 py-2.5 text-sm font-medium outline-none transition ${
+              errors.email
+                ? 'border-rose-400 bg-rose-50/40 text-rose-900 focus:border-rose-500'
+                : 'border-sky-200 bg-sky-50/50 focus:border-[#0284c7]'
+            }`}
             placeholder="ban@example.com"
           />
+          {errors.email && (
+            <span className="mt-1 text-[11px] text-rose-500 font-bold block">
+              {errors.email}
+            </span>
+          )}
         </label>
 
         {/* Rental mode */}
@@ -305,13 +374,14 @@ export default function RentalRequestForm({
           Sau khi gửi, THUECAM sẽ liên hệ xác nhận lịch và giữ máy cho bạn ngay.
         </p>
 
-        <button
+        <SafeButton
           type="submit"
+          loadingText="Đang gửi yêu cầu..."
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#0284c7] hover:bg-[#0369a1] px-8 py-3.5 text-sm font-black text-white shadow-cute transition-all hover:scale-105"
         >
           <span>Gửi Yêu Cầu Thuê Ngay</span>
           <Send className="size-4" />
-        </button>
+        </SafeButton>
       </div>
     </form>
   );

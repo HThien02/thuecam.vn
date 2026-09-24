@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { getAdminSession } from '@/lib/security/session';
 import {
   getArticles,
   getCategories,
@@ -18,10 +18,7 @@ import {
   ArrowRight,
   ShieldCheck,
   MapPin,
-  TrendingUp,
-  Clock,
   Sparkles,
-  CheckCircle2,
 } from 'lucide-react';
 
 export const metadata = {
@@ -30,12 +27,8 @@ export const metadata = {
 };
 
 export default async function AdminDashboardPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: admin } = user?.email
-    ? await supabase.from('admin_users').select('email').eq('email', user.email.toLowerCase()).eq('is_active', true).maybeSingle()
-    : { data: null };
-  if (!user || !admin) redirect('/admin/login');
+  const session = await getAdminSession();
+  if (!session) redirect('/admin/login');
 
   const [products, categories, articles, reviews] = await Promise.all([
     getProducts(),

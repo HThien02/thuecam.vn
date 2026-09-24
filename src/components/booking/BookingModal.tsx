@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState } from 'react';
 import { Product } from '@/types';
 import { formatVND } from '../product/ProductCard';
@@ -18,6 +17,15 @@ import {
   RotateCw,
 } from 'lucide-react';
 import AvailabilityCalendarTable from './AvailabilityCalendarTable';
+import SafeButton from '@/components/common/SafeButton';
+import {
+  isValidVietnamPhone,
+  isValidEmail,
+  isValidName,
+  PHONE_VALIDATION_ERROR,
+  EMAIL_VALIDATION_ERROR,
+  NAME_VALIDATION_ERROR,
+} from '@/lib/security/validation';
 
 interface BookingModalProps {
   product: Product;
@@ -44,6 +52,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
   const [customerEmail, setCustomerEmail] = useState('');
   const [pickupMethod, setPickupMethod] = useState<'STORE' | 'DELIVERY'>('STORE');
   const [address, setAddress] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Booking result
   const [bookingCode, setBookingCode] = useState('');
@@ -90,6 +99,27 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
 
   const handleCreateBooking = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+
+    const newErrors: Record<string, string> = {};
+    if (!isValidName(customerName)) {
+      newErrors.customerName = NAME_VALIDATION_ERROR;
+    }
+    if (!isValidVietnamPhone(customerPhone)) {
+      newErrors.customerPhone = PHONE_VALIDATION_ERROR;
+    }
+    if (!isValidEmail(customerEmail)) {
+      newErrors.customerEmail = EMAIL_VALIDATION_ERROR;
+    }
+    if (pickupMethod === 'DELIVERY' && (!address || address.trim().length < 5)) {
+      newErrors.address = 'Vui lòng nhập địa chỉ giao nhận cụ thể (tối thiểu 5 ký tự).';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     const generatedCode = `TC${Math.floor(100000 + Math.random() * 900000)}`;
     setBookingCode(generatedCode);
 
@@ -271,24 +301,48 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
                   required
                   placeholder="Ví dụ: Nguyễn Văn An"
                   value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  className="w-full bg-sky-50/60 border border-sky-200 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 font-medium focus:outline-none focus:border-[#0284c7]"
+                  onChange={(e) => {
+                    setCustomerName(e.target.value);
+                    if (errors.customerName) setErrors((prev) => ({ ...prev, customerName: '' }));
+                  }}
+                  className={`w-full border rounded-2xl px-3.5 py-2.5 text-sm font-medium focus:outline-none transition ${
+                    errors.customerName
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900 focus:border-rose-500'
+                      : 'bg-sky-50/60 border-sky-200 text-slate-900 focus:border-[#0284c7]'
+                  }`}
                 />
+                {errors.customerName && (
+                  <span className="mt-1 text-[11px] text-rose-500 font-bold block">
+                    {errors.customerName}
+                  </span>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">
-                    Số điện thoại / Zalo nhận xác nhận: *
+                    Số điện thoại (Bắt đầu từ 0, đủ 10 số): *
                   </label>
                   <input
                     type="tel"
                     required
                     placeholder="09xx xxx xxx"
                     value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
-                    className="w-full bg-sky-50/60 border border-sky-200 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 font-medium focus:outline-none focus:border-[#0284c7]"
+                    onChange={(e) => {
+                      setCustomerPhone(e.target.value);
+                      if (errors.customerPhone) setErrors((prev) => ({ ...prev, customerPhone: '' }));
+                    }}
+                    className={`w-full border rounded-2xl px-3.5 py-2.5 text-sm font-medium focus:outline-none transition ${
+                      errors.customerPhone
+                        ? 'border-rose-400 bg-rose-50/40 text-rose-900 focus:border-rose-500'
+                        : 'bg-sky-50/60 border-sky-200 text-slate-900 focus:border-[#0284c7]'
+                    }`}
                   />
+                  {errors.customerPhone && (
+                    <span className="mt-1 text-[11px] text-rose-500 font-bold block">
+                      {errors.customerPhone}
+                    </span>
+                  )}
                 </div>
 
                 <div>
@@ -300,9 +354,21 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
                     required
                     placeholder="email@gmail.com"
                     value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                    className="w-full bg-sky-50/60 border border-sky-200 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 font-medium focus:outline-none focus:border-[#0284c7]"
+                    onChange={(e) => {
+                      setCustomerEmail(e.target.value);
+                      if (errors.customerEmail) setErrors((prev) => ({ ...prev, customerEmail: '' }));
+                    }}
+                    className={`w-full border rounded-2xl px-3.5 py-2.5 text-sm font-medium focus:outline-none transition ${
+                      errors.customerEmail
+                        ? 'border-rose-400 bg-rose-50/40 text-rose-900 focus:border-rose-500'
+                        : 'bg-sky-50/60 border-sky-200 text-slate-900 focus:border-[#0284c7]'
+                    }`}
                   />
+                  {errors.customerEmail && (
+                    <span className="mt-1 text-[11px] text-rose-500 font-bold block">
+                      {errors.customerEmail}
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -354,9 +420,21 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
                     required
                     placeholder="Số nhà, tên đường, phường, quận..."
                     value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    className="w-full bg-sky-50/60 border border-sky-200 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#0284c7]"
+                    onChange={(e) => {
+                      setAddress(e.target.value);
+                      if (errors.address) setErrors((prev) => ({ ...prev, address: '' }));
+                    }}
+                    className={`w-full border rounded-2xl px-3.5 py-2.5 text-sm font-medium focus:outline-none transition ${
+                      errors.address
+                        ? 'border-rose-400 bg-rose-50/40 text-rose-900 focus:border-rose-500'
+                        : 'bg-sky-50/60 border-sky-200 text-slate-900 focus:border-[#0284c7]'
+                    }`}
                   />
+                  {errors.address && (
+                    <span className="mt-1 text-[11px] text-rose-500 font-bold block">
+                      {errors.address}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
@@ -369,13 +447,14 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
               >
                 Quay lại
               </button>
-              <button
+              <SafeButton
                 type="submit"
+                loadingText="Đang tạo đơn..."
                 className="w-2/3 py-3 rounded-full bg-gradient-candy hover:opacity-95 text-white font-black text-xs shadow-cute flex items-center justify-center gap-1.5"
               >
                 <CreditCard className="w-4 h-4" />
                 <span>Tiếp Tục Thanh Toán VietQR ({formatVND(totalDueNow)})</span>
-              </button>
+              </SafeButton>
             </div>
           </form>
         )}

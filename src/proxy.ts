@@ -1,12 +1,46 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { REDIRECTS } from '@/lib/data/mock-data';
+import { enforceApiRateLimit } from '@/lib/security/rate-limit';
+import { verifySession, SESSION_COOKIE_NAME } from '@/lib/security/session';
 
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const host = request.headers.get('host') || '';
 
-  // 1. Preview deployment safety: Add noindex header to any vercel.app preview URL or non-production host
+  // 1. Rate Limit all API endpoints (/api/*)
+  if (pathname.startsWith('/api/')) {
+    const isLoginEndpoint = pathname.startsWith('/api/admin/auth/login');
+    const rateLimitResponse = enforceApiRateLimit(request, {
+      limit: isLoginEndpoint ? 5 : 60,
+      windowMs: 60_000,
+    });
+    if (rateLimitResponse) {
+      return rateLimitResponse;
+    }
+  }
+
+  // 2. Admin Session Auth Guard (No localStorage, strictly HttpOnly Session Cookie)
+  if (pathname.startsWith('/admin')) {
+    const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+    const isValidSession = Boolean(verifySession(sessionCookie));
+
+    if (pathname === '/admin/login') {
+      // If already logged in, redirect to admin dashboard
+      if (isValidSession) {
+        return NextResponse.redirect(new URL('/admin', request.url));
+      }
+    } else {
+      // Any other /admin/* route requires active session
+      if (!isValidSession) {
+        const loginUrl = new URL('/admin/login', request.url);
+        loginUrl.searchParams.set('from', pathname);
+        return NextResponse.redirect(loginUrl);
+      }
+    }
+  }
+
+  // 3. Preview deployment safety: Add noindex header to any vercel.app preview URL or non-production host
   const isVercelPreview = host.includes('vercel.app') || host.includes('localhost');
   const response = NextResponse.next();
 
@@ -14,7 +48,13 @@ export function proxy(request: NextRequest) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow');
   }
 
-  // 2. Canonical www to non-www 301 Redirect
+  // 4. Global HTTP Security Headers
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('X-Frame-Options', 'SAMEORIGIN');
+  response.headers.set('X-XSS-Protection', '1; mode=block');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+  // 5. Canonical www to non-www 301 Redirect
   if (host.startsWith('www.thuecam.vn')) {
     const nonWwwUrl = new URL(
       `${pathname}${search}`,
@@ -23,7 +63,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(nonWwwUrl, 301);
   }
 
-  // 3. Configured 301 Redirect Rules (e.g. /thue-pocket-4 -> /thiet-bi/dji-pocket-4-creator)
+  // 6. Configured 301 Redirect Rules (e.g. /thue-pocket-4 -> /thiet-bi/dji-pocket-4-creator)
   const fullPath = `${pathname}${search}`;
   const matchedRedirect = REDIRECTS.find(
     (rule) => rule.is_active && (rule.old_url === pathname || rule.old_url === fullPath)

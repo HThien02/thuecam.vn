@@ -8,6 +8,8 @@ import {
   saveStoredCategory,
   deleteStoredCategory,
 } from '@/lib/data/admin-store';
+import SafeButton from '@/components/common/SafeButton';
+import { isValidName, isValidPositiveNumber } from '@/lib/security/validation';
 
 export default function CategoryManagerClient({
   initialCategories,
@@ -61,13 +63,18 @@ export default function CategoryManagerClient({
     e.preventDefault();
     const finalSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
+    if (!name.trim()) {
+      showToast('Vui lòng nhập tên danh mục');
+      return;
+    }
+
     const catData: Category = {
       id: editingCategory ? editingCategory.id : `cat-${Date.now()}`,
       slug: finalSlug,
-      name,
+      name: name.trim(),
       description,
       icon,
-      display_order: Number(displayOrder),
+      display_order: Number(displayOrder) || 1,
       h1: editingCategory?.h1 || `Dịch Vụ Thuê ${name} Chính Hãng`,
       intro_content: editingCategory?.intro_content || description,
       indexable: true,
@@ -221,12 +228,13 @@ export default function CategoryManagerClient({
                 >
                   Hủy
                 </button>
-                <button
+                <SafeButton
                   type="submit"
+                  loadingText="Đang lưu..."
                   className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-slate-950 font-black shadow-md"
                 >
                   <Save className="size-4" /> Lưu Danh Mục
-                </button>
+                </SafeButton>
               </div>
             </form>
           </div>
