@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Product, Category, Brand } from '@/types';
 import {
   Plus,
@@ -15,12 +15,7 @@ import {
   Layers,
   Sparkles,
 } from 'lucide-react';
-import {
-  getStoredProducts,
-  saveStoredProduct,
-  deleteStoredProduct,
-  getStoredCategories,
-} from '@/lib/data/admin-store';
+import { createClient } from '@/lib/supabase/client';
 
 export default function ProductManagerClient({
   initialProducts,
@@ -49,16 +44,7 @@ export default function ProductManagerClient({
   const [status, setStatus] = useState<'ACTIVE' | 'INACTIVE' | 'MAINTENANCE' | 'ARCHIVED'>('ACTIVE');
   const [toastMsg, setToastMsg] = useState('');
 
-  // Sync from localStorage on mount and listen to changes
-  useEffect(() => {
-    setProducts(getStoredProducts());
-
-    const handleDataChanged = () => {
-      setProducts(getStoredProducts());
-    };
-    window.addEventListener('thuecam_data_changed', handleDataChanged);
-    return () => window.removeEventListener('thuecam_data_changed', handleDataChanged);
-  }, []);
+  const supabase = createClient();
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -93,7 +79,7 @@ export default function ProductManagerClient({
     setIsModalOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     const finalSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
     const category = categories.find((c) => c.id === categoryId);
@@ -127,24 +113,55 @@ export default function ProductManagerClient({
       updated_at: new Date().toISOString(),
     };
 
-    const updated = saveStoredProduct(productData);
-    setProducts(updated);
+    const payload = {
+      slug: productData.slug,
+      name: productData.name,
+      sku: productData.sku,
+      category_id: productData.category_id || null,
+      brand_id: productData.brand_id || null,
+      excerpt: productData.excerpt,
+      description: productData.description,
+      rental_price_per_day: productData.rental_price_per_day,
+      deposit_amount: productData.deposit_amount,
+      primary_image: productData.primary_image,
+      gallery_images: productData.gallery_images,
+      inventory_count: productData.inventory_count,
+      status: productData.status,
+      indexable: productData.indexable,
+    };
+    const result = editingProduct
+      ? await supabase.from('products').update(payload).eq('id', editingProduct.id).select().single()
+      : await supabase.from('products').insert(payload).select().single();
+    if (result.error) {
+      showToast(`Không thể lưu thiết bị: ${result.error.message}`);
+      return;
+    }
+    setProducts((current) => editingProduct
+      ? current.map((item) => item.id === editingProduct.id ? { ...item, ...result.data } as Product : item)
+      : [{ ...productData, ...result.data } as Product, ...current]);
     setIsModalOpen(false);
     showToast(editingProduct ? `Đã cập nhật máy "${name}"` : `Đã thêm mới thiết bị "${name}"`);
   };
 
-  const handleDelete = (id: string, prodName: string) => {
-    if (confirm(`Bạn có chắc muốn xóa thiết bị "${prodName}" khỏi hệ thống?`)) {
-      const updated = deleteStoredProduct(id);
-      setProducts(updated);
-      showToast(`Đã xóa thiết bị "${prodName}"`);
+  const handleDelete = async (id: string, prodName: string) => {
+    if (!confirm(`Bạn có chắc muốn xóa thiết bị "${prodName}" khỏi hệ thống?`)) return;
+    const { error } = await supabase.from('products').delete().eq('id', id);
+    if (error) {
+      showToast(`Không thể xóa thiết bị: ${error.message}`);
+      return;
     }
+    setProducts((current) => current.filter((item) => item.id !== id));
+    showToast(`Đã xóa thiết bị "${prodName}"`);
   };
 
-  const handleToggleStatus = (prod: Product) => {
+  const handleToggleStatus = async (prod: Product) => {
     const nextStatus = prod.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-    const updated = saveStoredProduct({ ...prod, status: nextStatus });
-    setProducts(updated);
+    const { error } = await supabase.from('products').update({ status: nextStatus }).eq('id', prod.id);
+    if (error) {
+      showToast(`Không thể đổi trạng thái: ${error.message}`);
+      return;
+    }
+    setProducts((current) => current.map((item) => item.id === prod.id ? { ...item, status: nextStatus } : item));
     showToast(`Đã chuyển trạng thái sang ${nextStatus}`);
   };
 
