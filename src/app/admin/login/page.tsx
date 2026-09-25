@@ -3,7 +3,6 @@
 import { FormEvent, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Lock, Mail, AlertCircle, ArrowRight } from 'lucide-react';
-import SafeButton from '@/components/common/SafeButton';
 import { isValidEmail } from '@/lib/security/validation';
 
 function LoginFormContent() {
@@ -29,8 +28,8 @@ function LoginFormContent() {
       return;
     }
 
-    if (!password || password.length < 16) {
-      setError('Mật khẩu quản trị phải có ít nhất 16 ký tự.');
+    if (!password) {
+      setError('Vui lòng nhập mật khẩu.');
       return;
     }
 
@@ -107,7 +106,6 @@ function LoginFormContent() {
                   required
                   type="password"
                   autoComplete="current-password"
-                  minLength={16}
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -117,15 +115,14 @@ function LoginFormContent() {
             </div>
           </div>
 
-          <SafeButton
+          <button
             type="submit"
             disabled={loading}
-            loadingText="Đang xác thực bảo mật..."
-            className="w-full rounded-xl bg-gradient-to-r from-cyan-400 to-sky-500 hover:from-cyan-300 hover:to-sky-400 py-3.5 font-black text-slate-950 text-sm shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 transition"
+            className="w-full rounded-xl bg-gradient-to-r from-cyan-400 to-sky-500 hover:from-cyan-300 hover:to-sky-400 py-3.5 font-black text-slate-950 text-sm shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 transition disabled:cursor-not-allowed disabled:opacity-70"
           >
-            <span>Đăng Nhập Quản Trị</span>
-            <ArrowRight className="w-4 h-4" />
-          </SafeButton>
+            <span>{loading ? 'Đang xác thực bảo mật...' : 'Đăng Nhập Quản Trị'}</span>
+            {!loading && <ArrowRight className="w-4 h-4" />}
+          </button>
         </form>
       </div>
     </main>
