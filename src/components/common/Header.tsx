@@ -17,7 +17,7 @@ export default function Header() {
               <Gift className="w-3 h-3" />
               Ưu Đãi Bạn Mới
             </span>
-            <span className="font-bold">Ưu đãi cộng dồn đến <strong className="rounded-md bg-white/30 px-1.5 py-0.5 text-white">40%</strong> | Nhận máy tại ETown Tân Bình hoặc ship hỏa tốc!</span>
+            <span className="font-bold">Ưu đãi cộng dồn đến <strong className="rounded-md bg-white/30 px-1.5 py-0.5 text-white">30%</strong> | Nhận máy tại ETown Tân Bình hoặc ship hỏa tốc!</span>
           </div>
 
           <div className="flex items-center gap-4 text-white/95 text-xs">
