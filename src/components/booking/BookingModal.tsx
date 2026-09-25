@@ -279,6 +279,12 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
               </p>
             </div>
 
+            {product.inventory_count <= 0 && (
+              <p id="booking-modal-unavailable-message" role="status" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
+                Hiện full lịch thuê. Các ngày kín bên dưới không thể chọn; bạn vẫn có thể xem lịch.
+              </p>
+            )}
+
             {/* Visual Schedule Table Component */}
             <AvailabilityCalendarTable
               productId={product.id}
@@ -288,6 +294,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
               startDate={startDate}
               endDate={endDate}
               onDateChange={(start, end) => {
+                setRangeAvailability(null);
                 setStartDate(start);
                 setEndDate(end);
               }}
@@ -333,9 +340,10 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
                 </label>
                 <input
                   type="date"
+                  disabled={product.inventory_count <= 0}
                   min={todayStr}
                   value={startDate}
-                  onChange={(e) => { setStartDate(e.target.value); clearVoucherDiscount(); }}
+                  onChange={(e) => { setRangeAvailability(null); setStartDate(e.target.value); clearVoucherDiscount(); }}
                   className="w-full bg-sky-50/60 border border-sky-200 rounded-2xl px-3 py-2.5 text-sm text-slate-900 font-bold focus:outline-none focus:border-[#0284c7]"
                 />
               </div>
@@ -346,9 +354,10 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
                 </label>
                 <input
                   type="date"
+                  disabled={product.inventory_count <= 0}
                   min={startDate || todayStr}
                   value={endDate}
-                  onChange={(e) => { setEndDate(e.target.value); clearVoucherDiscount(); }}
+                  onChange={(e) => { setRangeAvailability(null); setEndDate(e.target.value); clearVoucherDiscount(); }}
                   className="w-full bg-sky-50/60 border border-sky-200 rounded-2xl px-3 py-2.5 text-sm text-slate-900 font-bold focus:outline-none focus:border-[#0284c7]"
                 />
               </div>

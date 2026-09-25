@@ -42,7 +42,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
           {product.inventory_count <= 0 && (
             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100/95 text-amber-900 backdrop-blur-md shadow-sm border border-amber-200">
-              Tạm hết máy · Kín lịch
+              Full lịch thuê
             </span>
           )}
         </div>

@@ -135,7 +135,7 @@ export default function AvailabilityCalendarTable({
 
   // User click on a calendar date
   const handleDateClick = (key: string, isPast: boolean) => {
-    if (isPast) return;
+    if (isPast || reservedDates.has(key)) return;
 
     if (!startDate || (startDate && endDate)) {
       // First click: select new start date
@@ -313,7 +313,7 @@ export default function AvailabilityCalendarTable({
               <button
                 key={item.dateKey}
                 type="button"
-                disabled={item.isPast}
+                disabled={item.isPast || isReserved}
                 onClick={() => handleDateClick(item.dateKey, item.isPast)}
                 className={`group relative flex min-h-[58px] sm:min-h-[64px] flex-col items-center justify-between rounded-xl border p-1.5 transition-all text-xs ${cellClass}`}
               >

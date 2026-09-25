@@ -24,11 +24,8 @@ export default function RentalRequestForm({
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingCode, setBookingCode] = useState('');
-  const firstAvailableProduct = products.find((item) => item.inventory_count > 0) ?? products[0];
   const [selectedProduct, setSelectedProduct] = useState(
-    initialProduct?.inventory_count && initialProduct.inventory_count > 0
-      ? initialProduct.slug
-      : firstAvailableProduct?.slug ?? ''
+    initialProduct?.slug ?? products[0]?.slug ?? ''
   );
   const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
   const [duration, setDuration] = useState<'hourly' | 'daily'>('daily');
@@ -224,17 +221,24 @@ export default function RentalRequestForm({
             onChange={(e) => {
               clearVoucher();
               setSelectedAddonIds([]);
+              setRangeAvailability(null);
               setSelectedProduct(e.target.value);
             }}
             className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-3 text-sm font-black text-slate-900 outline-none focus:border-[#0284c7]"
           >
             {products.map((item) => (
-              <option key={item.id} value={item.slug} disabled={item.inventory_count <= 0}>
-                {item.name} — {item.rental_price_per_day.toLocaleString('vi-VN')}đ/ngày{item.inventory_count <= 0 ? ' · Tạm hết máy, kín lịch' : ''}
+              <option key={item.id} value={item.slug}>
+                {item.name} — {item.rental_price_per_day.toLocaleString('vi-VN')}đ/ngày{item.inventory_count <= 0 ? ' · Full lịch thuê' : ''}
               </option>
             ))}
           </select>
         </label>
+
+        {product?.inventory_count <= 0 && (
+          <p role="status" className="sm:col-span-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
+            Sản phẩm hiện full lịch thuê. Bạn vẫn có thể xem lịch; các ngày full sẽ không chọn được.
+          </p>
+        )}
 
         {/* Schedule Calendar Table Section */}
         <div className="sm:col-span-2">
@@ -247,6 +251,7 @@ export default function RentalRequestForm({
             endDate={endDate}
             onDateChange={(start, end) => {
               clearVoucher();
+              setRangeAvailability(null);
               setStartDate(start);
               setEndDate(end);
             }}
@@ -289,10 +294,12 @@ export default function RentalRequestForm({
           <input
             required
             type="date"
+            disabled={product?.inventory_count <= 0}
             min={todayStr}
             value={startDate}
             onChange={(e) => {
               clearVoucher();
+              setRangeAvailability(null);
               setStartDate(e.target.value);
             }}
             className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-sm font-bold text-slate-900 outline-none focus:border-[#0284c7]"
@@ -304,10 +311,12 @@ export default function RentalRequestForm({
           <input
             required
             type="date"
+            disabled={product?.inventory_count <= 0}
             min={startDate || todayStr}
             value={endDate}
             onChange={(e) => {
               clearVoucher();
+              setRangeAvailability(null);
               setEndDate(e.target.value);
             }}
             className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-sm font-bold text-slate-900 outline-none focus:border-[#0284c7]"

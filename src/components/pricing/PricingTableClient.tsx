@@ -219,10 +219,9 @@ export default function PricingTableClient({ categories, products }: PricingTabl
                           <button
                             type="button"
                             onClick={() => setSelectedProductForBooking(product)}
-                            disabled={product.inventory_count <= 0}
-                            className="inline-flex items-center gap-1.5 rounded-full bg-[#0284c7] px-4 py-2 text-xs font-black text-white shadow-sm hover:bg-[#0369a1] transition hover:scale-105 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none disabled:hover:scale-100"
+                            className="inline-flex items-center gap-1.5 rounded-full bg-[#0284c7] px-4 py-2 text-xs font-black text-white shadow-sm hover:bg-[#0369a1] transition hover:scale-105"
                           >
-                            <Calendar className="size-3" /> {product.inventory_count > 0 ? 'Thuê máy' : 'Kín lịch'}
+                            <Calendar className="size-3" /> {product.inventory_count > 0 ? 'Thuê máy' : 'Xem lịch'}
                           </button>
                           <Link
                             href={`/thiet-bi/${product.slug}`}
