@@ -19,6 +19,22 @@ import { deleteAdminRecord, saveAdminRecord } from '@/lib/data/admin-api';
 import { compressImageToBase64 } from '@/lib/utils/image-compress';
 import SafeButton from '@/components/common/SafeButton';
 
+async function uploadProductImage(imageDataUrl: string) {
+  const imageBlob = await fetch(imageDataUrl).then((response) => response.blob());
+  const formData = new FormData();
+  formData.append('file', imageBlob, 'product-image');
+
+  const response = await fetch('/api/admin/product-images', {
+    method: 'POST',
+    credentials: 'same-origin',
+    body: formData,
+  });
+  const result = await response.json().catch(() => null) as { error?: string; path?: string; url?: string } | null;
+  if (!response.ok || !result?.path || !result.url) {
+    throw new Error(result?.error ?? 'Không thể tải ảnh sản phẩm lên kho lưu trữ.');
+  }
+  return { path: result.path, url: result.url };
+}
 
 export default function ProductManagerClient({
   initialProducts,
@@ -51,6 +67,7 @@ export default function ProductManagerClient({
   const [hasInventory, setHasInventory] = useState(true);
   const [toastMsg, setToastMsg] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [validationError, setValidationError] = useState('');
 
@@ -119,7 +136,7 @@ export default function ProductManagerClient({
     try {
       const uploadedImages: string[] = [];
       for (const file of validFiles) {
-        uploadedImages.push(await compressImageToBase64(file, 1200, 1200, 0.85));
+        uploadedImages.push(await compressImageToBase64(file, 1000, 1000, 0.78));
       }
       setGalleryImages((current) => [...current, ...uploadedImages]);
       showToast(`Đã thêm ${uploadedImages.length} ảnh theo thứ tự chọn${skippedCount ? `, bỏ qua ${skippedCount} file không hợp lệ` : ''}.`);
@@ -250,10 +267,43 @@ export default function ProductManagerClient({
       indexable: productData.indexable,
     };
 
+    const uploadedImagePaths: string[] = [];
+    setIsSaving(true);
     try {
+      const persistedGalleryImages: string[] = [];
+      for (const image of galleryImages) {
+        if (image.startsWith('data:')) {
+          const uploadedImage = await uploadProductImage(image);
+          uploadedImagePaths.push(uploadedImage.path);
+          persistedGalleryImages.push(uploadedImage.url);
+        } else {
+          persistedGalleryImages.push(image);
+        }
+      }
+
+      const persistedRentalAddons: RentalAddon[] = [];
+      for (const addon of rentalAddons) {
+        if (addon.image.startsWith('data:')) {
+          const uploadedImage = await uploadProductImage(addon.image);
+          uploadedImagePaths.push(uploadedImage.path);
+          persistedRentalAddons.push({ ...addon, image: uploadedImage.url });
+        } else {
+          persistedRentalAddons.push(addon);
+        }
+      }
+
+      const savedProductData = {
+        ...productData,
+        primary_image: persistedGalleryImages[0] ?? '',
+        gallery_images: persistedGalleryImages,
+        rental_addons: persistedRentalAddons,
+      };
       const saved = await saveAdminRecord<Product>('products', {
         ...payload,
         id: productData.id,
+        primary_image: savedProductData.primary_image,
+        gallery_images: savedProductData.gallery_images,
+        rental_addons: savedProductData.rental_addons,
         description: productData.description,
         specs: productData.specs,
         accessories_included: productData.accessories_included,
@@ -266,14 +316,24 @@ export default function ProductManagerClient({
         created_at: productData.created_at,
         updated_at: productData.updated_at,
       });
-      const savedProduct = { ...productData, ...saved, brand, category } as Product;
+      const savedProduct = { ...savedProductData, ...saved, brand, category } as Product;
       setProducts((current) => editingProduct
         ? current.map((item) => item.id === editingProduct.id ? savedProduct : item)
         : [savedProduct, ...current]);
       setIsModalOpen(false);
       showToast(editingProduct ? `Đã cập nhật máy "${name}"` : `Đã thêm mới thiết bị "${name}"`);
     } catch (error) {
+      if (uploadedImagePaths.length) {
+        await fetch('/api/admin/product-images', {
+          method: 'DELETE',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paths: uploadedImagePaths }),
+        }).catch(() => undefined);
+      }
       showToast(error instanceof Error ? error.message : 'Không thể lưu thiết bị.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -672,7 +732,7 @@ export default function ProductManagerClient({
                   id="product-file-input"
                   accept="image/jpeg,image/png,image/webp,image/avif"
                   multiple
-                  disabled={isUploading}
+                  disabled={isUploading || isSaving}
                   className="hidden"
                   onChange={(event) => {
                     const files = event.currentTarget.files;
@@ -811,7 +871,9 @@ export default function ProductManagerClient({
                 </button>
                 <SafeButton
                   type="submit"
-                  loadingText="Đang lưu vào CSDL..."
+                  loadingText="Đang tải ảnh và lưu..."
+                  isLoading={isSaving}
+                  disabled={isUploading}
                   className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black shadow-md"
                 >
                   <Save className="size-4" /> Lưu Thiết Bị
