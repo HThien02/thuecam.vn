@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Product } from '@/types';
 import { CheckCircle2, Clock3, CalendarDays, Send, MapPin, Truck, AlertCircle } from 'lucide-react';
 import AvailabilityCalendarTable from './AvailabilityCalendarTable';
@@ -28,7 +28,10 @@ export default function RentalRequestForm({
     initialProduct?.slug ?? products[0]?.slug ?? ''
   );
   const [duration, setDuration] = useState<'hourly' | 'daily'>('daily');
-  const [pickupMethod, setPickupMethod] = useState<'STORE' | 'DELIVERY'>('STORE');
+  const [pickupTime, setPickupTime] = useState('09:00');
+  const [rangeAvailability, setRangeAvailability] = useState<boolean | null>(null);
+  const updateRangeAvailability = useCallback((isAvailable: boolean | null) => setRangeAvailability(isAvailable), []);
+  const pickupMethod: 'STORE' | 'DELIVERY' = pickupTime >= '08:00' && pickupTime <= '18:00' ? 'STORE' : 'DELIVERY';
 
   const todayStr = new Date().toISOString().split('T')[0];
   const tomorrow = new Date();
@@ -58,6 +61,8 @@ export default function RentalRequestForm({
     if (!isValidName(fullName)) newErrors.fullName = NAME_VALIDATION_ERROR;
     if (!isValidVietnamPhone(phone)) newErrors.phone = PHONE_VALIDATION_ERROR;
     if (!isValidEmail(email)) newErrors.email = EMAIL_VALIDATION_ERROR;
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(pickupTime)) newErrors.pickupTime = 'Vui lòng chọn giờ nhận máy hợp lệ.';
+    if (rangeAvailability !== true) newErrors.submit = rangeAvailability === false ? 'Lịch đã kín trong ngày bạn chọn. Vui lòng chọn thiết bị hoặc ngày khác.' : 'Đang kiểm tra lịch trống. Vui lòng chờ một chút rồi gửi lại.';
     if (pickupMethod === 'DELIVERY' && (!address || address.trim().length < 5)) {
       newErrors.address = 'Vui lòng nhập địa chỉ giao máy cụ thể (tối thiểu 5 ký tự).';
     }
@@ -87,6 +92,7 @@ export default function RentalRequestForm({
           customer_phone: phone,
           customer_email: email,
           pickup_method: pickupMethod,
+          pickup_time: pickupTime,
           delivery_address: address,
           note: notes,
         }),
@@ -111,9 +117,9 @@ export default function RentalRequestForm({
         <h2 className="text-2xl font-black text-slate-900">
           Đã nhận yêu cầu thuê thiết bị! 🎉
         </h2>
-        <p className="mx-auto mt-2 max-w-lg text-slate-600 text-sm">
-          THUECAM sẽ liên hệ qua SĐT/Zalo <strong>{phone}</strong> trong vòng 10 phút để xác nhận lịch máy và hướng dẫn bạn nhận máy tại <strong>ETown Tân Bình</strong> hoặc giao hỏa tốc.
-        </p>
+          <p className="mx-auto mt-2 max-w-lg text-slate-600 text-sm">
+            THUECAM sẽ liên hệ qua SĐT/Zalo <strong>{phone}</strong> trong vòng 10 phút để xác nhận lịch máy. Giờ nhận {pickupTime} — {pickupMethod === 'STORE' ? 'nhận tại ETown Tân Bình' : 'giao hỏa tốc đến địa chỉ đã chọn'}.
+          </p>
         <p className="mt-4 text-sm font-bold text-sky-800">Mã yêu cầu: {bookingCode}</p>
         <div className="mt-6 flex justify-center">
           <button
@@ -147,7 +153,7 @@ export default function RentalRequestForm({
           >
             {products.map((item) => (
               <option key={item.id} value={item.slug}>
-                {item.name} — {item.rental_price_per_day.toLocaleString('vi-VN')}đ/ngày
+                {item.name}{item.status !== 'ACTIVE' ? ' · Tạm ẩn, full lịch' : ''} — {item.rental_price_per_day.toLocaleString('vi-VN')}đ/ngày
               </option>
             ))}
           </select>
@@ -166,6 +172,7 @@ export default function RentalRequestForm({
               setStartDate(start);
               setEndDate(end);
             }}
+            onRangeAvailabilityChange={updateRangeAvailability}
           />
         </div>
 
@@ -192,6 +199,21 @@ export default function RentalRequestForm({
             onChange={(e) => setEndDate(e.target.value)}
             className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-sm font-bold text-slate-900 outline-none focus:border-[#0284c7]"
           />
+        </label>
+
+        <label className="text-xs font-bold text-slate-700">
+          Giờ nhận máy: *
+          <input
+            required
+            type="time"
+            value={pickupTime}
+            onChange={(e) => setPickupTime(e.target.value)}
+            aria-describedby="pickup-time-guidance"
+            className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-sm font-bold text-slate-900 outline-none focus:border-[#0284c7]"
+          />
+          <span id="pickup-time-guidance" className="mt-1 block text-[11px] font-medium text-slate-500">
+            08:00–18:00 nhận tại ETown; ngoài khung giờ sẽ tự chuyển sang giao hỏa tốc.
+          </span>
         </label>
 
         {/* Customer Details */}
@@ -295,44 +317,12 @@ export default function RentalRequestForm({
           </div>
         </div>
 
-        {/* Pickup Method */}
-        <div className="sm:col-span-2">
-          <span className="block text-xs font-bold text-slate-700 mb-1.5">
-            Điểm nhận máy:
-          </span>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => setPickupMethod('STORE')}
-              className={`rounded-2xl border p-3 text-left transition-all font-bold flex items-center gap-2.5 ${
-                pickupMethod === 'STORE'
-                  ? 'bg-sky-50 border-[#0284c7] text-[#0284c7]'
-                  : 'bg-white border-slate-200 text-slate-600 hover:border-sky-200'
-              }`}
-            >
-              <MapPin className="size-4 shrink-0 text-[#0284c7]" />
-              <div>
-                <span className="block text-xs font-black">Nhận máy tại ETown Tân Bình</span>
-                <span className="block text-[11px] text-slate-500 font-normal">Cộng Hòa, Tân Bình, TP HCM</span>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setPickupMethod('DELIVERY')}
-              className={`rounded-2xl border p-3 text-left transition-all font-bold flex items-center gap-2.5 ${
-                pickupMethod === 'DELIVERY'
-                  ? 'bg-sky-50 border-[#0284c7] text-[#0284c7]'
-                  : 'bg-white border-slate-200 text-slate-600 hover:border-sky-200'
-              }`}
-            >
-              <Truck className="size-4 shrink-0 text-[#0284c7]" />
-              <div>
-                <span className="block text-xs font-black">Giao hỏa tốc 30 phút</span>
-                <span className="block text-[11px] text-slate-500 font-normal">Ship tận tay nội thành TP.HCM</span>
-              </div>
-            </button>
-          </div>
+        <div className="sm:col-span-2 rounded-2xl border border-sky-200 bg-sky-50/70 p-4 text-xs text-slate-700" role="status" aria-live="polite">
+          {pickupMethod === 'STORE' ? (
+            <span className="flex items-center gap-2 font-bold"><MapPin className="size-4 text-sky-700" /> Nhận máy tại ETown Tân Bình lúc {pickupTime}.</span>
+          ) : (
+            <span className="flex items-center gap-2 font-bold"><Truck className="size-4 text-sky-700" /> Ngoài giờ hành chính — THUECAM sẽ giao hỏa tốc lúc {pickupTime}.</span>
+          )}
         </div>
 
         {pickupMethod === 'DELIVERY' && (
@@ -364,10 +354,12 @@ export default function RentalRequestForm({
           Sau khi gửi, THUECAM sẽ liên hệ xác nhận lịch và giữ máy cho bạn ngay.
         </p>
 
+      {rangeAvailability === false && <p role="alert" className="text-sm font-semibold text-rose-600 sm:text-right">Khoảng ngày đang chọn đã kín lịch. Hãy chọn ngày khác.</p>}
       {errors.submit && <p role="alert" className="text-sm font-semibold text-rose-600">{errors.submit}</p>}
       <SafeButton
         type="submit"
-        disabled={isSubmitting || !product}
+        disabled={isSubmitting || !product || rangeAvailability !== true}
+        isLoading={isSubmitting}
         loadingText="Đang gửi yêu cầu..."
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#0284c7] hover:bg-[#0369a1] px-8 py-3.5 text-sm font-black text-white shadow-cute transition-all hover:scale-105"
         >

@@ -28,6 +28,7 @@ export default async function AdminBookingsPage() {
       customer_name: String(row.customer_name),
       customer_phone: String(row.customer_phone),
       customer_email: typeof row.customer_email === 'string' ? row.customer_email : undefined,
+      customer_cccd: typeof row.customer_cccd === 'string' ? row.customer_cccd : undefined,
       product_id: typeof row.product_id === 'string' ? row.product_id : undefined,
       product_name: String(row.product_name),
       start_date: String(row.start_date),

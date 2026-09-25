@@ -18,6 +18,10 @@ export default async function AdminSettingsPage() {
     open_hours: string;
     promo_banner: string;
     deposit_policy: string;
+    contact_manager_name: string;
+    facebook_url: string;
+    instagram_url: string;
+    whatsapp_url: string;
   }>('site_settings', 'global');
   const initialSettings = {
     siteName: row?.site_name ?? 'THUECAM.VN',
@@ -28,6 +32,10 @@ export default async function AdminSettingsPage() {
     openHours: row?.open_hours ?? '',
     promoBanner: row?.promo_banner ?? '',
     depositPolicy: row?.deposit_policy ?? '',
+    contactManagerName: row?.contact_manager_name ?? '',
+    facebookUrl: row?.facebook_url ?? '',
+    instagramUrl: row?.instagram_url ?? '',
+    whatsappUrl: row?.whatsapp_url ?? '',
   };
 
   return (

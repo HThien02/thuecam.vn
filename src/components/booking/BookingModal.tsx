@@ -1,5 +1,5 @@
 'use client';
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Product, RentalAddon } from '@/types';
 import { formatVND } from '../product/ProductCard';
 import { trackEvent } from '@/lib/analytics/gtag';
@@ -50,8 +50,11 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
-  const [pickupMethod, setPickupMethod] = useState<'STORE' | 'DELIVERY'>('STORE');
+  const [pickupTime, setPickupTime] = useState('09:00');
+  const pickupMethod: 'STORE' | 'DELIVERY' = pickupTime >= '08:00' && pickupTime <= '18:00' ? 'STORE' : 'DELIVERY';
   const [address, setAddress] = useState('');
+  const [rangeAvailability, setRangeAvailability] = useState<boolean | null>(null);
+  const updateRangeAvailability = useCallback((isAvailable: boolean | null) => setRangeAvailability(isAvailable), []);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
   const [voucherInput, setVoucherInput] = useState('');
@@ -132,6 +135,11 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
   };
 
   const handleStartBooking = () => {
+    if (rangeAvailability !== true) {
+      setSubmissionError(rangeAvailability === false ? 'Lịch đã kín trong khoảng ngày bạn chọn.' : 'Đang kiểm tra lịch. Vui lòng chờ một chút.');
+      return;
+    }
+    setSubmissionError('');
     trackEvent({
       action: 'availability_check',
       params: {
@@ -163,6 +171,8 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
     if (!isValidName(customerName)) newErrors.customerName = NAME_VALIDATION_ERROR;
     if (!isValidVietnamPhone(customerPhone)) newErrors.customerPhone = PHONE_VALIDATION_ERROR;
     if (!isValidEmail(customerEmail)) newErrors.customerEmail = EMAIL_VALIDATION_ERROR;
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(pickupTime)) newErrors.pickupTime = 'Vui lòng chọn giờ nhận máy hợp lệ.';
+    if (rangeAvailability !== true) newErrors.availability = rangeAvailability === false ? 'Lịch đã kín trong khoảng ngày bạn chọn.' : 'Đang kiểm tra lịch trống, vui lòng chờ một chút.';
     if (pickupMethod === 'DELIVERY' && (!address || address.trim().length < 5)) {
       newErrors.address = 'Vui lòng nhập địa chỉ giao nhận cụ thể (tối thiểu 5 ký tự).';
     }
@@ -184,6 +194,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
           customer_phone: customerPhone,
           customer_email: customerEmail,
           pickup_method: pickupMethod,
+          pickup_time: pickupTime,
           delivery_address: address,
           addon_ids: selectedAddonIds,
           voucher_code: appliedVoucher?.code ?? '',
@@ -283,6 +294,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
                 setStartDate(start);
                 setEndDate(end);
               }}
+              onRangeAvailabilityChange={updateRangeAvailability}
             />
 
             {availableAddons.length > 0 && (
@@ -345,13 +357,16 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
               </div>
             </div>
 
+            {rangeAvailability === false && <p role="alert" className="text-center text-xs font-bold text-rose-600">Khoảng ngày này đã kín lịch. Hãy chọn ngày khác.</p>}
+            {submissionError && <p role="alert" className="text-center text-xs font-bold text-rose-600">{submissionError}</p>}
             <button
               onClick={handleStartBooking}
-              disabled={!startDate || !endDate}
+              disabled={!startDate || !endDate || rangeAvailability !== true}
+              aria-busy={rangeAvailability === null}
               className="w-full py-3.5 rounded-full bg-gradient-candy hover:opacity-95 text-white font-black text-sm shadow-cute hover:shadow-cute-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Calendar className="w-4 h-4" />
-              <span>Tiếp Tục Đặt Máy ({totalDays} Ngày - {formatVND(totalDueNow)}) 📸</span>
+              {rangeAvailability === null ? <RotateCw className="size-4 animate-spin" aria-hidden="true" /> : <Calendar className="w-4 h-4" />}
+              <span>{rangeAvailability === null ? 'Đang kiểm tra lịch…' : `Tiếp tục đặt máy (${totalDays} ngày - ${formatVND(totalDueNow)})`}</span>
             </button>
           </div>
         )}
@@ -377,17 +392,23 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
 
             <section aria-label="Áp dụng voucher" className="rounded-2xl border border-slate-200 p-3">
               <label htmlFor="booking-voucher" className="mb-1.5 block text-xs font-bold text-slate-700">Mã voucher</label>
-              <div className="flex gap-2">
-                <input id="booking-voucher" value={voucherInput} onChange={(e) => { clearVoucherDiscount(); setVoucherInput(e.target.value.toUpperCase()); }} placeholder="Nhập mã giảm giá" maxLength={64} className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold uppercase text-slate-900 outline-none focus:border-sky-500" />
-                <button type="button" onClick={handleApplyVoucher} disabled={isCheckingVoucher} className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-black text-white disabled:opacity-50">{isCheckingVoucher ? 'Đang kiểm tra…' : appliedVoucher ? 'Áp dụng lại' : 'Áp dụng'}</button>
+              <div className="relative">
+                <input id="booking-voucher" value={voucherInput} onChange={(e) => { clearVoucherDiscount(); setVoucherInput(e.target.value.toUpperCase()); }} onBlur={handleApplyVoucher} placeholder="Nhập mã giảm giá" maxLength={64} aria-describedby="voucher-status" className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 pr-10 text-sm font-bold uppercase text-slate-900 outline-none focus:border-sky-500" />
+                {isCheckingVoucher && <RotateCw className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-sky-600" aria-label="Đang kiểm tra voucher" />}
               </div>
-              {voucherMessage && <p role="status" className={`mt-2 text-[11px] font-semibold ${appliedVoucher ? 'text-emerald-700' : 'text-rose-600'}`}>{voucherMessage}</p>}
+              <p className="mt-1 text-[10px] text-slate-500">Voucher sẽ được kiểm tra tự động khi bạn rời khỏi ô nhập.</p>
+              {voucherMessage && <p id="voucher-status" role="status" aria-live="polite" className={`mt-2 text-[11px] font-semibold ${appliedVoucher ? 'text-emerald-700' : 'text-rose-600'}`}>{voucherMessage}</p>}
             </section>
 
-            <div className="space-y-3 text-xs">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">
-                  Họ và tên của bạn: *
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1" htmlFor="booking-pickup-time">Giờ nhận máy: *</label>
+                  <input id="booking-pickup-time" type="time" required value={pickupTime} onChange={(e) => setPickupTime(e.target.value)} aria-describedby="booking-pickup-guidance" className="w-full rounded-2xl border border-sky-200 bg-sky-50/60 px-3.5 py-2.5 text-sm font-bold text-slate-900 focus:border-sky-500 focus:outline-none" />
+                  <p id="booking-pickup-guidance" className="mt-1 text-[10px] text-slate-500">08:00–18:00 nhận tại ETown; ngoài giờ sẽ tự chọn giao hỏa tốc.</p>
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Họ và tên của bạn: *
                 </label>
                 <input
                   type="text"
@@ -469,38 +490,13 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
                 <label className="block font-bold text-slate-700 mb-1">
                   Địa điểm & Hình thức nhận máy:
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPickupMethod('STORE')}
-                    className={`py-3 px-3 rounded-2xl border text-left transition-all font-bold flex items-center gap-2 ${
-                      pickupMethod === 'STORE'
-                        ? 'bg-sky-50 border-[#0284c7] text-[#0284c7]'
-                        : 'bg-white border-slate-200 text-slate-600 hover:border-sky-200'
-                    }`}
-                  >
-                    <MapPin className="size-4 shrink-0 text-[#0284c7]" />
-                    <div>
-                      <span className="block text-xs">Nhận tại điểm hẹn ETown</span>
-                      <span className="block text-[10px] text-slate-500 font-normal">Tân Bình, TP HCM</span>
-                    </div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPickupMethod('DELIVERY')}
-                    className={`py-3 px-3 rounded-2xl border text-left transition-all font-bold flex items-center gap-2 ${
-                      pickupMethod === 'DELIVERY'
-                        ? 'bg-sky-50 border-[#0284c7] text-[#0284c7]'
-                        : 'bg-white border-slate-200 text-slate-600 hover:border-sky-200'
-                    }`}
-                  >
-                    <Truck className="size-4 shrink-0 text-[#0284c7]" />
-                    <div>
-                      <span className="block text-xs">Giao hỏa tốc 30 phút</span>
-                      <span className="block text-[10px] text-slate-500 font-normal">Giao tận nơi toàn TP.HCM</span>
-                    </div>
-                  </button>
-                </div>
+                <div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-3 text-xs text-slate-700" role="status" aria-live="polite">
+                {pickupMethod === 'STORE' ? (
+                  <span className="flex items-center gap-2 font-bold"><MapPin className="size-4 text-sky-700" /> Nhận máy tại ETown Tân Bình lúc {pickupTime}.</span>
+                ) : (
+                  <span className="flex items-center gap-2 font-bold"><Truck className="size-4 text-sky-700" /> Ngoài giờ hành chính — giao hỏa tốc lúc {pickupTime}.</span>
+                )}
+              </div>
               </div>
 
               {pickupMethod === 'DELIVERY' && (
@@ -544,6 +540,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
               <SafeButton
                 type="submit"
                 disabled={isSubmitting}
+                isLoading={isSubmitting}
                 loadingText="Đang tạo đơn..."
                 className="w-2/3 py-3 rounded-full bg-gradient-candy hover:opacity-95 text-white font-black text-xs shadow-cute flex items-center justify-center gap-1.5"
               >

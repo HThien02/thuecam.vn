@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import PublicHeader from '@/components/common/PublicHeader';
 import PublicFooter from '@/components/common/PublicFooter';
+import NavigationProgress from '@/components/common/NavigationProgress';
 import FloatingContactWidget from '@/components/common/FloatingContactWidget';
 import { JsonLdScript, generateLocalBusinessJsonLd } from '@/lib/seo/jsonld';
 import { constructMetadata } from '@/lib/seo/metadata';
@@ -32,6 +33,7 @@ export default function RootLayout({
         <JsonLdScript data={organizationJsonLd} />
       </head>
       <body className="min-h-screen flex flex-col bg-[#FFF8F9] text-slate-900 selection:bg-pink-400 selection:text-white antialiased">
+        <NavigationProgress />
         <PublicHeader />
         <main className="flex-1">{children}</main>
         <PublicFooter />

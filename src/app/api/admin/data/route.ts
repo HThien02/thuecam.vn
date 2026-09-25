@@ -10,9 +10,9 @@ const fields = {
   articles: ['id', 'slug', 'type', 'title', 'excerpt', 'content', 'featured_image', 'author_name', 'author_avatar', 'author_bio', 'reviewer_name', 'pillar_slug', 'related_product_ids', 'faq', 'status', 'seo_title', 'seo_description', 'canonical_url', 'og_image', 'indexable', 'published_at', 'updated_at'],
   reviews: ['id', 'product_id', 'user_name', 'rating', 'comment', 'rental_verified', 'status', 'created_at'],
   redirects: ['id', 'old_url', 'new_url', 'status_code', 'is_active', 'created_at'],
-  bookings: ['id', 'booking_code', 'product_id', 'product_name', 'start_date', 'end_date', 'total_days', 'daily_price', 'deposit_amount', 'total_price', 'customer_name', 'customer_phone', 'customer_email', 'pickup_method', 'delivery_address', 'note', 'status', 'created_at', 'updated_at'],
+  bookings: ['id', 'booking_code', 'product_id', 'product_name', 'start_date', 'end_date', 'total_days', 'daily_price', 'deposit_amount', 'total_price', 'customer_name', 'customer_phone', 'customer_email', 'customer_cccd', 'pickup_method', 'pickup_time', 'delivery_address', 'note', 'status', 'created_at', 'updated_at'],
   blocked_dates: ['id', 'date', 'reason', 'created_at'],
-  site_settings: ['id', 'site_name', 'pickup_address', 'hotline', 'zalo', 'email', 'open_hours', 'promo_banner', 'deposit_policy', 'updated_at'],
+  site_settings: ['id', 'site_name', 'pickup_address', 'hotline', 'zalo', 'email', 'open_hours', 'promo_banner', 'deposit_policy', 'contact_manager_name', 'facebook_url', 'instagram_url', 'whatsapp_url', 'updated_at'],
   seo_settings: ['id', 'site_title', 'site_description', 'default_og_image', 'twitter_handle', 'business_name', 'hotline', 'email', 'address', 'opening_hours', 'google_verification_id', 'global_noindex_enabled', 'updated_at'],
 } as const;
 
@@ -71,6 +71,19 @@ export async function POST(request: NextRequest) {
   const table: AdminTable = tableName;
   const record = pickAllowedFields(table, body.record);
   if (!record || Object.keys(record).length === 0) return responseError('No valid record fields were provided.');
+
+  if (table === 'site_settings') {
+    for (const field of ['facebook_url', 'instagram_url', 'whatsapp_url']) {
+      const link = record[field];
+      if (typeof link === 'string' && link.trim()) {
+        try {
+          if (new URL(link).protocol !== 'https:') return responseError('Liên kết mạng xã hội phải bắt đầu bằng https://.', 400);
+        } catch {
+          return responseError('Vui lòng nhập liên kết mạng xã hội hợp lệ.', 400);
+        }
+      }
+    }
+  }
 
   if (table === 'bookings' && !record.booking_code) {
     record.booking_code = `TC${randomInt(100000, 1000000)}`;

@@ -36,6 +36,9 @@ export default function BookingManagerClient({
   // Form states
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
+  const [customerCccd, setCustomerCccd] = useState('');
+  const [customerLookup, setCustomerLookup] = useState<{ state: 'idle' | 'checking' | 'new' | 'existing' | 'error'; message?: string; history?: Array<{ booking_code: string; product_name: string; start_date: string; end_date: string; status: string }> }>({ state: 'idle' });
+  const [isSaving, setIsSaving] = useState(false);
   const [productName, setProductName] = useState('DJI Pocket 4 Creator Combo');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -60,6 +63,8 @@ export default function BookingManagerClient({
     setEditingBooking(null);
     setCustomerName('');
     setCustomerPhone('');
+    setCustomerCccd('');
+    setCustomerLookup({ state: 'idle' });
     setProductName('DJI Pocket 4 Creator Combo');
     setStartDate(new Date().toISOString().split('T')[0]);
     const tomorrow = new Date();
@@ -77,6 +82,8 @@ export default function BookingManagerClient({
     setEditingBooking(b);
     setCustomerName(b.customer_name);
     setCustomerPhone(b.customer_phone);
+    setCustomerCccd(b.customer_cccd ?? '');
+    setCustomerLookup({ state: 'idle' });
     setProductName(b.product_name);
     setStartDate(b.start_date);
     setEndDate(b.end_date);
@@ -88,8 +95,41 @@ export default function BookingManagerClient({
     setIsModalOpen(true);
   };
 
+  const handleLookupCustomer = async () => {
+    const identity = customerCccd.trim();
+    if (!identity) {
+      setCustomerLookup({ state: 'idle' });
+      return;
+    }
+    if (!/^(\d{9}|\d{12})$/.test(identity)) {
+      setCustomerLookup({ state: 'error', message: 'CCCD/CMND phải gồm 9 hoặc 12 chữ số.' });
+      return;
+    }
+
+    setCustomerLookup({ state: 'checking' });
+    try {
+      const response = await fetch(`/api/admin/customers/lookup?${new URLSearchParams({ cccd: identity })}`, { credentials: 'same-origin', cache: 'no-store' });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? 'Không thể tra cứu khách hàng.');
+      if (result.exists) {
+        setCustomerLookup({ state: 'existing', history: result.history ?? [], message: `Khách hàng cũ · ${result.bookingCount} lượt thuê đã lưu.` });
+        if (!customerName.trim() && result.customer?.name) setCustomerName(result.customer.name);
+        if (!customerPhone.trim() && result.customer?.phone) setCustomerPhone(result.customer.phone);
+      } else {
+        setCustomerLookup({ state: 'new', message: 'Đây là khách hàng mới.' });
+      }
+    } catch (error) {
+      setCustomerLookup({ state: 'error', message: error instanceof Error ? error.message : 'Không thể tra cứu khách hàng.' });
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!/^(\d{9}|\d{12})$/.test(customerCccd.trim())) {
+      showToast('Vui lòng nhập CCCD/CMND gồm 9 hoặc 12 chữ số.');
+      return;
+    }
+    setIsSaving(true);
     const daysCount = Math.max(
       1,
       Math.round(
@@ -109,6 +149,7 @@ export default function BookingManagerClient({
           customer_name: customerName.trim(),
           customer_phone: customerPhone.trim(),
           customer_email: editingBooking?.customer_email ?? null,
+          customer_cccd: customerCccd.trim(),
           product_id: editingBooking?.product_id ?? null,
           product_name: productName.trim(),
           start_date: startDate,
@@ -130,6 +171,7 @@ export default function BookingManagerClient({
         customer_name: String(saved.customer_name),
         customer_phone: String(saved.customer_phone),
         customer_email: typeof saved.customer_email === 'string' ? saved.customer_email : undefined,
+        customer_cccd: typeof saved.customer_cccd === 'string' ? saved.customer_cccd : undefined,
         product_id: typeof saved.product_id === 'string' ? saved.product_id : undefined,
         product_name: String(saved.product_name),
         start_date: String(saved.start_date),
@@ -152,6 +194,8 @@ export default function BookingManagerClient({
       showToast(editingBooking ? `Đã cập nhật đơn ${bookingData.id}` : `Đã tạo đơn ${bookingData.id}`);
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'Không thể lưu đơn thuê.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -214,6 +258,7 @@ export default function BookingManagerClient({
     const matchSearch =
       b.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       b.customer_phone.includes(searchTerm) ||
+      (b.customer_cccd ?? '').includes(searchTerm) ||
       b.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       b.product_name.toLowerCase().includes(searchTerm.toLowerCase());
     return matchStatus && matchSearch;
@@ -235,7 +280,7 @@ export default function BookingManagerClient({
             <Search className="size-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Tìm theo mã, tên khách, SĐT..."
+              placeholder="Tìm mã, tên, SĐT hoặc CCCD..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 w-64"
@@ -453,6 +498,39 @@ export default function BookingManagerClient({
               </div>
 
               <div>
+                <label htmlFor="booking-customer-cccd" className="block font-bold text-slate-300 mb-1">CCCD/CMND khách hàng: *</label>
+                <input
+                  id="booking-customer-cccd"
+                  required
+                  inputMode="numeric"
+                  autoComplete="off"
+                  maxLength={12}
+                  value={customerCccd}
+                  onChange={(event) => {
+                    setCustomerCccd(event.target.value.replace(/\D/g, '').slice(0, 12));
+                    setCustomerLookup({ state: 'idle' });
+                  }}
+                  onBlur={handleLookupCustomer}
+                  aria-describedby="customer-identity-status"
+                  placeholder="Nhập 9 hoặc 12 chữ số, tra cứu khi rời ô"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white outline-none focus:border-emerald-500"
+                />
+                <p id="customer-identity-status" role={customerLookup.state === 'error' ? 'alert' : 'status'} aria-live="polite" className={`mt-1 text-[11px] font-semibold ${customerLookup.state === 'error' ? 'text-rose-400' : customerLookup.state === 'existing' ? 'text-sky-300' : customerLookup.state === 'new' ? 'text-emerald-300' : 'text-slate-400'}`}>
+                  {customerLookup.state === 'checking' ? 'Đang tra cứu lịch sử khách hàng…' : customerLookup.message ?? (customerCccd ? 'Rời ô để kiểm tra khách hàng và lịch thuê cũ.' : 'Nhập CCCD để tra cứu và lưu lịch sử thuê theo khách hàng.')}
+                </p>
+                {customerLookup.state === 'existing' && customerLookup.history?.length ? (
+                  <ul className="mt-2 flex flex-col gap-1 rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-[11px] text-slate-300" aria-label="Lịch sử thuê gần đây">
+                    {customerLookup.history.map((item) => (
+                      <li key={item.booking_code} className="flex flex-wrap items-center justify-between gap-2">
+                        <span><strong className="text-white">{item.product_name}</strong> · {item.start_date}–{item.end_date}</span>
+                        <span className="font-mono text-sky-300">{item.booking_code}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+
+              <div>
                 <label className="block font-bold text-slate-300 mb-1">Thiết bị thuê: *</label>
                 <input
                   required
@@ -553,9 +631,12 @@ export default function BookingManagerClient({
                 </button>
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black shadow-md"
+                  disabled={isSaving}
+                  aria-busy={isSaving}
+                  className="rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-5 py-2.5 text-xs shadow-lg transition disabled:cursor-wait disabled:opacity-60"
                 >
-                  <Save className="size-4" /> Lưu Đơn Thuê
+                  {isSaving ? <Clock className="size-4 inline mr-1 animate-spin" aria-hidden="true" /> : <Save className="size-4 inline mr-1" />}
+                  {isSaving ? 'Đang lưu đơn…' : editingBooking ? 'Lưu Thay Đổi' : 'Tạo Đơn Thuê'}
                 </button>
               </div>
             </form>

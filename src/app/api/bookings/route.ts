@@ -46,7 +46,9 @@ export async function POST(request: NextRequest) {
   const customerName = typeof body.customer_name === 'string' ? body.customer_name.trim() : '';
   const customerPhone = typeof body.customer_phone === 'string' ? body.customer_phone.trim() : '';
   const customerEmail = typeof body.customer_email === 'string' ? body.customer_email.trim() : '';
-  const pickupMethod = body.pickup_method === 'DELIVERY' ? 'DELIVERY' : 'STORE';
+  const pickupTime = typeof body.pickup_time === 'string' ? body.pickup_time.trim() : '';
+  const isValidPickupTime = /^([01]\d|2[0-3]):[0-5]\d$/.test(pickupTime);
+  const pickupMethod = isValidPickupTime && pickupTime >= '08:00' && pickupTime <= '18:00' ? 'STORE' : 'DELIVERY';
   const deliveryAddress = typeof body.delivery_address === 'string' ? body.delivery_address.trim() : '';
   const addonIds = body.addon_ids;
   const voucherCode = typeof body.voucher_code === 'string' ? body.voucher_code.trim().toUpperCase() : '';
@@ -62,6 +64,7 @@ export async function POST(request: NextRequest) {
   if (!isValidName(customerName) || !isValidVietnamPhone(customerPhone) || (customerEmail && !isValidEmail(customerEmail))) {
     return errorResponse('Vui lòng kiểm tra lại họ tên, số điện thoại và email.', 400);
   }
+  if (!isValidPickupTime) return errorResponse('Vui lòng chọn giờ nhận máy hợp lệ.', 400);
   if (pickupMethod === 'DELIVERY' && deliveryAddress.length < 5) {
     return errorResponse('Vui lòng nhập địa chỉ giao máy cụ thể.', 400);
   }
@@ -132,6 +135,7 @@ export async function POST(request: NextRequest) {
       total_price: Number(addon!.price_per_day) * days.length,
     })),
     p_voucher_code: voucherCode || null,
+    p_pickup_time: pickupTime,
   });
   if (insertError || !booking) {
     if (insertError?.message.includes('VOUCHER_INVALID')) return errorResponse('Voucher không hợp lệ hoặc đã hết lượt. Vui lòng kiểm tra lại.', 409);

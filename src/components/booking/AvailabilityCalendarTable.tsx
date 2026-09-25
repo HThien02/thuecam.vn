@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import useSWR from 'swr';
 import {
   Calendar as CalendarIcon,
@@ -20,6 +20,7 @@ interface AvailabilityCalendarTableProps {
   startDate: string;
   endDate: string;
   onDateChange: (start: string, end: string) => void;
+  onRangeAvailabilityChange?: (isAvailable: boolean | null) => void;
 }
 
 // Helper to format Date to YYYY-MM-DD in local time
@@ -47,6 +48,7 @@ export default function AvailabilityCalendarTable({
   startDate,
   endDate,
   onDateChange,
+  onRangeAvailabilityChange,
 }: AvailabilityCalendarTableProps) {
   // Current viewing month offset (0 = current month, 1 = next month)
   const [monthOffset, setMonthOffset] = useState(0);
@@ -69,9 +71,9 @@ export default function AvailabilityCalendarTable({
   const availabilityQuery = productId
     ? `/api/availability?${new URLSearchParams({ productId, startDate: firstVisibleDate, endDate: lastVisibleDate })}`
     : null;
-  const { data: availability } = useSWR(availabilityQuery, fetchAvailability, {
+  const { data: availability, isLoading: isLoadingAvailability, error: availabilityError } = useSWR(availabilityQuery, fetchAvailability, {
     revalidateOnFocus: false,
-    keepPreviousData: true,
+    keepPreviousData: false,
   });
   const reservedDates = useMemo(() => new Set(availability?.reservedDates ?? []), [availability?.reservedDates]);
 
@@ -152,7 +154,7 @@ export default function AvailabilityCalendarTable({
 
   // Check if range has conflicts
   const rangeInfo = useMemo(() => {
-    if (!startDate || !endDate) return null;
+    if (!startDate || !endDate || !availability) return null;
 
     const start = new Date(`${startDate}T00:00:00`);
     const end = new Date(`${endDate}T00:00:00`);
@@ -185,7 +187,16 @@ export default function AvailabilityCalendarTable({
       discountAmount,
       finalTotal,
     };
-  }, [startDate, endDate, reservedDates, dailyPrice]);
+  }, [startDate, endDate, reservedDates, dailyPrice, availability]);
+
+  useEffect(() => {
+    if (!onRangeAvailabilityChange) return;
+    if (availabilityError || !availability || !rangeInfo) {
+      onRangeAvailabilityChange(null);
+      return;
+    }
+    onRangeAvailabilityChange(!rangeInfo.hasConflict);
+  }, [availability, availabilityError, rangeInfo, onRangeAvailabilityChange]);
 
   return (
     <div className="rounded-[28px] border-2 border-sky-100 bg-white p-4 sm:p-6 shadow-cute">
@@ -279,7 +290,11 @@ export default function AvailabilityCalendarTable({
               statusColor = 'text-slate-400 font-bold';
             }
 
-            if (isStart || isEnd) {
+            if ((isStart || isEnd) && isReserved) {
+              cellClass = 'bg-rose-100 border-rose-300 text-rose-900';
+              statusText = 'Full';
+              statusColor = 'text-rose-700 font-black';
+            } else if (isStart || isEnd) {
               cellClass = 'bg-[#0284c7] border-[#0284c7] text-white shadow-md z-10';
               statusText = isStart && isEnd ? '1 ngày' : isStart ? 'Nhận' : 'Trả';
               statusColor = 'text-white font-black';
@@ -323,7 +338,17 @@ export default function AvailabilityCalendarTable({
 
       {/* Selected Range Status / Alerts */}
       <div className="mt-4">
-        {rangeInfo ? (
+        {isLoadingAvailability && !availability ? (
+          <div className="flex items-center gap-2 rounded-2xl border border-sky-200 bg-sky-50 p-3.5 text-xs font-semibold text-sky-800" role="status" aria-live="polite">
+            <span className="size-4 animate-spin rounded-full border-2 border-sky-600 border-r-transparent" aria-hidden="true" />
+            Đang tải lịch thiết bị…
+          </div>
+        ) : availabilityError ? (
+          <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-3.5 text-xs font-semibold text-rose-800" role="alert">
+            <AlertTriangle className="size-4 shrink-0" />
+            Không tải được lịch. Vui lòng thử lại sau.
+          </div>
+        ) : rangeInfo ? (
           rangeInfo.hasConflict ? (
             <div className="flex items-start gap-3 rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs text-rose-800">
               <AlertTriangle className="size-5 text-rose-600 shrink-0 mt-0.5" />

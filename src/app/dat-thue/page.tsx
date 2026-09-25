@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { getProducts } from '@/lib/data';
+import { getBookingProducts } from '@/lib/data';
 import { constructMetadata } from '@/lib/seo/metadata';
 import RentalRequestForm from '@/components/booking/RentalRequestForm';
 import { Sparkles, MapPin } from 'lucide-react';
@@ -16,9 +16,8 @@ export default async function RentalPage({
 }: {
   searchParams: Promise<{ product?: string; duration?: string }>;
 }) {
-  const [products, params] = await Promise.all([getProducts(), searchParams]);
-  const activeProducts = products.filter((product) => product.status === 'ACTIVE');
-  const initialProduct = activeProducts.find((product) => product.slug === params.product);
+  const [products, params] = await Promise.all([getBookingProducts(), searchParams]);
+  const initialProduct = products.find((product) => product.slug === params.product);
 
   return (
     <main className="min-h-screen bg-[#f0f7ff] px-4 py-12 text-slate-900 sm:px-6 lg:px-8">
@@ -39,7 +38,7 @@ export default async function RentalPage({
           </div>
         </div>
 
-        <RentalRequestForm products={activeProducts} initialProduct={initialProduct} />
+        <RentalRequestForm products={products} initialProduct={initialProduct} />
       </div>
     </main>
   );

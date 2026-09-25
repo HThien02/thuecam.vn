@@ -4,6 +4,7 @@ export interface BookingRecord {
   customer_name: string;
   customer_phone: string;
   customer_email?: string;
+  customer_cccd?: string;
   product_id?: string;
   product_name: string;
   start_date: string;
@@ -27,6 +28,10 @@ export interface SiteSettings {
   openHours: string;
   promoBanner: string;
   depositPolicy: string;
+  contactManagerName: string;
+  facebookUrl: string;
+  instagramUrl: string;
+  whatsappUrl: string;
 }
 
 export interface BlockedDate {
