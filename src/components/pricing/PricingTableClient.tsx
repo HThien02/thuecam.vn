@@ -189,7 +189,7 @@ export default function PricingTableClient({ categories, products }: PricingTabl
                               {product.name}
                             </Link>
                             <span className="text-xs text-slate-500 font-medium">
-                              Tặng kèm thẻ nhớ + pin đầy
+                              {product.inventory_count > 0 ? 'Tặng kèm thẻ nhớ + pin đầy' : 'Tạm hết máy · Kín lịch thuê'}
                             </span>
                           </div>
                         </div>
@@ -219,9 +219,10 @@ export default function PricingTableClient({ categories, products }: PricingTabl
                           <button
                             type="button"
                             onClick={() => setSelectedProductForBooking(product)}
-                            className="inline-flex items-center gap-1.5 rounded-full bg-[#0284c7] px-4 py-2 text-xs font-black text-white shadow-sm hover:bg-[#0369a1] transition hover:scale-105"
+                            disabled={product.inventory_count <= 0}
+                            className="inline-flex items-center gap-1.5 rounded-full bg-[#0284c7] px-4 py-2 text-xs font-black text-white shadow-sm hover:bg-[#0369a1] transition hover:scale-105 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none disabled:hover:scale-100"
                           >
-                            <Calendar className="size-3" /> Thuê máy
+                            <Calendar className="size-3" /> {product.inventory_count > 0 ? 'Thuê máy' : 'Kín lịch'}
                           </button>
                           <Link
                             href={`/thiet-bi/${product.slug}`}
@@ -243,7 +244,7 @@ export default function PricingTableClient({ categories, products }: PricingTabl
             {[
               'Giá minh bạch trọn gói, đã gồm phụ kiện',
               'Nhận máy tại ETown Tân Bình hoặc ship 30p',
-              'Hỗ trợ test máy và hướng dẫn 1-1 miễn phí',
+              'H�� trợ test máy và hướng dẫn 1-1 miễn phí',
             ].map((item) => (
               <div key={item} className="flex items-center gap-2.5 text-sm font-bold text-slate-700">
                 <Check className="size-5 rounded-full bg-emerald-100 p-1 text-emerald-600 shrink-0" />

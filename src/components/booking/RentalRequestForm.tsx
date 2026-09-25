@@ -24,8 +24,11 @@ export default function RentalRequestForm({
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingCode, setBookingCode] = useState('');
+  const firstAvailableProduct = products.find((item) => item.inventory_count > 0) ?? products[0];
   const [selectedProduct, setSelectedProduct] = useState(
-    initialProduct?.slug ?? products[0]?.slug ?? ''
+    initialProduct?.inventory_count && initialProduct.inventory_count > 0
+      ? initialProduct.slug
+      : firstAvailableProduct?.slug ?? ''
   );
   const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
   const [duration, setDuration] = useState<'hourly' | 'daily'>('daily');
@@ -226,8 +229,8 @@ export default function RentalRequestForm({
             className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-3 text-sm font-black text-slate-900 outline-none focus:border-[#0284c7]"
           >
             {products.map((item) => (
-              <option key={item.id} value={item.slug}>
-                {item.name} — {item.rental_price_per_day.toLocaleString('vi-VN')}đ/ngày{item.inventory_count <= 0 ? ' · Hiện chưa có máy' : ''}
+              <option key={item.id} value={item.slug} disabled={item.inventory_count <= 0}>
+                {item.name} — {item.rental_price_per_day.toLocaleString('vi-VN')}đ/ngày{item.inventory_count <= 0 ? ' · Tạm hết máy, kín lịch' : ''}
               </option>
             ))}
           </select>

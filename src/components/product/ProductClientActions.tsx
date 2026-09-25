@@ -31,15 +31,22 @@ export default function ProductClientActions({ product }: ProductClientActionsPr
           </span>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-col items-center gap-2.5">
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
-            className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-gradient-candy hover:opacity-95 text-white font-black text-sm shadow-cute hover:shadow-cute-lg transition-all flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95"
+            disabled={product.inventory_count <= 0}
+            aria-describedby={product.inventory_count <= 0 ? 'product-unavailable-message' : undefined}
+            className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-gradient-candy hover:opacity-95 text-white font-black text-sm shadow-cute hover:shadow-cute-lg transition-all flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600 disabled:shadow-none disabled:hover:scale-100"
           >
             <Calendar className="w-4 h-4" />
-            <span>Kiểm Tra Lịch & Đặt Thuê 📸</span>
+            <span>{product.inventory_count <= 0 ? 'Tạm hết máy · Kín lịch' : 'Kiểm Tra Lịch & Đặt Thuê'}</span>
           </button>
+          {product.inventory_count <= 0 && (
+            <p id="product-unavailable-message" className="max-w-56 text-center text-xs font-semibold text-amber-800">
+              Sản phẩm vẫn có thể xem, nhưng hiện chưa thể đặt thuê.
+            </p>
+          )}
         </div>
       </div>
 
