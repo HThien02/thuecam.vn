@@ -1,5 +1,6 @@
 'use client';
 import React, { useCallback, useRef, useState } from 'react';
+import Image from 'next/image';
 import { Product, RentalAddon } from '@/types';
 import { formatVND } from '../product/ProductCard';
 import { trackEvent } from '@/lib/analytics/gtag';
@@ -323,7 +324,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
                             }}
                             className="mt-0.5 size-4 shrink-0 accent-sky-600"
                           />
-                          {addon.image && <img src={addon.image} alt={addon.name} className="size-12 shrink-0 rounded-lg object-cover" />}
+                          {addon.image && <Image src={addon.image} alt={addon.name} width={48} height={48} unoptimized className="size-12 shrink-0 rounded-lg object-cover" />}
                           <span className="min-w-0">
                             <span className="block">{addon.name}</span>
                             {addon.description && <span className="mt-0.5 block font-normal text-slate-500">{addon.description}</span>}
@@ -575,6 +576,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
 
             {/* QR display box */}
             <div className="p-4 bg-gradient-to-br from-sky-50 to-white rounded-3xl inline-block mx-auto shadow-cute border-2 border-sky-100">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={vietQrUrl}
                 alt="SePay VietQR Code"
@@ -584,6 +586,36 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
                 Hệ thống xác nhận tự động sau 3 - 5 giây
               </p>
             </div>
+
+            <section aria-label="Chi tiết hóa đơn thuê" className="mx-auto max-w-sm space-y-2 rounded-2xl border border-sky-100 bg-white p-3.5 text-left text-xs">
+              <h4 className="font-black text-slate-900">Chi tiết hóa đơn thuê</h4>
+              <div className="flex justify-between gap-3">
+                <span className="text-slate-600">Thuê thiết bị · {totalDays} ngày</span>
+                <span className="font-bold text-slate-800">{formatVND(baseRentalPrice)}</span>
+              </div>
+              {selectedAddons.map((addon) => (
+                <div key={addon.id} className="flex justify-between gap-3">
+                  <span className="text-slate-600">{addon.name} · một lần thuê</span>
+                  <span className="font-bold text-slate-800">{formatVND(Number(addon.price_per_rental ?? addon.price_per_day ?? 0))}</span>
+                </div>
+              ))}
+              {discountAmount > 0 && (
+                <div className="flex justify-between gap-3 text-emerald-700">
+                  <span>Ưu đãi thuê dài ngày</span>
+                  <span className="font-bold">−{formatVND(discountAmount)}</span>
+                </div>
+              )}
+              {appliedVoucher && (
+                <div className="flex justify-between gap-3 text-emerald-700">
+                  <span>Voucher {appliedVoucher.code}</span>
+                  <span className="font-bold">−{formatVND(voucherDiscount)}</span>
+                </div>
+              )}
+              <div className="flex justify-between gap-3 border-t border-slate-100 pt-2 font-black text-slate-900">
+                <span>Tổng tiền thuê</span>
+                <span className="text-[#0284c7]">{formatVND(totalDueNow)}</span>
+              </div>
+            </section>
 
             {/* Transfer details */}
             <div className="p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200 max-w-sm mx-auto space-y-1.5 text-xs text-left">

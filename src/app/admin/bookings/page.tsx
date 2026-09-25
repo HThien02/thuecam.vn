@@ -37,6 +37,20 @@ export default async function AdminBookingsPage() {
       daily_price: Number(row.daily_price),
       deposit_amount: Number(row.deposit_amount),
       total_price: Number(row.total_price),
+      selected_addons: Array.isArray(row.selected_addons)
+        ? row.selected_addons.flatMap((addon) => {
+            if (!addon || typeof addon !== 'object' || Array.isArray(addon)) return [];
+            const item = addon as Record<string, unknown>;
+            if (typeof item.id !== 'string' || typeof item.name !== 'string') return [];
+            return [{
+              id: item.id,
+              name: item.name,
+              description: typeof item.description === 'string' ? item.description : undefined,
+              price_per_rental: Number(item.price_per_rental ?? item.total_price ?? 0),
+              total_price: Number(item.total_price ?? item.price_per_rental ?? 0),
+            }];
+          })
+        : [],
       pickup_method: row.pickup_method === 'DELIVERY' ? String(row.delivery_address ?? 'Giao tận nơi') : 'ETown Tân Bình',
       status: mappedStatus,
       notes: typeof row.note === 'string' ? row.note : undefined,

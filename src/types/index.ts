@@ -80,7 +80,6 @@ export interface Product {
   deposit_amount: number;
   primary_image: string;
   gallery_images: string[];
-  three_d_model_url?: string;
   inventory_count: number;
   status: 'ACTIVE' | 'MAINTENANCE' | 'ARCHIVED' | 'INACTIVE';
   created_at?: string;

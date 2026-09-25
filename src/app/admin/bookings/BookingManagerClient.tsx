@@ -177,6 +177,7 @@ export default function BookingManagerClient({
         total_days: Number(saved.total_days),
         daily_price: Number(saved.daily_price),
         total_price: Number(saved.total_price),
+        selected_addons: editingBooking?.selected_addons ?? [],
         deposit_amount: Number(saved.deposit_amount),
         pickup_method: saved.pickup_method === 'DELIVERY'
           ? String(saved.delivery_address ?? 'Giao tận nơi')
@@ -341,7 +342,19 @@ export default function BookingManagerClient({
                       <p className="font-bold text-white">{b.customer_name}</p>
                       <p className="text-[11px] text-sky-400">{b.customer_phone}</p>
                     </td>
-                    <td className="px-4 py-3 font-medium text-slate-200">{b.product_name}</td>
+                    <td className="px-4 py-3 font-medium text-slate-200">
+                      <p>{b.product_name}</p>
+                      {b.selected_addons?.length ? (
+                        <ul className="mt-1.5 space-y-1 text-[10px] font-medium text-slate-400">
+                          {b.selected_addons.map((addon) => (
+                            <li key={addon.id} className="flex justify-between gap-3">
+                              <span>{addon.name} · 1 lần thuê</span>
+                              <span className="shrink-0">{Number(addon.price_per_rental ?? addon.total_price ?? 0).toLocaleString('vi-VN')}đ</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </td>
                     <td className="px-4 py-3">
                       <span className="font-bold text-white">{b.start_date}</span>
                       <span className="text-slate-500 mx-1">→</span>
