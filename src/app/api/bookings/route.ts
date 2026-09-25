@@ -76,6 +76,8 @@ export async function POST(request: NextRequest) {
   if ((blocked ?? []).length) return errorResponse('Lịch thuê đã khóa trong khoảng ngày bạn chọn.', 409);
 
   const capacity = Number(product.inventory_count);
+  if (capacity <= 0) return errorResponse('Thiết bị hiện chưa có máy và không thể đặt thuê.', 409);
+
   const productBookings = (bookings ?? []).filter((booking) => booking.product_id === productId);
   const unavailable = days.some((day) => {
     const bookedCount = productBookings.filter((booking) => booking.start_date <= day && booking.end_date >= day).length;

@@ -48,6 +48,7 @@ export default function ProductManagerClient({
   const [primaryImage, setPrimaryImage] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [status, setStatus] = useState<'ACTIVE' | 'INACTIVE' | 'MAINTENANCE' | 'ARCHIVED'>('ACTIVE');
+  const [hasInventory, setHasInventory] = useState(true);
   const [toastMsg, setToastMsg] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -70,6 +71,7 @@ export default function ProductManagerClient({
     setPrimaryImage('');
     setExcerpt('Bộ máy quay nhỏ gọn kèm đầy đủ thẻ nhớ và phụ kiện, nhận máy tại ETown Tân Bình.');
     setStatus('ACTIVE');
+    setHasInventory(true);
     setValidationError('');
     setIsModalOpen(true);
   };
@@ -85,6 +87,7 @@ export default function ProductManagerClient({
     setPrimaryImage(prod.primary_image);
     setExcerpt(prod.excerpt);
     setStatus(prod.status);
+    setHasInventory(prod.inventory_count > 0);
     setValidationError('');
     setIsModalOpen(true);
   };
@@ -158,7 +161,7 @@ export default function ProductManagerClient({
       features: editingProduct?.features || ['Cảm biến 1-inch', 'Chống rung 3 trục', 'Tặng thẻ 128GB'],
       accessories_included: editingProduct?.accessories_included || editingProduct?.included_accessories || ['Thẻ nhớ SanDisk Extreme 128GB', '2x Pin sạc đầy', 'Hộp chống sốc'],
       included_accessories: editingProduct?.included_accessories || ['Thẻ nhớ SanDisk Extreme 128GB', '2x Pin sạc đầy', 'Hộp chống sốc'],
-      inventory_count: editingProduct?.inventory_count || 1,
+      inventory_count: hasInventory ? Math.max(editingProduct?.inventory_count ?? 1, 1) : 0,
       specs: editingProduct?.specs || { 'Độ phân giải': '4K/60fps', 'Cảm biến': '1 inch CMOS', 'Trọng lượng': '179g' },
       status,
       indexable: true,
@@ -305,6 +308,7 @@ export default function ProductManagerClient({
                 <th className="px-4 py-3.5">Giá 1 ngày</th>
                 <th className="px-4 py-3.5">Giá 3 ngày (-10%)</th>
                 <th className="px-4 py-3.5">Tiền cọc</th>
+                <th className="px-4 py-3.5">Tình trạng máy</th>
                 <th className="px-4 py-3.5">Trạng th��i</th>
                 <th className="px-4 py-3.5 text-right">Thao tác</th>
               </tr>
@@ -355,6 +359,19 @@ export default function ProductManagerClient({
                     {/* Deposit */}
                     <td className="px-4 py-3 text-amber-400 font-medium">
                       {p.deposit_amount.toLocaleString('vi-VN')}đ
+                    </td>
+
+                    {/* Inventory */}
+                    <td className="px-4 py-3">
+                      {p.inventory_count > 0 ? (
+                        <span className="inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400">
+                          Có máy ({p.inventory_count})
+                        </span>
+                      ) : (
+                        <span className="inline-flex rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-bold text-amber-300">
+                          Chưa có máy · Kín lịch
+                        </span>
+                      )}
                     </td>
 
                     {/* Status */}
@@ -475,6 +492,21 @@ export default function ProductManagerClient({
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-amber-400 font-black text-sm outline-none focus:border-sky-500"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-300 mb-1">Tình trạng máy:</label>
+                <select
+                  value={hasInventory ? 'IN_STOCK' : 'NO_UNIT'}
+                  onChange={(e) => setHasInventory(e.target.value === 'IN_STOCK')}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white outline-none focus:border-sky-500 font-bold"
+                >
+                  <option value="IN_STOCK">Có máy, cho phép đặt theo lịch</option>
+                  <option value="NO_UNIT">Chưa có máy — luôn kín lịch, không nhận đặt</option>
+                </select>
+                <p className="mt-1 text-[10px] text-slate-400">
+                  Khi chọn “Chưa có máy”, lịch thuê sẽ kín toàn bộ ngày và hệ thống sẽ từ chối đơn đặt mới.
+                </p>
               </div>
 
               {/* Validation Error Alert */}
