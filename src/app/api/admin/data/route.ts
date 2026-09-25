@@ -4,7 +4,7 @@ import { getAdminSession } from '@/lib/security/admin-auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 const fields = {
-  products: ['id', 'slug', 'name', 'sku', 'brand_id', 'category_id', 'excerpt', 'description', 'specs', 'accessories_included', 'rental_price_per_day', 'deposit_amount', 'primary_image', 'gallery_images', 'three_d_model_url', 'inventory_count', 'status', 'seo_title', 'seo_description', 'seo_keywords', 'canonical_url', 'og_title', 'og_description', 'og_image', 'indexable', 'created_at', 'updated_at'],
+  products: ['id', 'slug', 'name', 'sku', 'brand_id', 'category_id', 'excerpt', 'description', 'specs', 'accessories_included', 'rental_price_per_day', 'rental_addons', 'deposit_amount', 'primary_image', 'gallery_images', 'three_d_model_url', 'inventory_count', 'status', 'seo_title', 'seo_description', 'seo_keywords', 'canonical_url', 'og_title', 'og_description', 'og_image', 'indexable', 'created_at', 'updated_at'],
   brands: ['id', 'slug', 'name', 'logo_url', 'description', 'seo_title', 'seo_description', 'indexable', 'created_at'],
   categories: ['id', 'slug', 'name', 'h1', 'intro_content', 'description', 'icon', 'seo_title', 'seo_description', 'og_image', 'display_order', 'indexable', 'created_at'],
   articles: ['id', 'slug', 'type', 'title', 'excerpt', 'content', 'featured_image', 'author_name', 'author_avatar', 'author_bio', 'reviewer_name', 'pillar_slug', 'related_product_ids', 'faq', 'status', 'seo_title', 'seo_description', 'canonical_url', 'og_image', 'indexable', 'published_at', 'updated_at'],

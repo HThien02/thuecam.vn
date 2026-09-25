@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { Product } from '@/types';
+import { Product, RentalAddon } from '@/types';
 import { formatVND } from '../product/ProductCard';
 import { trackEvent } from '@/lib/analytics/gtag';
 import confetti from 'canvas-confetti';
@@ -53,6 +53,11 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
   const [pickupMethod, setPickupMethod] = useState<'STORE' | 'DELIVERY'>('STORE');
   const [address, setAddress] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
+  const [voucherInput, setVoucherInput] = useState('');
+  const [appliedVoucher, setAppliedVoucher] = useState<{ code: string; discount: number } | null>(null);
+  const [voucherMessage, setVoucherMessage] = useState('');
+  const [isCheckingVoucher, setIsCheckingVoucher] = useState(false);
 
   // Booking result
   const [bookingCode, setBookingCode] = useState('');
@@ -70,12 +75,54 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
   const diffTime = Math.max(0, end.getTime() - start.getTime());
   const totalDays = Math.max(1, Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1);
 
+  const availableAddons = product.rental_addons ?? [];
+  const selectedAddons = availableAddons.filter((addon) => selectedAddonIds.includes(addon.id));
+  const addonSubtotal = selectedAddons.reduce((sum, addon) => sum + addon.price_per_day * totalDays, 0);
   const baseRentalPrice = totalDays * product.rental_price_per_day;
   const discountRate = totalDays >= 7 ? 0.2 : totalDays >= 3 ? 0.1 : 0;
-  const discountAmount = Math.round(baseRentalPrice * discountRate);
-  const totalRentalPrice = baseRentalPrice - discountAmount;
+  const rentalSubtotal = baseRentalPrice + addonSubtotal;
+  const discountAmount = Math.round(rentalSubtotal * discountRate);
+  const totalRentalPrice = rentalSubtotal - discountAmount;
+  const voucherDiscount = appliedVoucher?.discount ?? 0;
   const deposit = product.deposit_amount;
-  const totalDueNow = confirmedTotalPrice ?? totalRentalPrice;
+  const totalDueNow = confirmedTotalPrice ?? Math.max(0, totalRentalPrice - voucherDiscount);
+
+  const clearVoucherDiscount = () => {
+    setAppliedVoucher(null);
+    setVoucherMessage('');
+  };
+
+  const handleApplyVoucher = async () => {
+    if (!voucherInput.trim()) {
+      setVoucherMessage('Vui lòng nhập mã voucher.');
+      return;
+    }
+    setIsCheckingVoucher(true);
+    setVoucherMessage('');
+    try {
+      const response = await fetch('/api/vouchers/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product_id: product.id,
+          start_date: startDate,
+          end_date: endDate,
+          addon_ids: selectedAddonIds,
+          code: voucherInput.trim(),
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.valid) throw new Error(result.error ?? 'Mã voucher không hợp lệ hoặc đã hết lượt.');
+      setAppliedVoucher({ code: result.code, discount: Number(result.discount) });
+      setVoucherInput(result.code);
+      setVoucherMessage(`Đã áp dụng voucher ${result.code}.`);
+    } catch (error) {
+      setAppliedVoucher(null);
+      setVoucherMessage(error instanceof Error ? error.message : 'Không thể kiểm tra voucher.');
+    } finally {
+      setIsCheckingVoucher(false);
+    }
+  };
 
   const handleStartBooking = () => {
     trackEvent({
@@ -131,6 +178,8 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
           customer_email: customerEmail,
           pickup_method: pickupMethod,
           delivery_address: address,
+          addon_ids: selectedAddonIds,
+          voucher_code: appliedVoucher?.code ?? '',
         }),
       });
       const booking = await response.json();
@@ -229,6 +278,37 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
               }}
             />
 
+            {availableAddons.length > 0 && (
+              <section aria-labelledby="rental-addons-heading" className="rounded-2xl border border-sky-100 bg-sky-50/60 p-4">
+                <div className="mb-3">
+                  <h4 id="rental-addons-heading" className="text-sm font-black text-slate-900">Phụ kiện thuê thêm</h4>
+                  <p className="mt-0.5 text-[11px] text-slate-500">Tùy chọn theo nhu cầu, giá tính theo ngày thuê.</p>
+                </div>
+                <div className="space-y-2">
+                  {availableAddons.map((addon: RentalAddon) => {
+                    const checked = selectedAddonIds.includes(addon.id);
+                    return (
+                      <label key={addon.id} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-sky-100 bg-white p-3">
+                        <span className="flex items-center gap-2 text-xs font-bold text-slate-800">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => {
+                              clearVoucherDiscount();
+                              setSelectedAddonIds((current) => checked ? current.filter((id) => id !== addon.id) : [...current, addon.id]);
+                            }}
+                            className="size-4 accent-sky-600"
+                          />
+                          {addon.name}
+                        </span>
+                        <span className="shrink-0 text-xs font-black text-sky-700">+{formatVND(addon.price_per_day)}/ngày</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
             {/* Date Pickers for precision input */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <div>
@@ -239,7 +319,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
                   type="date"
                   min={todayStr}
                   value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                  onChange={(e) => { setStartDate(e.target.value); clearVoucherDiscount(); }}
                   className="w-full bg-sky-50/60 border border-sky-200 rounded-2xl px-3 py-2.5 text-sm text-slate-900 font-bold focus:outline-none focus:border-[#0284c7]"
                 />
               </div>
@@ -252,7 +332,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
                   type="date"
                   min={startDate || todayStr}
                   value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
+                  onChange={(e) => { setEndDate(e.target.value); clearVoucherDiscount(); }}
                   className="w-full bg-sky-50/60 border border-sky-200 rounded-2xl px-3 py-2.5 text-sm text-slate-900 font-bold focus:outline-none focus:border-[#0284c7]"
                 />
               </div>
@@ -279,6 +359,23 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
                 Lịch thuê {totalDays} ngày: từ <strong className="text-slate-800">{startDate}</strong> đến <strong className="text-slate-800">{endDate}</strong>
               </p>
             </div>
+
+            <section aria-label="Tổng tiền thuê" className="space-y-2 rounded-2xl border border-sky-100 bg-sky-50/60 p-4 text-xs">
+              <div className="flex justify-between gap-3"><span className="text-slate-600">Tiền thuê thiết bị</span><span className="font-bold text-slate-800">{formatVND(baseRentalPrice)}</span></div>
+              {selectedAddons.map((addon) => <div key={addon.id} className="flex justify-between gap-3"><span className="text-slate-600">{addon.name} × {totalDays} ngày</span><span className="font-bold text-slate-800">{formatVND(addon.price_per_day * totalDays)}</span></div>)}
+              {discountAmount > 0 && <div className="flex justify-between gap-3 text-emerald-700"><span>Ưu đãi thuê dài ngày</span><span className="font-bold">−{formatVND(discountAmount)}</span></div>}
+              {appliedVoucher && <div className="flex justify-between gap-3 text-emerald-700"><span>Voucher {appliedVoucher.code}</span><span className="font-bold">−{formatVND(voucherDiscount)}</span></div>}
+              <div className="flex items-center justify-between gap-3 border-t border-sky-200 pt-2 text-sm"><span className="font-black text-slate-900">Tổng thanh toán</span><span className="font-black text-[#0284c7]">{formatVND(totalDueNow)}</span></div>
+            </section>
+
+            <section aria-label="Áp dụng voucher" className="rounded-2xl border border-slate-200 p-3">
+              <label htmlFor="booking-voucher" className="mb-1.5 block text-xs font-bold text-slate-700">Mã voucher</label>
+              <div className="flex gap-2">
+                <input id="booking-voucher" value={voucherInput} onChange={(e) => { setVoucherInput(e.target.value.toUpperCase()); setAppliedVoucher(null); setVoucherMessage(''); }} placeholder="Nhập mã giảm giá" maxLength={64} className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold uppercase text-slate-900 outline-none focus:border-sky-500" />
+                <button type="button" onClick={handleApplyVoucher} disabled={isCheckingVoucher} className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-black text-white disabled:opacity-50">{isCheckingVoucher ? 'Đang kiểm tra…' : appliedVoucher ? 'Áp dụng lại' : 'Áp dụng'}</button>
+              </div>
+              {voucherMessage && <p role="status" className={`mt-2 text-[11px] font-semibold ${appliedVoucher ? 'text-emerald-700' : 'text-rose-600'}`}>{voucherMessage}</p>}
+            </section>
 
             <div className="space-y-3 text-xs">
               <div>

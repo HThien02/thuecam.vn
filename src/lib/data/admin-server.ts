@@ -12,7 +12,8 @@ export type AdminTable =
   | 'bookings'
   | 'blocked_dates'
   | 'site_settings'
-  | 'seo_settings';
+  | 'seo_settings'
+  | 'vouchers';
 
 const sortColumns: Record<AdminTable, string> = {
   products: 'created_at',
@@ -25,6 +26,7 @@ const sortColumns: Record<AdminTable, string> = {
   blocked_dates: 'date',
   site_settings: 'id',
   seo_settings: 'id',
+  vouchers: 'created_at',
 };
 
 export async function getAdminRows<T>(table: AdminTable): Promise<T[]> {

@@ -16,6 +16,7 @@ import {
   Layers,
   Settings,
   LayoutDashboard,
+  TicketPercent,
 } from 'lucide-react';
 import SafeButton from '@/components/common/SafeButton';
 
@@ -103,6 +104,11 @@ export default function AdminLayout({
             <Link href="/admin/bookings" className={navClass('/admin/bookings')}>
               <Activity className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>Đơn Thuê & Lịch Máy</span>
+            </Link>
+
+            <Link href="/admin/vouchers" className={navClass('/admin/vouchers')}>
+              <TicketPercent className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>Voucher & Khuyến Mãi</span>
             </Link>
 
             <div className="pt-3 pb-1 px-3 text-[10px] font-black uppercase text-slate-500 tracking-wider">

@@ -44,6 +44,7 @@ export default function ProductManagerClient({
   const [categoryId, setCategoryId] = useState(categories[0]?.id || '');
   const [brandId, setBrandId] = useState(brands[0]?.id || '');
   const [rentalPrice, setRentalPrice] = useState<number>(250000);
+  const [rentalAddonText, setRentalAddonText] = useState('');
   const [depositAmount, setDepositAmount] = useState<number>(3000000);
   const [primaryImage, setPrimaryImage] = useState('');
   const [excerpt, setExcerpt] = useState('');
@@ -67,6 +68,7 @@ export default function ProductManagerClient({
     setCategoryId(categories[0]?.id || '');
     setBrandId(brands[0]?.id || '');
     setRentalPrice(250000);
+    setRentalAddonText('');
     setDepositAmount(3000000);
     setPrimaryImage('');
     setExcerpt('Bộ máy quay nhỏ gọn kèm đầy đủ thẻ nhớ và phụ kiện, nhận máy tại ETown Tân Bình.');
@@ -83,6 +85,7 @@ export default function ProductManagerClient({
     setCategoryId(prod.category_id || '');
     setBrandId(prod.brand_id || '');
     setRentalPrice(prod.rental_price_per_day);
+    setRentalAddonText((prod.rental_addons ?? []).map((addon) => `${addon.name}|${addon.price_per_day}`).join('\n'));
     setDepositAmount(prod.deposit_amount);
     setPrimaryImage(prod.primary_image);
     setExcerpt(prod.excerpt);
@@ -139,6 +142,23 @@ export default function ProductManagerClient({
       return;
     }
 
+    const addonLines = rentalAddonText.split('\n').map((line) => line.trim()).filter(Boolean);
+    const rentalAddons = addonLines.map((line) => {
+      const separator = line.lastIndexOf('|');
+      const addonName = line.slice(0, separator).trim();
+      const pricePerDay = Number(line.slice(separator + 1).trim());
+      const id = addonName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      return { id, name: addonName, price_per_day: pricePerDay };
+    });
+    if (rentalAddons.some((addon) => !addon.id || !addon.name || !Number.isSafeInteger(addon.price_per_day) || addon.price_per_day <= 0)) {
+      setValidationError('Mỗi phụ kiện cần đúng định dạng Tên|Giá/ngày, giá phải là số nguyên lớn hơn 0.');
+      return;
+    }
+    if (new Set(rentalAddons.map((addon) => addon.id)).size !== rentalAddons.length) {
+      setValidationError('Tên phụ kiện cần khác nhau để không bị trùng lựa chọn.');
+      return;
+    }
+
     const finalSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
     const category = categories.find((c) => c.id === categoryId);
     const brand = brands.find((b) => b.id === brandId);
@@ -153,6 +173,7 @@ export default function ProductManagerClient({
       category,
       brand,
       rental_price_per_day: Number(rentalPrice),
+      rental_addons: rentalAddons,
       deposit_amount: Number(depositAmount),
       primary_image: primaryImage,
       gallery_images: editingProduct?.gallery_images || [primaryImage],
@@ -180,6 +201,7 @@ export default function ProductManagerClient({
       excerpt: productData.excerpt,
       description: productData.description,
       rental_price_per_day: productData.rental_price_per_day,
+      rental_addons: productData.rental_addons,
       deposit_amount: productData.deposit_amount,
       primary_image: productData.primary_image,
       gallery_images: productData.gallery_images,
@@ -492,6 +514,19 @@ export default function ProductManagerClient({
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-amber-400 font-black text-sm outline-none focus:border-sky-500"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label htmlFor="rental-addons" className="block font-bold text-slate-300 mb-1">Phụ kiện thuê thêm (giá/ngày):</label>
+                <textarea
+                  id="rental-addons"
+                  rows={3}
+                  value={rentalAddonText}
+                  onChange={(e) => setRentalAddonText(e.target.value)}
+                  placeholder={'Gimbal|150000\nNâng cấp thẻ nhớ 256GB|50000'}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-white outline-none focus:border-sky-500 font-mono text-xs"
+                />
+                <p className="mt-1 text-[10px] text-slate-400">Mỗi dòng nhập Tên phụ kiện|Giá thuê mỗi ngày (VNĐ). Khách sẽ chọn khi đặt thuê.</p>
               </div>
 
               <div>

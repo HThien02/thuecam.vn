@@ -51,6 +51,12 @@ export interface Location {
   indexable: boolean;
 }
 
+export interface RentalAddon {
+  id: string;
+  name: string;
+  price_per_day: number;
+}
+
 export interface Product {
   id: string;
   slug: string;
@@ -67,6 +73,7 @@ export interface Product {
   included_accessories?: string[];
   features?: string[];
   rental_price_per_day: number;
+  rental_addons?: RentalAddon[];
   deposit_amount: number;
   primary_image: string;
   gallery_images: string[];
