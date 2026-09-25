@@ -42,15 +42,19 @@ export async function proxy(request: NextRequest) {
     ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method);
   if (isAdminMutation) {
     const origin = request.headers.get('origin');
-    const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0].trim();
-    const expectedHost = forwardedHost || request.headers.get('host');
-    const forwardedProtocol = request.headers.get('x-forwarded-proto')?.split(',')[0].trim();
-    const expectedProtocol = forwardedProtocol ? `${forwardedProtocol}:` : request.nextUrl.protocol;
+    const acceptedHosts = [
+      request.headers.get('x-forwarded-host')?.split(',')[0].trim(),
+      request.headers.get('host'),
+      request.nextUrl.host,
+    ].filter((value): value is string => Boolean(value));
+    const acceptedProtocols = process.env.NODE_ENV === 'production'
+      ? ['https:']
+      : ['http:', 'https:'];
     let sameOrigin = false;
-    if (origin && expectedHost) {
+    if (origin) {
       try {
         const originUrl = new URL(origin);
-        sameOrigin = originUrl.host === expectedHost && originUrl.protocol === expectedProtocol;
+        sameOrigin = acceptedHosts.includes(originUrl.host) && acceptedProtocols.includes(originUrl.protocol);
       } catch {
         sameOrigin = false;
       }
