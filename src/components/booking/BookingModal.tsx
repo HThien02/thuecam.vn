@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   Copy,
   CreditCard,
-  Sparkles,
   X,
   ShieldCheck,
   MapPin,
@@ -66,7 +65,6 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
   // Booking result
   const [bookingCode, setBookingCode] = useState('');
   const [copied, setCopied] = useState(false);
-  const [paymentVerified, setPaymentVerified] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmedTotalPrice, setConfirmedTotalPrice] = useState<number | null>(null);
   const [submissionError, setSubmissionError] = useState('');
@@ -235,7 +233,6 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
   };
 
   const handleSimulateSuccessfulPayment = () => {
-    setPaymentVerified(true);
     confetti({
       particleCount: 120,
       spread: 70,
@@ -366,7 +363,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
               className="w-full py-3.5 rounded-full bg-gradient-candy hover:opacity-95 text-white font-black text-sm shadow-cute hover:shadow-cute-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {rangeAvailability === null ? <RotateCw className="size-4 animate-spin" aria-hidden="true" /> : <Calendar className="w-4 h-4" />}
-              <span>{rangeAvailability === null ? 'Đang kiểm tra lịch…' : `Tiếp tục đặt máy (${totalDays} ngày - ${formatVND(totalDueNow)})`}</span>
+              <span>{rangeAvailability === null ? 'Đang kiểm tra l��ch…' : `Tiếp tục đặt máy (${totalDays} ngày - ${formatVND(totalDueNow)})`}</span>
             </button>
           </div>
         )}

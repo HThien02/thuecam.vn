@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   AlertTriangle,
   Info,
-  Sparkles,
 } from 'lucide-react';
 
 interface AvailabilityCalendarTableProps {
