@@ -10,6 +10,7 @@ export async function saveAdminRecord<T>(
     headers: { 'Content-Type': 'application/json' },
     credentials: 'same-origin',
     body: JSON.stringify({ table, record, operation }),
+    signal: AbortSignal.timeout(30_000),
   });
   const result = await response.json().catch(() => null);
   if (!response.ok) throw new Error(result?.error ?? 'Không thể lưu dữ liệu.');

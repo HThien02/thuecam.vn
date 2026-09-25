@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Product, Category, Brand, RentalAddon } from '@/types';
 import {
   Plus,
@@ -28,6 +28,7 @@ async function uploadProductImage(imageDataUrl: string) {
     method: 'POST',
     credentials: 'same-origin',
     body: formData,
+    signal: AbortSignal.timeout(30_000),
   });
   const result = await response.json().catch(() => null) as { error?: string; path?: string; url?: string } | null;
   if (!response.ok || !result?.path || !result.url) {
@@ -50,6 +51,7 @@ export default function ProductManagerClient({
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [newProductIdentity, setNewProductIdentity] = useState('');
 
   // Form fields
   const [name, setName] = useState('');
@@ -66,19 +68,24 @@ export default function ProductManagerClient({
   const [status, setStatus] = useState<'ACTIVE' | 'INACTIVE' | 'MAINTENANCE' | 'ARCHIVED'>('ACTIVE');
   const [hasInventory, setHasInventory] = useState(true);
   const [toastMsg, setToastMsg] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveProgress, setSaveProgress] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [validationError, setValidationError] = useState('');
 
-
-  const showToast = (msg: string) => {
+  const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     setToastMsg(msg);
-    setTimeout(() => setToastMsg(''), 3000);
+    setToastType(type);
+    toastTimeoutRef.current = setTimeout(() => setToastMsg(''), 4000);
   };
 
   const handleOpenCreate = () => {
     setEditingProduct(null);
+    setNewProductIdentity(Date.now().toString());
     setName('');
     setSlug('');
     setCategoryId(categories[0]?.id || '');
@@ -221,10 +228,10 @@ export default function ProductManagerClient({
     const brand = brands.find((b) => b.id === brandId);
 
     const productData: Product = {
-      id: editingProduct ? editingProduct.id : `prod-${Date.now()}`,
+      id: editingProduct ? editingProduct.id : `prod-${newProductIdentity}`,
       slug: finalSlug,
       name,
-      sku: editingProduct?.sku || `SKU-${Date.now()}`,
+      sku: editingProduct?.sku || `SKU-${newProductIdentity}`,
       category_id: categoryId,
       brand_id: brandId,
       category,
@@ -268,11 +275,15 @@ export default function ProductManagerClient({
     };
 
     const uploadedImagePaths: string[] = [];
+    let databaseSaveStarted = false;
     setIsSaving(true);
+    setSaveProgress('Đang tải ảnh lên kho lưu trữ…');
     try {
       const persistedGalleryImages: string[] = [];
-      for (const image of galleryImages) {
+      for (let index = 0; index < galleryImages.length; index += 1) {
+        const image = galleryImages[index];
         if (image.startsWith('data:')) {
+          setSaveProgress(`Đang tải ảnh ${index + 1}/${galleryImages.length}…`);
           const uploadedImage = await uploadProductImage(image);
           uploadedImagePaths.push(uploadedImage.path);
           persistedGalleryImages.push(uploadedImage.url);
@@ -282,8 +293,10 @@ export default function ProductManagerClient({
       }
 
       const persistedRentalAddons: RentalAddon[] = [];
-      for (const addon of rentalAddons) {
+      for (let index = 0; index < rentalAddons.length; index += 1) {
+        const addon = rentalAddons[index];
         if (addon.image.startsWith('data:')) {
+          setSaveProgress(`Đang tải ảnh phụ kiện ${index + 1}/${rentalAddons.length}…`);
           const uploadedImage = await uploadProductImage(addon.image);
           uploadedImagePaths.push(uploadedImage.path);
           persistedRentalAddons.push({ ...addon, image: uploadedImage.url });
@@ -292,6 +305,8 @@ export default function ProductManagerClient({
         }
       }
 
+      setSaveProgress('Đang lưu thông tin thiết bị…');
+      databaseSaveStarted = true;
       const savedProductData = {
         ...productData,
         primary_image: persistedGalleryImages[0] ?? '',
@@ -323,17 +338,26 @@ export default function ProductManagerClient({
       setIsModalOpen(false);
       showToast(editingProduct ? `Đã cập nhật máy "${name}"` : `Đã thêm mới thiết bị "${name}"`);
     } catch (error) {
-      if (uploadedImagePaths.length) {
+      const saveOutcomeIsUnknown = databaseSaveStarted && (
+        error instanceof TypeError || (error instanceof Error && error.name === 'TimeoutError')
+      );
+      if (uploadedImagePaths.length && !saveOutcomeIsUnknown) {
         await fetch('/api/admin/product-images', {
           method: 'DELETE',
           credentials: 'same-origin',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ paths: uploadedImagePaths }),
+          signal: AbortSignal.timeout(8_000),
         }).catch(() => undefined);
       }
-      showToast(error instanceof Error ? error.message : 'Không thể lưu thiết bị.');
+      const message = error instanceof Error && error.name === 'TimeoutError'
+        ? 'Máy chủ phản hồi quá lâu. Hãy tải lại danh sách để xác nhận dữ liệu trước khi thử lưu lại.'
+        : error instanceof Error ? error.message : 'Không thể lưu thiết bị.';
+      setValidationError(message);
+      showToast(message, 'error');
     } finally {
       setIsSaving(false);
+      setSaveProgress('');
     }
   };
 
@@ -370,8 +394,14 @@ export default function ProductManagerClient({
     <div className="space-y-6">
       {/* Toast notification */}
       {toastMsg && (
-        <div className="fixed bottom-6 right-6 z-50 rounded-2xl bg-emerald-500 text-slate-950 font-black px-5 py-3 shadow-2xl flex items-center gap-2 animate-in slide-in-from-bottom">
-          <CheckCircle2 className="size-5" />
+        <div
+          role={toastType === 'error' ? 'alert' : 'status'}
+          aria-live={toastType === 'error' ? 'assertive' : 'polite'}
+          className={`fixed bottom-6 right-6 z-[60] flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-2xl px-5 py-3 font-black shadow-2xl animate-in slide-in-from-bottom ${
+            toastType === 'error' ? 'bg-rose-500 text-white' : 'bg-emerald-500 text-slate-950'
+          }`}
+        >
+          {toastType === 'error' ? <X className="size-5 shrink-0" /> : <CheckCircle2 className="size-5 shrink-0" />}
           <span>{toastMsg}</span>
         </div>
       )}
@@ -717,7 +747,7 @@ export default function ProductManagerClient({
 
               {/* Validation Error Alert */}
               {validationError && (
-                <div className="rounded-xl bg-rose-500/15 border border-rose-500/30 p-3 text-xs text-rose-300 font-bold">
+                <div role="alert" aria-live="assertive" className="rounded-xl bg-rose-500/15 border border-rose-500/30 p-3 text-xs text-rose-300 font-bold">
                   {validationError}
                 </div>
               )}
@@ -871,7 +901,7 @@ export default function ProductManagerClient({
                 </button>
                 <SafeButton
                   type="submit"
-                  loadingText="Đang tải ảnh và lưu..."
+                  loadingText={saveProgress || 'Đang lưu thiết bị…'}
                   isLoading={isSaving}
                   disabled={isUploading}
                   className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black shadow-md"
