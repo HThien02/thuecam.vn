@@ -62,7 +62,7 @@ async function getProductRelations(products: Product[]): Promise<Product[]> {
 
 export async function getProducts(): Promise<Product[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.from('products').select('*').eq('status', 'ACTIVE').order('created_at', { ascending: false });
+  const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
   return getProductRelations(requireData(data, error) as Product[]);
 }
 

@@ -12,6 +12,17 @@ interface ProductClientActionsProps {
 
 export default function ProductClientActions({ product }: ProductClientActionsProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const canRent = product.status === 'ACTIVE';
+  const statusMessage = product.status === 'MAINTENANCE'
+    ? 'Thiết bị đang bảo trì nên tạm thời chưa thể đặt thuê.'
+    : product.status === 'ARCHIVED'
+      ? 'Sản phẩm đã ngừng kinh doanh và hiện không nhận đặt thuê.'
+      : !canRent
+        ? 'Shop đang tạm ngưng cho thuê thiết bị này.'
+        : 'Hiện full lịch thuê; bạn vẫn có thể xem lịch và chọn ngày còn trống khi có.';
+  const actionLabel = !canRent
+    ? product.status === 'MAINTENANCE' ? 'Đang bảo trì' : product.status === 'ARCHIVED' ? 'Ngừng kinh doanh' : 'Tạm ngưng cho thuê'
+    : product.inventory_count <= 0 ? 'Xem lịch thuê' : 'Kiểm Tra Lịch & Đặt Thuê';
 
   return (
     <div className="space-y-4">
@@ -35,15 +46,16 @@ export default function ProductClientActions({ product }: ProductClientActionsPr
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
-            aria-describedby={product.inventory_count <= 0 ? 'product-unavailable-message' : undefined}
-            className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-gradient-candy hover:opacity-95 text-white font-black text-sm shadow-cute hover:shadow-cute-lg transition-all flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95"
+            disabled={!canRent}
+            aria-describedby={!canRent || product.inventory_count <= 0 ? 'product-unavailable-message' : undefined}
+            className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-gradient-candy hover:opacity-95 text-white font-black text-sm shadow-cute hover:shadow-cute-lg transition-all flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
           >
             <Calendar className="w-4 h-4" />
-            <span>{product.inventory_count <= 0 ? 'Xem lịch thuê' : 'Kiểm Tra Lịch & Đặt Thuê'}</span>
+            <span>{actionLabel}</span>
           </button>
-          {product.inventory_count <= 0 && (
-            <p id="product-unavailable-message" className="max-w-56 text-center text-xs font-semibold text-amber-800">
-              Hiện full lịch thuê; bạn vẫn có thể xem lịch và chọn ngày còn trống khi có.
+          {(!canRent || product.inventory_count <= 0) && (
+            <p id="product-unavailable-message" role="status" className="max-w-56 text-center text-xs font-semibold text-amber-800">
+              {statusMessage}
             </p>
           )}
         </div>

@@ -5,7 +5,7 @@ import { getProducts, getCategories, getBrands } from '@/lib/data';
 import ProductCard from '@/components/product/ProductCard';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import { constructMetadata } from '@/lib/seo/metadata';
-import { Camera, Sparkles, Filter } from 'lucide-react';
+import { Sparkles, Filter } from 'lucide-react';
 
 export const metadata: Metadata = constructMetadata({
   title: 'Cho Thuê Camera, Action Cam & Thiết Bị Quay Phim Chính Hãng | THUECAM',
@@ -16,6 +16,7 @@ export const metadata: Metadata = constructMetadata({
 
 export default async function EquipmentCatalogPage() {
   const products = await getProducts();
+  const rentableCount = products.filter((product) => product.status === 'ACTIVE' && product.inventory_count > 0).length;
   const categories = await getCategories();
   const brands = await getBrands();
 
@@ -28,13 +29,13 @@ export default async function EquipmentCatalogPage() {
       <div className="border-b border-white/10 pb-6 space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-semibold">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>Sẵn sàng giao ngay trong 30 phút</span>
+          <span>Toàn bộ thiết bị · {rentableCount} đang sẵn sàng cho thuê</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
           Danh Sách Thiết Bị Cho Thuê Chính Hãng
         </h1>
         <p className="text-sm text-slate-400 max-w-3xl leading-relaxed">
-          Tất cả thiết bị tại THUECAM đều được vệ sinh cảm biến, cập nhật firmware mới nhất, tặng kèm thẻ nhớ tốc độ cao SanDisk Extreme Pro và sạc pin 100% trước khi bàn giao.
+          Danh mục hiển thị đầy đủ thiết bị của shop, kể cả máy đang tạm ngưng hoặc bảo trì. Tình trạng thuê được ghi rõ trên từng sản phẩm; chỉ máy sẵn sàng mới nhận đặt thuê.
         </p>
       </div>
 
