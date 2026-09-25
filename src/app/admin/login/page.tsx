@@ -36,9 +36,9 @@ function LoginFormContent() {
     setLoading(true);
 
     try {
-      // Authenticate via secure server API (sets HttpOnly session cookie, zero localStorage)
       const res = await fetch('/api/admin/auth/login', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim(), password }),
       });
@@ -51,8 +51,17 @@ function LoginFormContent() {
         return;
       }
 
-      // Hard redirect to clear any state and load session in layout
-      window.location.href = redirectTarget;
+      const sessionResponse = await fetch('/api/admin/auth/me', {
+        credentials: 'same-origin',
+        cache: 'no-store',
+      });
+      if (!sessionResponse.ok) {
+        setError('Đăng nhập thành công nhưng phiên chưa được lưu. Vui lòng tải lại trang và thử lại.');
+        setLoading(false);
+        return;
+      }
+
+      window.location.assign(redirectTarget);
     } catch {
       setError('Không thể kết nối đến máy chủ xác thực. Vui lòng thử lại.');
       setLoading(false);
@@ -71,7 +80,7 @@ function LoginFormContent() {
           </div>
 
           {error && (
-            <div className="flex items-start gap-2.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 p-3.5 text-xs text-rose-300 animate-in fade-in">
+            <div role="alert" aria-live="assertive" className="flex items-start gap-2.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 p-3.5 text-xs text-rose-300 animate-in fade-in">
               <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-rose-400" />
               <span>{error}</span>
             </div>

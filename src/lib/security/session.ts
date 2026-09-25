@@ -90,7 +90,7 @@ export async function setAdminSessionCookie(sessionPayload: { userId: string; em
   cookieStore.set(SESSION_COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     path: '/',
     maxAge: SESSION_DURATION_SECONDS,
   });
@@ -104,7 +104,7 @@ export async function clearAdminSessionCookie(): Promise<void> {
   cookieStore.set(SESSION_COOKIE_NAME, '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     path: '/',
     maxAge: 0,
   });

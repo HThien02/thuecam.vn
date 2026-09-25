@@ -36,6 +36,30 @@ export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const host = request.headers.get('host') || '';
 
+  // Admin session cookies use SameSite=None so Preview iframes can authenticate.
+  // Require same-origin requests for state-changing admin APIs to prevent CSRF.
+  const isAdminMutation = pathname.startsWith('/api/admin/') &&
+    ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method);
+  if (isAdminMutation) {
+    const origin = request.headers.get('origin');
+    const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0].trim();
+    const expectedHost = forwardedHost || request.headers.get('host');
+    const forwardedProtocol = request.headers.get('x-forwarded-proto')?.split(',')[0].trim();
+    const expectedProtocol = forwardedProtocol ? `${forwardedProtocol}:` : request.nextUrl.protocol;
+    let sameOrigin = false;
+    if (origin && expectedHost) {
+      try {
+        const originUrl = new URL(origin);
+        sameOrigin = originUrl.host === expectedHost && originUrl.protocol === expectedProtocol;
+      } catch {
+        sameOrigin = false;
+      }
+    }
+    if (!sameOrigin) {
+      return NextResponse.json({ error: 'Yêu cầu không hợp lệ.' }, { status: 403 });
+    }
+  }
+
   // 1. Rate Limit all API endpoints (/api/*)
   if (pathname.startsWith('/api/')) {
     const isLoginEndpoint = pathname.startsWith('/api/admin/auth/login');
