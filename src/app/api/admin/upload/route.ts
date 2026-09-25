@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminSession } from '@/lib/security/session';
+import { getAdminSession } from '@/lib/security/admin-auth';
 import { enforceApiRateLimit } from '@/lib/security/rate-limit';
 
 const ALLOWED_MIME_TYPES = [

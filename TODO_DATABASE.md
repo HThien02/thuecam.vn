@@ -24,6 +24,25 @@ union all select 'articles', count(*) from public.articles;
 - [ ] Nếu **đúng project mà các bảng thực sự trống**, dừng trước khi chạy migration và xác định schema đích. Các file SQL trong repo có những phiên bản schema khác nhau: `01_initial_schema.sql` dùng ID kiểu UUID, trong khi app hiện dùng ID dạng text; không chạy tất cả file theo thứ tự một cách máy móc. `02_admin_catalog_data.sql` và `02_app_data.sql` cũng có phần tạo schema trùng nhau. `seed.sql` chứa dữ liệu catalog mẫu.
 - [ ] Chỉ sau khi xác nhận đúng project và schema, áp dụng một bộ schema tương thích rồi seed catalog; sau đó chạy lại truy vấn đếm dòng ở trên.
 
+## Tài khoản quản trị
+
+Admin đăng nhập bằng Supabase Auth (email/mật khẩu); quyền quản trị được cấp riêng trong bảng `public.admin_users`. Bảng này bật RLS và chỉ server có service role mới đọc/ghi được. Không còn dùng `ADMIN_EMAIL` hoặc `ADMIN_PASSWORD`.
+
+Để cấp quyền cho admin đầu tiên:
+
+1. Tạo user email/mật khẩu trong Supabase Auth của project đang kết nối. Không tạo user bằng cách INSERT trực tiếp vào `auth.users`.
+2. Chạy SQL sau, thay email bằng email vừa tạo:
+
+```sql
+insert into public.admin_users (user_id)
+select id
+from auth.users
+where lower(email) = lower('admin@example.com')
+on conflict (user_id) do nothing;
+```
+
+Sau đó đăng nhập tại `/admin/login` bằng email và mật khẩu đó. Xóa dòng tương ứng khỏi `public.admin_users` để thu hồi quyền; các session hiện có cũng sẽ bị từ chối ở lần kiểm tra tiếp theo. Mật khẩu được Supabase Auth quản lý, không lưu trong bảng admin.
+
 ## Lưu ý
 
 Các dòng hiện có là dữ liệu catalog mẫu trong Supabase, không phải booking hay review khách hàng thật. Không chạy lại hoặc xóa dữ liệu để xử lý nhầm project; trước tiên hãy kiểm tra project/ref mà app và SQL Editor đang trỏ tới.

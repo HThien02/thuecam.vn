@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { getAdminSession } from '@/lib/security/session';
+import { getAdminSession } from '@/lib/security/admin-auth';
 import { getAdminRows } from '@/lib/data/admin-server';
 import type { Product, Category, Article, Review } from '@/types';
 import {

@@ -1,15 +1,17 @@
 'use client';
 
 import { FormEvent, useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { ShieldCheck, Lock, Mail, AlertCircle, ArrowRight } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Lock, Mail, AlertCircle, ArrowRight } from 'lucide-react';
 import SafeButton from '@/components/common/SafeButton';
 import { isValidEmail } from '@/lib/security/validation';
 
 function LoginFormContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTarget = searchParams.get('from') || '/admin';
+  const requestedRedirect = searchParams.get('from') || '/admin';
+  const redirectTarget = requestedRedirect.startsWith('/') && !requestedRedirect.startsWith('//')
+    ? requestedRedirect
+    : '/admin';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

@@ -1,6 +1,6 @@
 import { randomInt } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminSession } from '@/lib/security/session';
+import { getAdminSession } from '@/lib/security/admin-auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 const fields = {

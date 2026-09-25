@@ -54,10 +54,7 @@ export async function proxy(request: NextRequest) {
     const isValidSession = Boolean(verifySession(sessionCookie));
 
     if (pathname === '/admin/login') {
-      // If already logged in, redirect to admin dashboard
-      if (isValidSession) {
-        return NextResponse.redirect(new URL('/admin', request.url));
-      }
+      // Always allow login so revoked sessions can recover without redirect loops.
     } else {
       // Any other /admin/* route requires active session
       if (!isValidSession) {

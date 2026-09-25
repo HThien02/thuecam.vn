@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { getAdminSession } from '@/lib/security/session';
+import { getAdminSession } from '@/lib/security/admin-auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export type AdminTable =
