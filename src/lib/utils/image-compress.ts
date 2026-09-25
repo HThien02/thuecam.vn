@@ -1,6 +1,5 @@
 /**
- * Compresses an image file client-side using HTMLCanvasElement
- * Returns a Base64 Data URL ready to be persisted directly in the Database
+ * Compresses an image client-side and returns a size-bounded Base64 data URL.
  */
 export async function compressImageToBase64(
   file: File,
@@ -29,30 +28,47 @@ export async function compressImageToBase64(
         }
 
         const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-
         const ctx = canvas.getContext('2d');
         if (!ctx) {
           reject(new Error('Canvas context not available'));
           return;
         }
 
-        // Draw image onto canvas
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Try WebP first, fallback to JPEG
+        const maxEncodedBytes = 3.5 * 1024 * 1024;
+        let outputQuality = quality;
         let dataUrl = '';
-        try {
-          dataUrl = canvas.toDataURL('image/webp', quality);
-          if (!dataUrl.startsWith('data:image/webp')) {
-            dataUrl = canvas.toDataURL('image/jpeg', quality);
+
+        for (let attempt = 0; attempt < 8; attempt += 1) {
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+
+          try {
+            dataUrl = canvas.toDataURL('image/webp', outputQuality);
+            if (!dataUrl.startsWith('data:image/webp')) {
+              dataUrl = canvas.toDataURL('image/jpeg', outputQuality);
+            }
+          } catch {
+            dataUrl = canvas.toDataURL('image/jpeg', outputQuality);
           }
-        } catch {
-          dataUrl = canvas.toDataURL('image/jpeg', quality);
+
+          const payload = dataUrl.slice(dataUrl.indexOf(',') + 1);
+          const encodedBytes = Math.ceil((payload.length * 3) / 4);
+          if (encodedBytes <= maxEncodedBytes) {
+            resolve(dataUrl);
+            return;
+          }
+
+          if (attempt < 3) {
+            outputQuality = Math.max(0.45, outputQuality * 0.78);
+          } else {
+            width = Math.max(1, Math.floor(width * 0.8));
+            height = Math.max(1, Math.floor(height * 0.8));
+            outputQuality = quality;
+          }
         }
 
-        resolve(dataUrl);
+        reject(new Error('Ảnh quá lớn sau khi nén. Vui lòng chọn ảnh khác hoặc giảm kích thước ảnh.'));
       };
 
       img.onerror = () => reject(new Error('Không thể tải file hình ảnh'));

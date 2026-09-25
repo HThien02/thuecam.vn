@@ -103,7 +103,8 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase.from(table).update(updateRecord).eq(key, keyValue).select('*').maybeSingle();
     if (error) {
       console.error(`[v0] Admin ${table} update failed:`, error.message);
-      return responseError(table === 'products' ? 'Không thể cập nhật thiết bị. Vui lòng kiểm tra lại thông tin và thử lại.' : 'Unable to save record.', 400);
+      const reason = error.message.replace(/[\r\n]/g, ' ').slice(0, 240);
+      return responseError(table === 'products' ? `Không thể cập nhật thiết bị: ${reason}` : 'Unable to save record.', 400);
     }
     if (data) return NextResponse.json(data, { headers: { 'Cache-Control': 'no-store' } });
     if (table.endsWith('_settings') || body.operation === 'update') return responseError('Record not found.', 404);
@@ -115,7 +116,8 @@ export async function POST(request: NextRequest) {
   const { data, error } = await query;
   if (error) {
     console.error(`[v0] Admin ${table} create failed:`, error.message);
-    return responseError(table === 'products' ? 'Không thể tạo thiết bị. Vui lòng kiểm tra lại thông tin và thử lại.' : 'Unable to create record.', 400);
+    const reason = error.message.replace(/[\r\n]/g, ' ').slice(0, 240);
+    return responseError(table === 'products' ? `Không thể tạo thiết bị: ${reason}` : 'Unable to create record.', 400);
   }
   return NextResponse.json(data, { status: 201, headers: { 'Cache-Control': 'no-store' } });
 }

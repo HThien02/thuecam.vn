@@ -50,7 +50,8 @@ export async function POST(request: NextRequest) {
 
   if (error) {
     console.error('[v0] Product image upload failed:', error.message);
-    return responseError('Không thể tải ảnh sản phẩm lên kho lưu trữ.', 500);
+    const reason = error.message.replace(/[\r\n]/g, ' ').slice(0, 240);
+    return responseError(`Supabase từ chối ảnh: ${reason}`, 500);
   }
 
   const { data } = supabase.storage.from(bucketName).getPublicUrl(path);
