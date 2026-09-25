@@ -243,7 +243,7 @@ export default function PricingTableClient({ categories, products }: PricingTabl
             {[
               'Giá minh bạch trọn gói, đã gồm phụ kiện',
               'Nhận máy tại ETown Tân Bình hoặc ship 30p',
-              'H�� trợ test máy và hướng dẫn 1-1 miễn phí',
+              'Hỗ trợ test máy và hướng dẫn 1-1 miễn phí',
             ].map((item) => (
               <div key={item} className="flex items-center gap-2.5 text-sm font-bold text-slate-700">
                 <Check className="size-5 rounded-full bg-emerald-100 p-1 text-emerald-600 shrink-0" />
