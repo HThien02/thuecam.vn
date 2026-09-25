@@ -25,6 +25,8 @@ export default function SafeButton({
   const lastClickedTimeRef = useRef<number>(0);
 
   const handleSafeClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (type === 'submit' && !onClick) return;
+
     const now = Date.now();
 
     // Prevent spam if processing or clicked too rapidly within cooldown
@@ -39,8 +41,8 @@ export default function SafeButton({
 
     try {
       if (onClick) {
-        const result: any = onClick(e);
-        if (result && typeof result.then === 'function') {
+        const result = (onClick as (event: React.MouseEvent<HTMLButtonElement>) => unknown)(e);
+        if (result && typeof result === 'object' && 'then' in result && typeof result.then === 'function') {
           await result;
         }
       }
