@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { Product, Category, Brand } from '@/types';
+import { Product, Category, Brand, RentalAddon } from '@/types';
 import {
   Plus,
   Edit,
@@ -11,17 +11,14 @@ import {
   X,
   Save,
   Camera,
-  Layers,
-  Sparkles,
   UploadCloud,
   Image as ImageIcon,
   Loader2,
-  Check,
 } from 'lucide-react';
 import { deleteAdminRecord, saveAdminRecord } from '@/lib/data/admin-api';
 import { compressImageToBase64 } from '@/lib/utils/image-compress';
 import SafeButton from '@/components/common/SafeButton';
-import { isValidPositiveNumber } from '@/lib/security/validation';
+
 
 export default function ProductManagerClient({
   initialProducts,
@@ -44,9 +41,11 @@ export default function ProductManagerClient({
   const [categoryId, setCategoryId] = useState(categories[0]?.id || '');
   const [brandId, setBrandId] = useState(brands[0]?.id || '');
   const [rentalPrice, setRentalPrice] = useState<number>(250000);
-  const [rentalAddonText, setRentalAddonText] = useState('');
+  const [rentalAddonDrafts, setRentalAddonDrafts] = useState<RentalAddon[]>([]);
+  const [uploadingAddonId, setUploadingAddonId] = useState<string | null>(null);
   const [depositAmount, setDepositAmount] = useState<number>(3000000);
-  const [primaryImage, setPrimaryImage] = useState('');
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const primaryImage = galleryImages[0] ?? '';
   const [excerpt, setExcerpt] = useState('');
   const [status, setStatus] = useState<'ACTIVE' | 'INACTIVE' | 'MAINTENANCE' | 'ARCHIVED'>('ACTIVE');
   const [hasInventory, setHasInventory] = useState(true);
@@ -68,9 +67,9 @@ export default function ProductManagerClient({
     setCategoryId(categories[0]?.id || '');
     setBrandId(brands[0]?.id || '');
     setRentalPrice(250000);
-    setRentalAddonText('');
+    setRentalAddonDrafts([]);
     setDepositAmount(3000000);
-    setPrimaryImage('');
+    setGalleryImages([]);
     setExcerpt('Bộ máy quay nhỏ gọn kèm đầy đủ thẻ nhớ và phụ kiện, nhận máy tại ETown Tân Bình.');
     setStatus('ACTIVE');
     setHasInventory(true);
@@ -85,9 +84,15 @@ export default function ProductManagerClient({
     setCategoryId(prod.category_id || '');
     setBrandId(prod.brand_id || '');
     setRentalPrice(prod.rental_price_per_day);
-    setRentalAddonText((prod.rental_addons ?? []).map((addon) => `${addon.name}|${addon.price_per_day}`).join('\n'));
+    setRentalAddonDrafts((prod.rental_addons ?? []).map((addon) => ({
+      ...addon,
+      price_per_rental: Number(addon.price_per_rental ?? addon.price_per_day ?? 0),
+    })));
     setDepositAmount(prod.deposit_amount);
-    setPrimaryImage(prod.primary_image);
+    setGalleryImages([
+      prod.primary_image,
+      ...(prod.gallery_images ?? []).filter((image) => image && image !== prod.primary_image),
+    ].filter(Boolean));
     setExcerpt(prod.excerpt);
     setStatus(prod.status);
     setHasInventory(prod.inventory_count > 0);
@@ -95,28 +100,60 @@ export default function ProductManagerClient({
     setIsModalOpen(true);
   };
 
-  const handleFileUpload = async (file: File) => {
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      showToast('Vui lòng chọn một file hình ảnh (JPG, PNG, WebP)');
-      return;
-    }
-    if (file.size > 8 * 1024 * 1024) {
-      showToast('Kích thước file ảnh tối đa là 8MB');
+  const handleImageUpload = async (files: FileList | File[]) => {
+    const selectedFiles = Array.from(files);
+    if (!selectedFiles.length || isUploading) return;
+
+    const validFiles = selectedFiles.filter((file) =>
+      file.type.startsWith('image/') && file.size <= 8 * 1024 * 1024,
+    );
+    const skippedCount = selectedFiles.length - validFiles.length;
+
+    if (!validFiles.length) {
+      showToast('Chỉ nhận file ảnh có dung lượng tối đa 8MB.');
       return;
     }
 
     setIsUploading(true);
     setValidationError('');
     try {
-      const base64DataUrl = await compressImageToBase64(file, 1200, 1200, 0.85);
-      setPrimaryImage(base64DataUrl);
-      showToast('Đã nạp ảnh thành công! Sẵn sàng lưu vào CSDL');
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Lỗi khi đọc file ảnh';
+      const uploadedImages: string[] = [];
+      for (const file of validFiles) {
+        uploadedImages.push(await compressImageToBase64(file, 1200, 1200, 0.85));
+      }
+      setGalleryImages((current) => [...current, ...uploadedImages]);
+      showToast(`Đã thêm ${uploadedImages.length} ảnh theo thứ tự chọn${skippedCount ? `, bỏ qua ${skippedCount} file không hợp lệ` : ''}.`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Lỗi khi đọc file ảnh';
       showToast(errorMessage);
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const updateRentalAddon = (id: string, updates: Partial<RentalAddon>) => {
+    setRentalAddonDrafts((current) => current.map((addon) => addon.id === id ? { ...addon, ...updates } : addon));
+  };
+
+  const handleAddonImageUpload = async (id: string, file?: File) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      showToast('Vui lòng chọn một file hình ảnh.');
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      showToast('Kích thước ảnh phụ kiện tối đa là 8MB.');
+      return;
+    }
+
+    setUploadingAddonId(id);
+    try {
+      const image = await compressImageToBase64(file, 900, 900, 0.82);
+      updateRentalAddon(id, { image });
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể đọc ảnh phụ kiện.');
+    } finally {
+      setUploadingAddonId(null);
     }
   };
 
@@ -142,16 +179,19 @@ export default function ProductManagerClient({
       return;
     }
 
-    const addonLines = rentalAddonText.split('\n').map((line) => line.trim()).filter(Boolean);
-    const rentalAddons = addonLines.map((line) => {
-      const separator = line.lastIndexOf('|');
-      const addonName = line.slice(0, separator).trim();
-      const pricePerDay = Number(line.slice(separator + 1).trim());
-      const id = addonName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-      return { id, name: addonName, price_per_day: pricePerDay };
+    const namedAddons = rentalAddonDrafts.filter((addon) => addon.name.trim());
+    const rentalAddons = namedAddons.map((addon, index) => {
+      const id = addon.name.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `accessory-${index + 1}`;
+      return {
+        id,
+        name: addon.name.trim(),
+        description: addon.description?.trim() ?? '',
+        image: addon.image ?? '',
+        price_per_rental: Number(addon.price_per_rental),
+      };
     });
-    if (rentalAddons.some((addon) => !addon.id || !addon.name || !Number.isSafeInteger(addon.price_per_day) || addon.price_per_day <= 0)) {
-      setValidationError('Mỗi phụ kiện cần đúng định dạng Tên|Giá/ngày, giá phải là số nguyên lớn hơn 0.');
+    if (rentalAddons.some((addon) => !Number.isSafeInteger(addon.price_per_rental) || addon.price_per_rental <= 0)) {
+      setValidationError('Mỗi phụ kiện cần có giá thuê một lần là số nguyên lớn hơn 0 VNĐ.');
       return;
     }
     if (new Set(rentalAddons.map((addon) => addon.id)).size !== rentalAddons.length) {
@@ -176,7 +216,7 @@ export default function ProductManagerClient({
       rental_addons: rentalAddons,
       deposit_amount: Number(depositAmount),
       primary_image: primaryImage,
-      gallery_images: editingProduct?.gallery_images || [primaryImage],
+      gallery_images: galleryImages,
       excerpt,
       description: editingProduct?.description || excerpt,
       features: editingProduct?.features || ['Cảm biến 1-inch', 'Chống rung 3 trục', 'Tặng thẻ 128GB'],
@@ -516,18 +556,89 @@ export default function ProductManagerClient({
                 </div>
               </div>
 
-              <div>
-                <label htmlFor="rental-addons" className="block font-bold text-slate-300 mb-1">Phụ kiện thuê thêm (giá/ngày):</label>
-                <textarea
-                  id="rental-addons"
-                  rows={3}
-                  value={rentalAddonText}
-                  onChange={(e) => setRentalAddonText(e.target.value)}
-                  placeholder={'Gimbal|150000\nNâng cấp thẻ nhớ 256GB|50000'}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-white outline-none focus:border-sky-500 font-mono text-xs"
-                />
-                <p className="mt-1 text-[10px] text-slate-400">Mỗi dòng nhập Tên phụ kiện|Giá thuê mỗi ngày (VNĐ). Khách sẽ chọn khi đặt thuê.</p>
-              </div>
+              <section className="space-y-3 rounded-2xl border border-slate-800 bg-slate-950/60 p-4" aria-labelledby="rental-accessories-heading">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h4 id="rental-accessories-heading" className="font-black text-white">Phụ kiện thuê thêm</h4>
+                    <p className="mt-1 text-[10px] text-slate-400">Giá được cộng một lần cho toàn bộ đơn thuê, không nhân theo số ngày.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setRentalAddonDrafts((current) => [...current, { id: `new-accessory-${Date.now()}`, name: '', price_per_rental: 0, description: '', image: '' }])}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-sky-500/15 px-3 py-2 text-[11px] font-black text-sky-300 hover:bg-sky-500/25"
+                  >
+                    <Plus className="size-3.5" /> Thêm phụ kiện
+                  </button>
+                </div>
+
+                {rentalAddonDrafts.length ? rentalAddonDrafts.map((addon, index) => (
+                  <div key={addon.id} className="grid gap-3 rounded-xl border border-slate-800 bg-slate-900 p-3 sm:grid-cols-[1fr_auto]">
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-bold text-slate-400" htmlFor={`addon-name-${index}`}>Tên phụ kiện</label>
+                      <input
+                        id={`addon-name-${index}`}
+                        value={addon.name}
+                        onChange={(event) => updateRentalAddon(addon.id, { name: event.target.value })}
+                        placeholder="Ví dụ: Gimbal chống rung"
+                        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-white outline-none focus:border-sky-500"
+                      />
+                      <label className="block text-[10px] font-bold text-slate-400" htmlFor={`addon-description-${index}`}>Mô tả</label>
+                      <textarea
+                        id={`addon-description-${index}`}
+                        rows={2}
+                        value={addon.description ?? ''}
+                        onChange={(event) => updateRentalAddon(addon.id, { description: event.target.value })}
+                        placeholder="Mô tả ngắn về phụ kiện"
+                        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-white outline-none focus:border-sky-500"
+                      />
+                      <label className="block text-[10px] font-bold text-slate-400" htmlFor={`addon-price-${index}`}>Giá thuê một lần (VNĐ)</label>
+                      <input
+                        id={`addon-price-${index}`}
+                        type="number"
+                        min={1}
+                        step={1}
+                        value={addon.price_per_rental ?? addon.price_per_day ?? ''}
+                        onChange={(event) => updateRentalAddon(addon.id, { price_per_rental: Number(event.target.value) })}
+                        placeholder="150000"
+                        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs font-bold text-sky-300 outline-none focus:border-sky-500"
+                      />
+                    </div>
+                    <div className="flex items-start gap-2 sm:flex-col">
+                      {addon.image ? (
+                        <div className="relative size-20 shrink-0 overflow-hidden rounded-lg border border-slate-700">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={addon.image} alt={`Ảnh ${addon.name || 'phụ kiện'}`} className="size-full object-cover" />
+                        </div>
+                      ) : (
+                        <div className="flex size-20 shrink-0 items-center justify-center rounded-lg border border-dashed border-slate-700 text-slate-500" aria-hidden="true">
+                          <ImageIcon className="size-5" />
+                        </div>
+                      )}
+                      <label className="cursor-pointer rounded-lg bg-slate-800 px-2.5 py-2 text-center text-[10px] font-bold text-slate-200 hover:bg-slate-700">
+                        {uploadingAddonId === addon.id ? 'Đang tải…' : addon.image ? 'Đổi ảnh' : 'Tải ảnh'}
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,image/avif"
+                          className="sr-only"
+                          disabled={uploadingAddonId === addon.id}
+                          onChange={(event) => {
+                            void handleAddonImageUpload(addon.id, event.target.files?.[0]);
+                            event.currentTarget.value = '';
+                          }}
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setRentalAddonDrafts((current) => current.filter((item) => item.id !== addon.id))}
+                        className="rounded-lg p-2 text-rose-400 hover:bg-rose-500/10"
+                        aria-label={`Xóa phụ kiện ${addon.name || index + 1}`}
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
+                  </div>
+                )) : <p className="rounded-xl border border-dashed border-slate-800 px-3 py-4 text-center text-[11px] text-slate-500">Chưa có phụ kiện thuê thêm.</p>}
+              </section>
 
               <div>
                 <label className="block font-bold text-slate-300 mb-1">Tình trạng máy:</label>
@@ -551,109 +662,103 @@ export default function ProductManagerClient({
                 </div>
               )}
 
-              {/* Image Upload Area (Stores in DB, allows local upload) */}
+              {/* Product image gallery */}
               <div>
-                <label className="block font-bold text-slate-300 mb-1.5 flex items-center justify-between">
-                  <span>Ảnh đại diện thiết bị (Lưu trực tiếp vào CSDL): *</span>
-                  {primaryImage && (
-                    <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
-                      <Check className="size-3" /> Đã có dữ liệu ảnh trong CSDL
-                    </span>
-                  )}
+                <label htmlFor="product-file-input" className="mb-1.5 block font-bold text-slate-300">
+                  Ảnh thiết bị: * <span className="font-normal text-slate-400">Ảnh đầu tiên là ảnh đại diện</span>
                 </label>
-
                 <input
                   type="file"
                   id="product-file-input"
                   accept="image/jpeg,image/png,image/webp,image/avif"
+                  multiple
+                  disabled={isUploading}
                   className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleFileUpload(file);
+                  onChange={(event) => {
+                    const files = event.currentTarget.files;
+                    if (files?.length) void handleImageUpload(files);
+                    event.currentTarget.value = '';
                   }}
                 />
 
-                {primaryImage ? (
-                  <div className="rounded-2xl border border-slate-700 bg-slate-950 p-3.5 space-y-3">
-                    <div className="flex items-center gap-4">
-                      {/* Image Preview */}
-                      <div className="relative h-20 w-24 rounded-xl overflow-hidden bg-slate-900 border border-slate-700 shrink-0">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={primaryImage}
-                          alt="Xem trước ảnh sản phẩm"
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-white truncate">
-                          Ảnh thiết bị đã sẵn sàng lưu vào CSDL
+                <div
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                    setIsDragging(true);
+                  }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    setIsDragging(false);
+                    if (event.dataTransfer.files.length) void handleImageUpload(event.dataTransfer.files);
+                  }}
+                  className={`rounded-2xl border-2 border-dashed p-3 transition ${
+                    isDragging ? 'border-sky-400 bg-sky-500/10' : 'border-slate-700 bg-slate-950/60'
+                  }`}
+                >
+                  {galleryImages.length > 0 ? (
+                    <>
+                      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-xs font-bold text-white" aria-live="polite">
+                          {galleryImages.length} ảnh · Thứ tự hiển thị theo thứ tự thêm
                         </p>
-                        <p className="text-[10px] text-slate-400 mt-0.5">
-                          {primaryImage.startsWith('data:image')
-                            ? 'Dữ liệu ảnh Base64 mã hóa trực tiếp trong Database'
-                            : 'Đường dẫn ảnh'}
-                        </p>
-                        <div className="mt-2 flex items-center gap-2">
-                          <label
-                            htmlFor="product-file-input"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 font-bold text-[11px] cursor-pointer transition"
-                          >
-                            <UploadCloud className="size-3.5" /> Chọn ảnh khác từ máy
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() => setPrimaryImage('')}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-bold text-[11px] transition"
-                          >
-                            <Trash2 className="size-3" /> Xóa
-                          </button>
-                        </div>
+                        <label
+                          htmlFor="product-file-input"
+                          className={`inline-flex items-center gap-1.5 rounded-lg bg-sky-500/20 px-3 py-1.5 text-[11px] font-bold text-sky-300 transition ${isUploading ? 'cursor-wait opacity-60' : 'cursor-pointer hover:bg-sky-500/30'}`}
+                        >
+                          {isUploading ? <Loader2 className="size-3.5 animate-spin" /> : <UploadCloud className="size-3.5" />}
+                          {isUploading ? 'Đang nén ảnh...' : 'Thêm ảnh'}
+                        </label>
                       </div>
-                    </div>
-                  </div>
-                ) : (
-                  <label
-                    htmlFor="product-file-input"
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      setIsDragging(true);
-                    }}
-                    onDragLeave={() => setIsDragging(false)}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      setIsDragging(false);
-                      const file = e.dataTransfer.files?.[0];
-                      if (file) handleFileUpload(file);
-                    }}
-                    className={`flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed p-6 text-center cursor-pointer transition ${
-                      isDragging
-                        ? 'border-sky-400 bg-sky-500/10'
-                        : 'border-slate-700 bg-slate-950/60 hover:border-sky-500/60 hover:bg-slate-900/60'
-                    }`}
-                  >
-                    {isUploading ? (
-                      <div className="flex flex-col items-center gap-2 text-sky-400">
-                        <Loader2 className="size-8 animate-spin" />
-                        <span className="text-xs font-bold">Đang nén và nạp dữ liệu ảnh...</span>
+                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                        {galleryImages.map((image, index) => (
+                          <div key={`${index}-${image.slice(0, 32)}`} className="overflow-hidden rounded-xl border border-slate-700 bg-slate-900">
+                            <div className="relative aspect-[4/3] bg-slate-950">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={image} alt={`Ảnh sản phẩm thứ ${index + 1}`} className="size-full object-contain" />
+                              <span className="absolute left-2 top-2 rounded-md bg-slate-950/85 px-2 py-1 text-[10px] font-bold text-white">
+                                {index === 0 ? 'Ảnh đại diện' : `Ảnh ${index + 1}`}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setGalleryImages((current) => current.filter((_, imageIndex) => imageIndex !== index))}
+                              aria-label={`Xóa ảnh thứ ${index + 1}`}
+                              className="flex w-full items-center justify-center gap-1 border-t border-slate-700 px-2 py-2 text-[11px] font-bold text-rose-400 transition hover:bg-rose-500/10"
+                            >
+                              <Trash2 className="size-3.5" /> Xóa ảnh
+                            </button>
+                          </div>
+                        ))}
                       </div>
-                    ) : (
-                      <>
-                        <div className="rounded-full bg-sky-500/10 p-3 text-sky-400">
-                          <UploadCloud className="size-6" />
+                      <p className="mt-3 text-[10px] text-slate-400" role="status">
+                        {isUploading ? 'Đang nén và thêm ảnh theo thứ tự đã chọn…' : 'Có thể chọn nhiều ảnh cùng lúc hoặc kéo thả ảnh vào khu vực này.'}
+                      </p>
+                    </>
+                  ) : (
+                    <label
+                      htmlFor="product-file-input"
+                      className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl p-6 text-center"
+                    >
+                      {isUploading ? (
+                        <div className="flex flex-col items-center gap-2 text-sky-400">
+                          <Loader2 className="size-8 animate-spin" />
+                          <span className="text-xs font-bold">Đang nén ảnh…</span>
                         </div>
-                        <div>
-                          <p className="text-xs font-bold text-white">
-                            Bấm để chọn ảnh từ máy tính hoặc kéo thả file vào đây
-                          </p>
-                          <p className="text-[10px] text-slate-400 mt-1">
-                            Hỗ trợ JPG, PNG, WebP (Tự động nén chuẩn HD lưu trực tiếp vào CSDL, không cần link)
-                          </p>
-                        </div>
-                      </>
-                    )}
-                  </label>
-                )}
+                      ) : (
+                        <>
+                          <div className="rounded-full bg-sky-500/10 p-3 text-sky-400">
+                            <UploadCloud className="size-6" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-white">Chọn hoặc kéo thả nhiều ảnh vào đây</p>
+                            <p className="mt-1 text-[10px] text-slate-400">Ảnh được nén và thêm theo đúng thứ tự chọn · Tối đa 8MB mỗi ảnh</p>
+                          </div>
+                        </>
+                      )}
+                    </label>
+                  )}
+                </div>
               </div>
 
               <div>

@@ -54,7 +54,10 @@ export interface Location {
 export interface RentalAddon {
   id: string;
   name: string;
-  price_per_day: number;
+  price_per_rental?: number;
+  price_per_day?: number;
+  image?: string;
+  description?: string;
 }
 
 export interface Product {

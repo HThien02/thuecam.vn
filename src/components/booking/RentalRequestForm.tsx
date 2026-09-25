@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useRef, useState } from 'react';
+import Image from 'next/image';
 import { Product } from '@/types';
 import { CheckCircle2, Clock3, CalendarDays, Send, MapPin, Truck } from 'lucide-react';
 import AvailabilityCalendarTable from './AvailabilityCalendarTable';
@@ -63,7 +64,7 @@ export default function RentalRequestForm({
     : 1;
   const selectedAddons = (product?.rental_addons ?? []).filter((addon) => selectedAddonIds.includes(addon.id));
   const baseRentalTotal = product ? rentalDays * product.rental_price_per_day : 0;
-  const addonTotal = selectedAddons.reduce((sum, addon) => sum + Number(addon.price_per_day) * rentalDays, 0);
+  const addonTotal = selectedAddons.reduce((sum, addon) => sum + Number(addon.price_per_rental ?? addon.price_per_day ?? 0), 0);
   const rentalSubtotal = baseRentalTotal + addonTotal;
   const rentalDiscountRate = rentalDays >= 7 ? 0.2 : rentalDays >= 3 ? 0.1 : 0;
   const rentalDiscount = Math.round(rentalSubtotal * rentalDiscountRate);
@@ -262,13 +263,14 @@ export default function RentalRequestForm({
         {product?.rental_addons?.length ? (
           <fieldset className="sm:col-span-2 rounded-2xl border border-sky-200 bg-sky-50/50 p-4">
             <legend className="px-1 text-xs font-black text-slate-800">Phụ kiện thuê thêm</legend>
-            <p className="mb-3 text-[11px] text-slate-500">Phụ kiện được tính theo ngày và cộng trực tiếp vào hóa đơn.</p>
+            <p className="mb-3 text-[11px] text-slate-500">Phụ kiện được tính một lần cho toàn bộ đơn thuê và cộng vào hóa đơn.</p>
             <div className="flex flex-col gap-2">
               {product.rental_addons.map((addon) => {
                 const checked = selectedAddonIds.includes(addon.id);
+                const addonPrice = Number(addon.price_per_rental ?? addon.price_per_day ?? 0);
                 return (
-                  <label key={addon.id} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-sky-100 bg-white p-3 text-xs">
-                    <span className="flex items-center gap-2 font-bold text-slate-800">
+                  <label key={addon.id} className="flex cursor-pointer items-start justify-between gap-3 rounded-xl border border-sky-100 bg-white p-3 text-xs">
+                    <span className="flex min-w-0 items-start gap-2 font-bold text-slate-800">
                       <input
                         type="checkbox"
                         checked={checked}
@@ -276,11 +278,15 @@ export default function RentalRequestForm({
                           clearVoucher();
                           setSelectedAddonIds((current) => checked ? current.filter((id) => id !== addon.id) : [...current, addon.id]);
                         }}
-                        className="size-4 accent-sky-600"
+                        className="mt-0.5 size-4 shrink-0 accent-sky-600"
                       />
-                      {addon.name}
+                      {addon.image && <Image src={addon.image} alt={addon.name} width={48} height={48} className="size-12 shrink-0 rounded-lg object-cover" />}
+                      <span className="min-w-0">
+                        <span className="block">{addon.name}</span>
+                        {addon.description && <span className="mt-0.5 block font-normal text-slate-500">{addon.description}</span>}
+                      </span>
                     </span>
-                    <span className="shrink-0 font-black text-sky-700">+{addon.price_per_day.toLocaleString('vi-VN')}đ/ngày</span>
+                    <span className="shrink-0 font-black text-sky-700">+{addonPrice.toLocaleString('vi-VN')}đ / lần thuê</span>
                   </label>
                 );
               })}
@@ -472,7 +478,7 @@ export default function RentalRequestForm({
 
         <section className="sm:col-span-2 rounded-2xl border border-sky-200 bg-sky-50/70 p-4 text-xs" aria-label="Tạm tính đơn thuê">
           <div className="flex justify-between gap-3 text-slate-600"><span>Tiền thuê thiết bị · {rentalDays} ngày</span><span className="font-bold text-slate-800">{baseRentalTotal.toLocaleString('vi-VN')}đ</span></div>
-          {selectedAddons.map((addon) => <div key={addon.id} className="mt-1 flex justify-between gap-3 text-slate-600"><span>{addon.name} · {rentalDays} ngày</span><span className="font-bold text-slate-800">{(Number(addon.price_per_day) * rentalDays).toLocaleString('vi-VN')}đ</span></div>)}
+          {selectedAddons.map((addon) => <div key={addon.id} className="mt-1 flex justify-between gap-3 text-slate-600"><span>{addon.name} · tính một lần</span><span className="font-bold text-slate-800">{Number(addon.price_per_rental ?? addon.price_per_day ?? 0).toLocaleString('vi-VN')}đ</span></div>)}
           {rentalDiscount > 0 && <div className="mt-1 flex justify-between gap-3 text-emerald-700"><span>Ưu đãi thuê dài ngày</span><span className="font-bold">−{rentalDiscount.toLocaleString('vi-VN')}đ</span></div>}
           {appliedVoucher && <div className="mt-1 flex justify-between gap-3 text-emerald-700"><span>Voucher {appliedVoucher.code}</span><span className="font-bold">−{appliedVoucher.discount.toLocaleString('vi-VN')}đ</span></div>}
           <div className="mt-2 flex justify-between gap-3 border-t border-sky-200 pt-2 text-sm"><span className="font-black text-slate-900">Tổng tạm tính</span><span className="font-black text-sky-700">{estimatedTotal.toLocaleString('vi-VN')}đ</span></div>

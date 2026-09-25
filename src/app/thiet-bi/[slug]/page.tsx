@@ -10,7 +10,6 @@ import {
   generateProductRentalJsonLd,
 } from '@/lib/seo/jsonld';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
-import Product3DViewer from '@/components/product/Product3DViewer';
 import ProductClientActions from '@/components/product/ProductClientActions';
 import ProductCard, { formatVND } from '@/components/product/ProductCard';
 import {
@@ -91,12 +90,18 @@ export default async function ProductDetailPage({ params }: Props) {
 
       {/* 3. Main Product Section */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* Left Column: Media & Progressive 3D Viewer */}
+        {/* Left Column: Product images */}
         <div className="lg:col-span-7 space-y-4">
-          <Product3DViewer
-            productName={product.name}
-            fallbackImage={product.primary_image}
-          />
+          <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-pink-100 bg-white shadow-sm">
+            <Image
+              src={product.primary_image}
+              alt={product.name}
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 58vw"
+              className="object-contain"
+            />
+          </div>
 
           {/* Gallery thumbnails */}
           {product.gallery_images && product.gallery_images.length > 1 && (

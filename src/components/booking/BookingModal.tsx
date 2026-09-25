@@ -79,7 +79,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
 
   const availableAddons = product.rental_addons ?? [];
   const selectedAddons = availableAddons.filter((addon) => selectedAddonIds.includes(addon.id));
-  const addonSubtotal = selectedAddons.reduce((sum, addon) => sum + addon.price_per_day * totalDays, 0);
+  const addonSubtotal = selectedAddons.reduce((sum, addon) => sum + Number(addon.price_per_rental ?? addon.price_per_day ?? 0), 0);
   const baseRentalPrice = totalDays * product.rental_price_per_day;
   const discountRate = totalDays >= 7 ? 0.2 : totalDays >= 3 ? 0.1 : 0;
   const rentalSubtotal = baseRentalPrice + addonSubtotal;
@@ -305,14 +305,15 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
               <section aria-labelledby="rental-addons-heading" className="rounded-2xl border border-sky-100 bg-sky-50/60 p-4">
                 <div className="mb-3">
                   <h4 id="rental-addons-heading" className="text-sm font-black text-slate-900">Phụ kiện thuê thêm</h4>
-                  <p className="mt-0.5 text-[11px] text-slate-500">Tùy chọn theo nhu cầu, giá tính theo ngày thuê.</p>
+                  <p className="mt-0.5 text-[11px] text-slate-500">Tùy chọn theo nhu cầu, phụ kiện chỉ tính một lần cho đơn thuê.</p>
                 </div>
                 <div className="space-y-2">
                   {availableAddons.map((addon: RentalAddon) => {
                     const checked = selectedAddonIds.includes(addon.id);
+                    const addonPrice = Number(addon.price_per_rental ?? addon.price_per_day ?? 0);
                     return (
-                      <label key={addon.id} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-sky-100 bg-white p-3">
-                        <span className="flex items-center gap-2 text-xs font-bold text-slate-800">
+                      <label key={addon.id} className="flex cursor-pointer items-start justify-between gap-3 rounded-xl border border-sky-100 bg-white p-3">
+                        <span className="flex min-w-0 items-start gap-2 text-xs font-bold text-slate-800">
                           <input
                             type="checkbox"
                             checked={checked}
@@ -320,11 +321,15 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
                               clearVoucherDiscount();
                               setSelectedAddonIds((current) => checked ? current.filter((id) => id !== addon.id) : [...current, addon.id]);
                             }}
-                            className="size-4 accent-sky-600"
+                            className="mt-0.5 size-4 shrink-0 accent-sky-600"
                           />
-                          {addon.name}
+                          {addon.image && <img src={addon.image} alt={addon.name} className="size-12 shrink-0 rounded-lg object-cover" />}
+                          <span className="min-w-0">
+                            <span className="block">{addon.name}</span>
+                            {addon.description && <span className="mt-0.5 block font-normal text-slate-500">{addon.description}</span>}
+                          </span>
                         </span>
-                        <span className="shrink-0 text-xs font-black text-sky-700">+{formatVND(addon.price_per_day)}/ngày</span>
+                        <span className="shrink-0 text-xs font-black text-sky-700">+{formatVND(addonPrice)} / lần thuê</span>
                       </label>
                     );
                   })}
@@ -390,7 +395,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
 
             <section aria-label="Tổng tiền thuê" className="space-y-2 rounded-2xl border border-sky-100 bg-sky-50/60 p-4 text-xs">
               <div className="flex justify-between gap-3"><span className="text-slate-600">Tiền thuê thiết bị</span><span className="font-bold text-slate-800">{formatVND(baseRentalPrice)}</span></div>
-              {selectedAddons.map((addon) => <div key={addon.id} className="flex justify-between gap-3"><span className="text-slate-600">{addon.name} × {totalDays} ngày</span><span className="font-bold text-slate-800">{formatVND(addon.price_per_day * totalDays)}</span></div>)}
+              {selectedAddons.map((addon) => <div key={addon.id} className="flex justify-between gap-3"><span className="text-slate-600">{addon.name} · một lần thuê</span><span className="font-bold text-slate-800">{formatVND(Number(addon.price_per_rental ?? addon.price_per_day ?? 0))}</span></div>)}
               {discountAmount > 0 && <div className="flex justify-between gap-3 text-emerald-700"><span>Ưu đãi thuê dài ngày</span><span className="font-bold">−{formatVND(discountAmount)}</span></div>}
               {appliedVoucher && <div className="flex justify-between gap-3 text-emerald-700"><span>Voucher {appliedVoucher.code}</span><span className="font-bold">−{formatVND(voucherDiscount)}</span></div>}
               <div className="flex items-center justify-between gap-3 border-t border-sky-200 pt-2 text-sm"><span className="font-black text-slate-900">Tổng thanh toán</span><span className="font-black text-[#0284c7]">{formatVND(totalDueNow)}</span></div>

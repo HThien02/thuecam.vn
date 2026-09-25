@@ -53,12 +53,12 @@ export async function POST(request: NextRequest) {
 
   const addons = (Array.isArray(product.rental_addons) ? product.rental_addons : []) as RentalAddon[];
   const selectedAddons = addonIds.map((id) => addons.find((addon) => addon.id === id));
-  if (selectedAddons.some((addon) => !addon || !Number.isSafeInteger(Number(addon.price_per_day)) || Number(addon.price_per_day) <= 0)) {
+  const addonPrices = selectedAddons.map((addon) => Number(addon?.price_per_rental ?? addon?.price_per_day));
+  if (selectedAddons.some((addon, index) => !addon || !Number.isSafeInteger(addonPrices[index]) || addonPrices[index] <= 0)) {
     return responseError('Một hoặc nhiều phụ kiện không còn khả dụng.', 400);
   }
-  const pricePerDay = Number(product.rental_price_per_day)
-    + selectedAddons.reduce((sum, addon) => sum + Number(addon!.price_per_day), 0);
-  const basePrice = pricePerDay * totalDays;
+  const basePrice = (Number(product.rental_price_per_day) * totalDays)
+    + addonPrices.reduce((sum, price) => sum + price, 0);
   const discountRate = totalDays >= 7 ? 0.2 : totalDays >= 3 ? 0.1 : 0;
   const subtotal = Math.max(0, basePrice - Math.round(basePrice * discountRate));
   const { data, error } = await supabase.rpc('validate_voucher', { p_code: code, p_subtotal: subtotal });

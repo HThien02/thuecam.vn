@@ -104,10 +104,11 @@ export async function POST(request: NextRequest) {
   const depositAmount = Number(product.deposit_amount);
   const configuredAddons = Array.isArray(product.rental_addons) ? product.rental_addons as RentalAddon[] : [];
   const selectedAddons = addonIds.map((addonId) => configuredAddons.find((addon) => addon.id === addonId));
-  if (selectedAddons.some((addon) => !addon || !addon.name || !Number.isSafeInteger(Number(addon.price_per_day)) || Number(addon.price_per_day) <= 0)) {
+  const addonPrices = selectedAddons.map((addon) => Number(addon?.price_per_rental ?? addon?.price_per_day));
+  if (selectedAddons.some((addon, index) => !addon || !addon.name || !Number.isSafeInteger(addonPrices[index]) || addonPrices[index] <= 0)) {
     return errorResponse('Một hoặc nhiều phụ kiện không còn khả dụng. Vui lòng tải lại và chọn lại.', 400);
   }
-  const addonSubtotal = selectedAddons.reduce((sum, addon) => sum + Number(addon!.price_per_day) * days.length, 0);
+  const addonSubtotal = addonPrices.reduce((sum, price) => sum + price, 0);
   const basePrice = (dailyPrice * days.length) + addonSubtotal;
   const discountRate = days.length >= 7 ? 0.2 : days.length >= 3 ? 0.1 : 0;
   const subtotal = Math.max(0, basePrice - Math.round(basePrice * discountRate));
@@ -128,11 +129,12 @@ export async function POST(request: NextRequest) {
     p_pickup_method: pickupMethod,
     p_delivery_address: pickupMethod === 'DELIVERY' ? sanitizeInput(deliveryAddress) : null,
     p_note: typeof body.note === 'string' ? sanitizeInput(body.note).slice(0, 2000) : null,
-    p_selected_addons: selectedAddons.map((addon) => ({
+    p_selected_addons: selectedAddons.map((addon, index) => ({
       id: addon!.id,
       name: addon!.name,
-      price_per_day: Number(addon!.price_per_day),
-      total_price: Number(addon!.price_per_day) * days.length,
+      description: addon!.description ?? '',
+      price_per_rental: addonPrices[index],
+      total_price: addonPrices[index],
     })),
     p_voucher_code: voucherCode || null,
     p_pickup_time: pickupTime,
