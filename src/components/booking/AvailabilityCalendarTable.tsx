@@ -391,7 +391,7 @@ export default function AvailabilityCalendarTable({
                   </strong>
                   {rangeInfo.discountAmount > 0 && (
                     <span className="block text-[10px] text-emerald-600 font-bold">
-                      ��ã giảm {rangeInfo.discountAmount.toLocaleString('vi-VN')}đ (-{rangeInfo.discountRate * 100}%)
+                      Đã giảm {rangeInfo.discountAmount.toLocaleString('vi-VN')}đ (-{rangeInfo.discountRate * 100}%)
                     </span>
                   )}
                 </div>

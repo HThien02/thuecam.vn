@@ -47,7 +47,7 @@ export default function FloatingContactWidget() {
   const settings = contactData?.settings;
   const hasLoadedSettings = contactData !== undefined;
   const managerName = settings?.contact_manager_name?.trim() || 'THUECAM';
-  const phoneDigits = settings?.hotline.replace(/\\D/g, '') ?? '';
+  const phoneDigits = settings?.hotline.replace(/\D/g, '') ?? '';
   const hotlineHref = hasLoadedSettings
     ? phoneDigits ? `tel:${phoneDigits.startsWith('84') ? `+${phoneDigits}` : phoneDigits}` : ''
     : 'tel:+84932501411';

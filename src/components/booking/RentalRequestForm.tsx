@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Product } from '@/types';
-import { CheckCircle2, Clock3, CalendarDays, Send, MapPin, Truck, AlertCircle } from 'lucide-react';
+import { CheckCircle2, Clock3, CalendarDays, Send, MapPin, Truck, AlertCircle, Loader2 } from 'lucide-react';
 import AvailabilityCalendarTable from './AvailabilityCalendarTable';
 import SafeButton from '@/components/common/SafeButton';
 import {
@@ -47,11 +47,66 @@ export default function RentalRequestForm({
   const [address, setAddress] = useState('');
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [voucherInput, setVoucherInput] = useState('');
+  const [appliedVoucher, setAppliedVoucher] = useState<{ code: string; discount: number } | null>(null);
+  const [voucherMessage, setVoucherMessage] = useState('');
+  const [isCheckingVoucher, setIsCheckingVoucher] = useState(false);
+  const voucherRequestId = useRef(0);
 
   const product =
     products.find((item) => item.slug === selectedProduct) ??
     initialProduct ??
     products[0];
+  const rentalDays = Math.max(1, Math.floor((Date.parse(`${endDate}T00:00:00Z`) - Date.parse(`${startDate}T00:00:00Z`)) / 86_400_000) + 1);
+  const rentalSubtotal = product ? rentalDays * product.rental_price_per_day : 0;
+  const rentalDiscountRate = rentalDays >= 7 ? 0.2 : rentalDays >= 3 ? 0.1 : 0;
+  const estimatedTotal = Math.max(0, rentalSubtotal - Math.round(rentalSubtotal * rentalDiscountRate) - (appliedVoucher?.discount ?? 0));
+
+  const clearVoucher = () => {
+    voucherRequestId.current += 1;
+    setAppliedVoucher(null);
+    setVoucherMessage('');
+    setIsCheckingVoucher(false);
+  };
+
+  const handleValidateVoucher = async () => {
+    const requestId = ++voucherRequestId.current;
+    const code = voucherInput.trim();
+    if (!code) {
+      setAppliedVoucher(null);
+      setVoucherMessage('');
+      setIsCheckingVoucher(false);
+      return;
+    }
+    if (!product) return;
+
+    setIsCheckingVoucher(true);
+    setVoucherMessage('');
+    try {
+      const response = await fetch('/api/vouchers/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: product.id, start_date: startDate, end_date: endDate, addon_ids: [], code }),
+      });
+      const result = await response.json();
+      if (requestId !== voucherRequestId.current) return;
+      if (!response.ok) throw new Error(result.error ?? 'Không thể kiểm tra mã voucher.');
+      if (!result.valid) {
+        setAppliedVoucher(null);
+        setVoucherMessage('Voucher không tồn tại hoặc đã hết lượt.');
+        return;
+      }
+      setAppliedVoucher({ code: result.code, discount: Number(result.discount) });
+      setVoucherInput(result.code);
+      setVoucherMessage(`Đã áp dụng voucher ${result.code}. Giảm ${Number(result.discount).toLocaleString('vi-VN')}đ.`);
+    } catch (error) {
+      if (requestId !== voucherRequestId.current) return;
+      setAppliedVoucher(null);
+      setVoucherMessage(error instanceof Error ? error.message : 'Không thể kiểm tra voucher.');
+    } finally {
+      if (requestId === voucherRequestId.current) setIsCheckingVoucher(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,6 +150,7 @@ export default function RentalRequestForm({
           pickup_time: pickupTime,
           delivery_address: address,
           note: notes,
+          voucher_code: appliedVoucher?.code ?? '',
         }),
       });
       const result = await response.json();
@@ -148,12 +204,15 @@ export default function RentalRequestForm({
           Chọn thiết bị bạn muốn thuê:
           <select
             value={selectedProduct}
-            onChange={(e) => setSelectedProduct(e.target.value)}
+            onChange={(e) => {
+              clearVoucher();
+              setSelectedProduct(e.target.value);
+            }}
             className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-3 text-sm font-black text-slate-900 outline-none focus:border-[#0284c7]"
           >
             {products.map((item) => (
               <option key={item.id} value={item.slug}>
-                {item.name}{item.status !== 'ACTIVE' ? ' · Tạm ẩn, full lịch' : ''} — {item.rental_price_per_day.toLocaleString('vi-VN')}đ/ngày
+                {item.name} — {item.rental_price_per_day.toLocaleString('vi-VN')}đ/ngày
               </option>
             ))}
           </select>
@@ -184,7 +243,10 @@ export default function RentalRequestForm({
             type="date"
             min={todayStr}
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            onChange={(e) => {
+              clearVoucher();
+              setStartDate(e.target.value);
+            }}
             className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-sm font-bold text-slate-900 outline-none focus:border-[#0284c7]"
           />
         </label>
@@ -196,7 +258,10 @@ export default function RentalRequestForm({
             type="date"
             min={startDate || todayStr}
             value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
+            onChange={(e) => {
+              clearVoucher();
+              setEndDate(e.target.value);
+            }}
             className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-sm font-bold text-slate-900 outline-none focus:border-[#0284c7]"
           />
         </label>

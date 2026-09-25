@@ -100,6 +100,11 @@ export interface Product {
   review_count?: number;
 }
 
+export interface CameraSetting {
+  label: string;
+  value: string;
+}
+
 export interface Article {
   id: string;
   slug: string;
@@ -108,6 +113,8 @@ export interface Article {
   excerpt: string;
   content: string;
   featured_image: string;
+  camera_settings?: CameraSetting[];
+  gallery_images?: string[];
   author_name: string;
   author_avatar?: string;
   author_bio?: string;

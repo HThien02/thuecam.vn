@@ -13,6 +13,7 @@ export async function compressImageToBase64(
 
     reader.onload = (e) => {
       const img = new Image();
+      img.crossOrigin = 'anonymous';
       img.onload = () => {
         let { width, height } = img;
 

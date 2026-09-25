@@ -9,6 +9,7 @@ import type {
   RedirectRule,
   SeoSettings,
 } from '@/types';
+import { CAMERA_FORMULA_PILLAR } from '@/lib/camera-formulas';
 import { createClient } from '@/lib/supabase/server';
 
 function requireData<T>(data: T | null, error: { message: string } | null): T {
@@ -139,7 +140,7 @@ export async function getArticles(type?: Article['type']): Promise<Article[]> {
   let query = supabase.from('articles').select('*').eq('status', 'PUBLISHED').eq('indexable', true).order('published_at', { ascending: false });
   if (type) query = query.eq('type', type);
   const { data, error } = await query;
-  return requireData(data, error) as Article[];
+  return (requireData(data, error) as Article[]).filter((article) => article.pillar_slug !== CAMERA_FORMULA_PILLAR);
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
@@ -215,8 +216,34 @@ export async function getPublicProductsForBooking() {
 
 export async function getBookingProducts(): Promise<Product[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.from('products').select('*').in('status', ['ACTIVE', 'INACTIVE']).order('created_at', { ascending: false });
+  const { data, error } = await supabase.from('products').select('*').eq('status', 'ACTIVE').order('created_at', { ascending: false });
   return getProductRelations(requireData(data, error) as Product[]);
+}
+
+export async function getCameraFormulas(): Promise<Article[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('articles')
+    .select('*')
+    .eq('pillar_slug', CAMERA_FORMULA_PILLAR)
+    .eq('status', 'PUBLISHED')
+    .eq('indexable', true)
+    .order('published_at', { ascending: false });
+  return requireData(data, error) as Article[];
+}
+
+export async function getCameraFormulaBySlug(slug: string): Promise<Article | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('articles')
+    .select('*')
+    .eq('slug', slug)
+    .eq('pillar_slug', CAMERA_FORMULA_PILLAR)
+    .eq('status', 'PUBLISHED')
+    .eq('indexable', true)
+    .maybeSingle();
+  if (error) throw new Error(`Supabase camera formula query failed: ${error.message}`);
+  return data as Article | null;
 }
 
 export async function getProductsForSearch(query: string) {
