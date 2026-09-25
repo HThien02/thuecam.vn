@@ -331,7 +331,7 @@ export default function ProductManagerClient({
                 <th className="px-4 py-3.5">Giá 3 ngày (-10%)</th>
                 <th className="px-4 py-3.5">Tiền cọc</th>
                 <th className="px-4 py-3.5">Tình trạng máy</th>
-                <th className="px-4 py-3.5">Trạng th��i</th>
+                <th className="px-4 py-3.5">Trạng thái</th>
                 <th className="px-4 py-3.5 text-right">Thao tác</th>
               </tr>
             </thead>

@@ -372,7 +372,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
               className="w-full py-3.5 rounded-full bg-gradient-candy hover:opacity-95 text-white font-black text-sm shadow-cute hover:shadow-cute-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {rangeAvailability === null ? <RotateCw className="size-4 animate-spin" aria-hidden="true" /> : <Calendar className="w-4 h-4" />}
-              <span>{rangeAvailability === null ? 'Đang kiểm tra l��ch…' : `Tiếp tục đặt máy (${totalDays} ngày - ${formatVND(totalDueNow)})`}</span>
+              <span>{rangeAvailability === null ? 'Đang kiểm tra lịch…' : `Tiếp tục đặt máy (${totalDays} ngày - ${formatVND(totalDueNow)})`}</span>
             </button>
           </div>
         )}

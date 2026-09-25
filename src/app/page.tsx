@@ -269,7 +269,7 @@ export default async function HomePage() {
                   <div>
                     <span className="text-[11px] font-black text-[#0284c7] uppercase tracking-wider">
                       {art.type === 'comparison'
-                        ? 'So S��nh Trực Diện'
+                        ? 'So Sánh Trực Diện'
                         : art.type === 'guide'
                         ? 'Hướng Dẫn Kỹ Thuật'
                         : 'Cẩm Nang Thuê'}
