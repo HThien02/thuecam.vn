@@ -6,12 +6,14 @@ import { Loader2 } from 'lucide-react';
 
 export default function NavigationProgress() {
   const pathname = usePathname();
-  const [isNavigating, setIsNavigating] = useState(false);
+  const [navigationStartedFrom, setNavigationStartedFrom] = useState<string | null>(null);
+  const isNavigating = navigationStartedFrom === pathname;
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    setIsNavigating(false);
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (!timeoutRef.current) return;
+    clearTimeout(timeoutRef.current);
+    timeoutRef.current = null;
   }, [pathname]);
 
   useEffect(() => {
@@ -25,9 +27,12 @@ export default function NavigationProgress() {
       const nextUrl = new URL(anchor.href, window.location.href);
       if (nextUrl.origin !== window.location.origin || nextUrl.href === window.location.href) return;
 
-      setIsNavigating(true);
+      setNavigationStartedFrom(pathname);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => setIsNavigating(false), 8000);
+      timeoutRef.current = setTimeout(() => {
+        setNavigationStartedFrom(null);
+        timeoutRef.current = null;
+      }, 8000);
     };
 
     document.addEventListener('click', handleInternalNavigation);
@@ -35,7 +40,7 @@ export default function NavigationProgress() {
       document.removeEventListener('click', handleInternalNavigation);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, []);
+  }, [pathname]);
 
   if (!isNavigating) return null;
 

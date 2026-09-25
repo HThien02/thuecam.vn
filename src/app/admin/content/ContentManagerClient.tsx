@@ -8,13 +8,8 @@ import {
   Plus,
   Edit,
   Trash2,
-  CheckCircle2,
-  FileText,
-  Compass,
   X,
   Save,
-  Eye,
-  ExternalLink,
   ImagePlus,
   Loader2,
 } from 'lucide-react';

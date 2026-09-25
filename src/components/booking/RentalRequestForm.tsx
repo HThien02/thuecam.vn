@@ -2,7 +2,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { Product } from '@/types';
-import { CheckCircle2, Clock3, CalendarDays, Send, MapPin, Truck, AlertCircle, Loader2 } from 'lucide-react';
+import { CheckCircle2, Clock3, CalendarDays, Send, MapPin, Truck } from 'lucide-react';
 import AvailabilityCalendarTable from './AvailabilityCalendarTable';
 import SafeButton from '@/components/common/SafeButton';
 import {
@@ -27,6 +27,7 @@ export default function RentalRequestForm({
   const [selectedProduct, setSelectedProduct] = useState(
     initialProduct?.slug ?? products[0]?.slug ?? ''
   );
+  const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
   const [duration, setDuration] = useState<'hourly' | 'daily'>('daily');
   const [pickupTime, setPickupTime] = useState('09:00');
   const [rangeAvailability, setRangeAvailability] = useState<boolean | null>(null);
@@ -57,10 +58,17 @@ export default function RentalRequestForm({
     products.find((item) => item.slug === selectedProduct) ??
     initialProduct ??
     products[0];
-  const rentalDays = Math.max(1, Math.floor((Date.parse(`${endDate}T00:00:00Z`) - Date.parse(`${startDate}T00:00:00Z`)) / 86_400_000) + 1);
-  const rentalSubtotal = product ? rentalDays * product.rental_price_per_day : 0;
+  const rentalDays = startDate && endDate
+    ? Math.max(1, Math.floor((Date.parse(`${endDate}T00:00:00Z`) - Date.parse(`${startDate}T00:00:00Z`)) / 86_400_000) + 1)
+    : 1;
+  const selectedAddons = (product?.rental_addons ?? []).filter((addon) => selectedAddonIds.includes(addon.id));
+  const baseRentalTotal = product ? rentalDays * product.rental_price_per_day : 0;
+  const addonTotal = selectedAddons.reduce((sum, addon) => sum + Number(addon.price_per_day) * rentalDays, 0);
+  const rentalSubtotal = baseRentalTotal + addonTotal;
   const rentalDiscountRate = rentalDays >= 7 ? 0.2 : rentalDays >= 3 ? 0.1 : 0;
-  const estimatedTotal = Math.max(0, rentalSubtotal - Math.round(rentalSubtotal * rentalDiscountRate) - (appliedVoucher?.discount ?? 0));
+  const rentalDiscount = Math.round(rentalSubtotal * rentalDiscountRate);
+  const discountedSubtotal = Math.max(0, rentalSubtotal - rentalDiscount);
+  const estimatedTotal = Math.max(0, discountedSubtotal - (appliedVoucher?.discount ?? 0));
 
   const clearVoucher = () => {
     voucherRequestId.current += 1;
@@ -86,7 +94,7 @@ export default function RentalRequestForm({
       const response = await fetch('/api/vouchers/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_id: product.id, start_date: startDate, end_date: endDate, addon_ids: [], code }),
+        body: JSON.stringify({ product_id: product.id, start_date: startDate, end_date: endDate, addon_ids: selectedAddonIds, code }),
       });
       const result = await response.json();
       if (requestId !== voucherRequestId.current) return;
@@ -118,6 +126,11 @@ export default function RentalRequestForm({
     if (!isValidEmail(email)) newErrors.email = EMAIL_VALIDATION_ERROR;
     if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(pickupTime)) newErrors.pickupTime = 'Vui lòng chọn giờ nhận máy hợp lệ.';
     if (rangeAvailability !== true) newErrors.submit = rangeAvailability === false ? 'Lịch đã kín trong ngày bạn chọn. Vui lòng chọn thiết bị hoặc ngày khác.' : 'Đang kiểm tra lịch trống. Vui lòng chờ một chút rồi gửi lại.';
+    if (voucherInput.trim() && appliedVoucher?.code !== voucherInput.trim().toUpperCase()) {
+      newErrors.submit = isCheckingVoucher
+        ? 'Đang kiểm tra voucher. Vui lòng chờ trước khi gửi yêu cầu.'
+        : 'Vui lòng kiểm tra voucher trước khi gửi yêu cầu thuê.';
+    }
     if (pickupMethod === 'DELIVERY' && (!address || address.trim().length < 5)) {
       newErrors.address = 'Vui lòng nhập địa chỉ giao máy cụ thể (tối thiểu 5 ký tự).';
     }
@@ -150,6 +163,7 @@ export default function RentalRequestForm({
           pickup_time: pickupTime,
           delivery_address: address,
           note: notes,
+          addon_ids: selectedAddonIds,
           voucher_code: appliedVoucher?.code ?? '',
         }),
       });
@@ -206,13 +220,14 @@ export default function RentalRequestForm({
             value={selectedProduct}
             onChange={(e) => {
               clearVoucher();
+              setSelectedAddonIds([]);
               setSelectedProduct(e.target.value);
             }}
             className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-3 text-sm font-black text-slate-900 outline-none focus:border-[#0284c7]"
           >
             {products.map((item) => (
               <option key={item.id} value={item.slug}>
-                {item.name} — {item.rental_price_per_day.toLocaleString('vi-VN')}đ/ngày
+                {item.name} — {item.rental_price_per_day.toLocaleString('vi-VN')}đ/ngày{item.inventory_count <= 0 ? ' · Hiện chưa có máy' : ''}
               </option>
             ))}
           </select>
@@ -228,12 +243,42 @@ export default function RentalRequestForm({
             startDate={startDate}
             endDate={endDate}
             onDateChange={(start, end) => {
+              clearVoucher();
               setStartDate(start);
               setEndDate(end);
             }}
             onRangeAvailabilityChange={updateRangeAvailability}
           />
         </div>
+
+        {product?.rental_addons?.length ? (
+          <fieldset className="sm:col-span-2 rounded-2xl border border-sky-200 bg-sky-50/50 p-4">
+            <legend className="px-1 text-xs font-black text-slate-800">Phụ kiện thuê thêm</legend>
+            <p className="mb-3 text-[11px] text-slate-500">Phụ kiện được tính theo ngày và cộng trực tiếp vào hóa đơn.</p>
+            <div className="flex flex-col gap-2">
+              {product.rental_addons.map((addon) => {
+                const checked = selectedAddonIds.includes(addon.id);
+                return (
+                  <label key={addon.id} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-sky-100 bg-white p-3 text-xs">
+                    <span className="flex items-center gap-2 font-bold text-slate-800">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => {
+                          clearVoucher();
+                          setSelectedAddonIds((current) => checked ? current.filter((id) => id !== addon.id) : [...current, addon.id]);
+                        }}
+                        className="size-4 accent-sky-600"
+                      />
+                      {addon.name}
+                    </span>
+                    <span className="shrink-0 font-black text-sky-700">+{addon.price_per_day.toLocaleString('vi-VN')}đ/ngày</span>
+                  </label>
+                );
+              })}
+            </div>
+          </fieldset>
+        ) : null}
 
         {/* Start / End Date pickers */}
         <label className="text-xs font-bold text-slate-700">
@@ -412,6 +457,33 @@ export default function RentalRequestForm({
             placeholder="Bạn cần thêm chân máy, kính lọc, pin phụ hoặc yêu cầu giờ giao máy cụ thể?"
           />
         </label>
+
+        <section className="sm:col-span-2 rounded-2xl border border-sky-200 bg-sky-50/70 p-4 text-xs" aria-label="Tạm tính đơn thuê">
+          <div className="flex justify-between gap-3 text-slate-600"><span>Tiền thuê thiết bị · {rentalDays} ngày</span><span className="font-bold text-slate-800">{baseRentalTotal.toLocaleString('vi-VN')}đ</span></div>
+          {selectedAddons.map((addon) => <div key={addon.id} className="mt-1 flex justify-between gap-3 text-slate-600"><span>{addon.name} · {rentalDays} ngày</span><span className="font-bold text-slate-800">{(Number(addon.price_per_day) * rentalDays).toLocaleString('vi-VN')}đ</span></div>)}
+          {rentalDiscount > 0 && <div className="mt-1 flex justify-between gap-3 text-emerald-700"><span>Ưu đãi thuê dài ngày</span><span className="font-bold">−{rentalDiscount.toLocaleString('vi-VN')}đ</span></div>}
+          {appliedVoucher && <div className="mt-1 flex justify-between gap-3 text-emerald-700"><span>Voucher {appliedVoucher.code}</span><span className="font-bold">−{appliedVoucher.discount.toLocaleString('vi-VN')}đ</span></div>}
+          <div className="mt-2 flex justify-between gap-3 border-t border-sky-200 pt-2 text-sm"><span className="font-black text-slate-900">Tổng tạm tính</span><span className="font-black text-sky-700">{estimatedTotal.toLocaleString('vi-VN')}đ</span></div>
+        </section>
+
+        <label className="sm:col-span-2 text-xs font-bold text-slate-700">
+          Mã voucher:
+          <input
+            value={voucherInput}
+            maxLength={64}
+            onChange={(event) => {
+              clearVoucher();
+              setVoucherInput(event.target.value.toUpperCase());
+            }}
+            onBlur={() => void handleValidateVoucher()}
+            aria-describedby="rental-voucher-status"
+            placeholder="Nhập mã giảm giá"
+            className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-sm font-bold uppercase text-slate-900 outline-none focus:border-[#0284c7]"
+          />
+          <span id="rental-voucher-status" role="status" aria-live="polite" className={`mt-1 block text-[11px] ${voucherMessage ? appliedVoucher ? 'font-bold text-emerald-700' : 'font-semibold text-rose-600' : 'font-medium text-slate-500'}`}>
+            {isCheckingVoucher ? 'Đang kiểm tra voucher…' : voucherMessage || 'Voucher sẽ được kiểm tra khi bạn rời khỏi ô nhập.'}
+          </span>
+        </label>
       </div>
 
       <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-sky-100">
@@ -423,9 +495,9 @@ export default function RentalRequestForm({
       {errors.submit && <p role="alert" className="text-sm font-semibold text-rose-600">{errors.submit}</p>}
       <SafeButton
         type="submit"
-        disabled={isSubmitting || !product || rangeAvailability !== true}
-        isLoading={isSubmitting}
-        loadingText="Đang gửi yêu cầu..."
+        disabled={isSubmitting || isCheckingVoucher || !product || rangeAvailability !== true}
+        isLoading={isSubmitting || isCheckingVoucher}
+        loadingText={isCheckingVoucher ? 'Đang kiểm tra voucher...' : 'Đang gửi yêu cầu...'}
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#0284c7] hover:bg-[#0369a1] px-8 py-3.5 text-sm font-black text-white shadow-cute transition-all hover:scale-105"
         >
           <span>Gửi Yêu Cầu Thuê Ngay</span>

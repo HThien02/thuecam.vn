@@ -208,12 +208,6 @@ export async function getBookingByCode(bookingCode: string) {
   return data;
 }
 
-export async function getPublicProductsForBooking() {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from('products').select('id,name,slug,rental_price_per_day,deposit_amount,inventory_count,status').in('status', ['ACTIVE', 'INACTIVE']).order('name');
-  return requireData(data, error);
-}
-
 export async function getBookingProducts(): Promise<Product[]> {
   const supabase = await createClient();
   const { data, error } = await supabase.from('products').select('*').eq('status', 'ACTIVE').order('created_at', { ascending: false });

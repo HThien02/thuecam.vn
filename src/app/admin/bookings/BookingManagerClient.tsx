@@ -9,8 +9,6 @@ import {
   Clock,
   X,
   Lock,
-  Unlock,
-  AlertCircle,
   Save,
   Search,
   Filter,
@@ -191,7 +189,7 @@ export default function BookingManagerClient({
         ? current.map((booking) => booking.id === editingBooking.id ? bookingData : booking)
         : [bookingData, ...current]);
       setIsModalOpen(false);
-      showToast(editingBooking ? `Đã cập nhật đơn ${bookingData.id}` : `Đã tạo đơn ${bookingData.id}`);
+      showToast(editingBooking ? `��ã cập nhật đơn ${bookingData.id}` : `Đã tạo đơn ${bookingData.id}`);
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'Không thể lưu đơn thuê.');
     } finally {

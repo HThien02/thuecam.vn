@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import type { SiteSettings } from '@/lib/data/admin-types';
 import { saveAdminRecord } from '@/lib/data/admin-api';
-import { Save, CheckCircle2, Sliders, MapPin, Phone, Clock, Gift, ShieldAlert, Loader2, Share2 } from 'lucide-react';
+import { Save, CheckCircle2, MapPin, Phone, Gift, Loader2, Share2 } from 'lucide-react';
 
 export default function SettingsManagerClient({ initialSettings }: { initialSettings: SiteSettings }) {
   const [settings, setSettings] = useState<SiteSettings>(initialSettings);
