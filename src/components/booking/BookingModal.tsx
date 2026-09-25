@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Product, RentalAddon } from '@/types';
 import { formatVND } from '../product/ProductCard';
 import { trackEvent } from '@/lib/analytics/gtag';
@@ -58,6 +58,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
   const [appliedVoucher, setAppliedVoucher] = useState<{ code: string; discount: number } | null>(null);
   const [voucherMessage, setVoucherMessage] = useState('');
   const [isCheckingVoucher, setIsCheckingVoucher] = useState(false);
+  const voucherRequestId = useRef(0);
 
   // Booking result
   const [bookingCode, setBookingCode] = useState('');
@@ -88,12 +89,16 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
   const totalDueNow = confirmedTotalPrice ?? Math.max(0, totalRentalPrice - voucherDiscount);
 
   const clearVoucherDiscount = () => {
+    voucherRequestId.current += 1;
     setAppliedVoucher(null);
     setVoucherMessage('');
+    setIsCheckingVoucher(false);
   };
 
   const handleApplyVoucher = async () => {
+    const requestId = ++voucherRequestId.current;
     if (!voucherInput.trim()) {
+      setIsCheckingVoucher(false);
       setVoucherMessage('Vui lòng nhập mã voucher.');
       return;
     }
@@ -112,15 +117,17 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
         }),
       });
       const result = await response.json();
+      if (requestId !== voucherRequestId.current) return;
       if (!response.ok || !result.valid) throw new Error(result.error ?? 'Mã voucher không hợp lệ hoặc đã hết lượt.');
       setAppliedVoucher({ code: result.code, discount: Number(result.discount) });
       setVoucherInput(result.code);
       setVoucherMessage(`Đã áp dụng voucher ${result.code}.`);
     } catch (error) {
+      if (requestId !== voucherRequestId.current) return;
       setAppliedVoucher(null);
       setVoucherMessage(error instanceof Error ? error.message : 'Không thể kiểm tra voucher.');
     } finally {
-      setIsCheckingVoucher(false);
+      if (requestId === voucherRequestId.current) setIsCheckingVoucher(false);
     }
   };
 
@@ -371,7 +378,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
             <section aria-label="Áp dụng voucher" className="rounded-2xl border border-slate-200 p-3">
               <label htmlFor="booking-voucher" className="mb-1.5 block text-xs font-bold text-slate-700">Mã voucher</label>
               <div className="flex gap-2">
-                <input id="booking-voucher" value={voucherInput} onChange={(e) => { setVoucherInput(e.target.value.toUpperCase()); setAppliedVoucher(null); setVoucherMessage(''); }} placeholder="Nhập mã giảm giá" maxLength={64} className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold uppercase text-slate-900 outline-none focus:border-sky-500" />
+                <input id="booking-voucher" value={voucherInput} onChange={(e) => { clearVoucherDiscount(); setVoucherInput(e.target.value.toUpperCase()); }} placeholder="Nhập mã giảm giá" maxLength={64} className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold uppercase text-slate-900 outline-none focus:border-sky-500" />
                 <button type="button" onClick={handleApplyVoucher} disabled={isCheckingVoucher} className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-black text-white disabled:opacity-50">{isCheckingVoucher ? 'Đang kiểm tra…' : appliedVoucher ? 'Áp dụng lại' : 'Áp dụng'}</button>
               </div>
               {voucherMessage && <p role="status" className={`mt-2 text-[11px] font-semibold ${appliedVoucher ? 'text-emerald-700' : 'text-rose-600'}`}>{voucherMessage}</p>}

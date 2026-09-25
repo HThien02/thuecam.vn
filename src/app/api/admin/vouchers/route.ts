@@ -72,11 +72,19 @@ export async function DELETE(request: NextRequest) {
   const id = request.nextUrl.searchParams.get('id');
   if (!id || id.length > 80) return responseError('Voucher không hợp lệ.');
   const supabase = createAdminClient();
-  const { data: voucher, error: readError } = await supabase.from('vouchers').select('used_count').eq('id', id).maybeSingle();
-  if (readError || !voucher) return responseError('Không tìm thấy voucher.', 404);
-  if (Number(voucher.used_count) > 0) return responseError('Voucher đã được sử dụng; hãy tắt trạng thái thay vì xóa.', 409);
-  const { error } = await supabase.from('vouchers').delete().eq('id', id);
+  const { data: deletedVoucher, error } = await supabase
+    .from('vouchers')
+    .delete()
+    .eq('id', id)
+    .eq('used_count', 0)
+    .select('id')
+    .maybeSingle();
   if (error) return responseError('Không thể xóa voucher.', 400);
+  if (!deletedVoucher) {
+    const { data: voucher } = await supabase.from('vouchers').select('used_count').eq('id', id).maybeSingle();
+    if (!voucher) return responseError('Không tìm thấy voucher.', 404);
+    return responseError('Voucher đã được sử dụng; hãy tắt trạng thái thay vì xóa.', 409);
+  }
   return new NextResponse(null, { status: 204, headers: { 'Cache-Control': 'no-store' } });
 }
 
