@@ -29,8 +29,8 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-20 pb-20 overflow-hidden bg-[#f0f7ff]/40">
-      {/* 1. HERO COMPONENT WITH BLUE CHIBI AESTHETIC & ETOWN */}
-      <HomeHero image={featuredProducts[0]?.primary_image} />
+      {/* 1. HOMEPAGE HERO WITH ORIGINAL CHIBI CAMERA MASCOTS */}
+      <HomeHero />
 
       {/* 2. CATEGORIES OVERVIEW */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -269,7 +269,7 @@ export default async function HomePage() {
                   <div>
                     <span className="text-[11px] font-black text-[#0284c7] uppercase tracking-wider">
                       {art.type === 'comparison'
-                        ? 'So Sánh Trực Diện'
+                        ? 'So S��nh Trực Diện'
                         : art.type === 'guide'
                         ? 'Hướng Dẫn Kỹ Thuật'
                         : 'Cẩm Nang Thuê'}

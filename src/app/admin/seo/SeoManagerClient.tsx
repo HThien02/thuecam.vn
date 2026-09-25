@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { saveAdminRecord } from '@/lib/data/admin-api';
 import { SeoSettings, Product } from '@/types';
 import {
   Search,
@@ -39,6 +40,7 @@ export default function SeoManagerClient({
   const [safetyConfirmationText, setSafetyConfirmationText] = useState('');
   const [globalNoindex, setGlobalNoindex] = useState(initialSettings.global_noindex_enabled);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   // Handle target switch (Global vs specific products)
   const handleSelectTarget = (target: string) => {
@@ -91,9 +93,37 @@ export default function SeoManagerClient({
     }
   };
 
-  const handleSave = () => {
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
+  const handleSave = async () => {
+    setSaveError('');
+    try {
+      if (selectedTarget === 'GLOBAL') {
+        await saveAdminRecord('seo_settings', {
+          id: initialSettings.id,
+          site_title: seoTitle.trim(),
+          site_description: seoDescription.trim(),
+          default_og_image: ogImage.trim(),
+          global_noindex_enabled: globalNoindex,
+        }, 'update');
+      } else {
+        const product = products.find((item) => item.slug === selectedTarget);
+        if (!product) throw new Error('Không tìm thấy thiết bị cần cập nhật.');
+        if (!canonicalUrl.startsWith('https://thuecam.vn/')) {
+          throw new Error('Canonical URL cần dùng domain https://thuecam.vn.');
+        }
+        await saveAdminRecord('products', {
+          id: product.id,
+          seo_title: seoTitle.trim(),
+          seo_description: seoDescription.trim(),
+          canonical_url: canonicalUrl.trim(),
+          og_image: ogImage.trim(),
+          indexable,
+        }, 'update');
+      }
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Không thể lưu thay đổi SEO.');
+    }
   };
 
   return (
@@ -119,6 +149,7 @@ export default function SeoManagerClient({
         </div>
 
         <div className="flex items-center gap-3">
+          {saveError && <span role="alert" className="text-xs text-rose-400">{saveError}</span>}
           {saveSuccess && (
             <span className="text-xs text-emerald-400 flex items-center gap-1">
               <CheckCircle2 className="w-4 h-4" /> Đã lưu cấu hình SEO thành công!

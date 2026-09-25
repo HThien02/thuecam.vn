@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Plus,
   Trash2,
@@ -9,22 +9,23 @@ import {
   Clock,
   X,
   Lock,
-  Unlock,
-  AlertCircle,
   Save,
   Search,
   Filter,
 } from 'lucide-react';
-import {
-  BookingRecord,
-  getStoredBookings,
-  saveStoredBooking,
-  deleteStoredBooking,
-  updateBookingStatus,
-} from '@/lib/data/admin-store';
+import { saveAdminRecord, deleteAdminRecord } from '@/lib/data/admin-api';
+import type { BookingRecord, BlockedDate } from '@/lib/data/admin-types';
 
-export default function BookingManagerClient() {
-  const [bookings, setBookings] = useState<BookingRecord[]>([]);
+export { type BookingRecord } from '@/lib/data/admin-types';
+
+export default function BookingManagerClient({
+  initialBookings,
+  initialBlockedDates,
+}: {
+  initialBookings: BookingRecord[];
+  initialBlockedDates: BlockedDate[];
+}) {
+  const [bookings, setBookings] = useState<BookingRecord[]>(initialBookings);
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,6 +34,9 @@ export default function BookingManagerClient() {
   // Form states
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
+  const [customerCccd, setCustomerCccd] = useState('');
+  const [customerLookup, setCustomerLookup] = useState<{ state: 'idle' | 'checking' | 'new' | 'existing' | 'error'; message?: string; history?: Array<{ booking_code: string; product_name: string; start_date: string; end_date: string; status: string }> }>({ state: 'idle' });
+  const [isSaving, setIsSaving] = useState(false);
   const [productName, setProductName] = useState('DJI Pocket 4 Creator Combo');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -44,29 +48,9 @@ export default function BookingManagerClient() {
   const [toastMsg, setToastMsg] = useState('');
 
   // Blocked dates list for calendar
-  const [blockedDates, setBlockedDates] = useState<{ date: string; reason: string }[]>([]);
+  const [blockedDates, setBlockedDates] = useState<BlockedDate[]>(initialBlockedDates);
   const [blockDateInput, setBlockDateInput] = useState('');
   const [blockReasonInput, setBlockReasonInput] = useState('Bảo trì thiết bị');
-
-  useEffect(() => {
-    setBookings(getStoredBookings());
-
-    // Load blocked dates
-    try {
-      const stored = localStorage.getItem('thuecam_blocked_dates');
-      if (stored) {
-        setBlockedDates(JSON.parse(stored));
-      }
-    } catch {
-      // ignore
-    }
-
-    const handleDataChanged = () => {
-      setBookings(getStoredBookings());
-    };
-    window.addEventListener('thuecam_data_changed', handleDataChanged);
-    return () => window.removeEventListener('thuecam_data_changed', handleDataChanged);
-  }, []);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -77,6 +61,8 @@ export default function BookingManagerClient() {
     setEditingBooking(null);
     setCustomerName('');
     setCustomerPhone('');
+    setCustomerCccd('');
+    setCustomerLookup({ state: 'idle' });
     setProductName('DJI Pocket 4 Creator Combo');
     setStartDate(new Date().toISOString().split('T')[0]);
     const tomorrow = new Date();
@@ -94,6 +80,8 @@ export default function BookingManagerClient() {
     setEditingBooking(b);
     setCustomerName(b.customer_name);
     setCustomerPhone(b.customer_phone);
+    setCustomerCccd(b.customer_cccd ?? '');
+    setCustomerLookup({ state: 'idle' });
     setProductName(b.product_name);
     setStartDate(b.start_date);
     setEndDate(b.end_date);
@@ -105,8 +93,41 @@ export default function BookingManagerClient() {
     setIsModalOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleLookupCustomer = async () => {
+    const identity = customerCccd.trim();
+    if (!identity) {
+      setCustomerLookup({ state: 'idle' });
+      return;
+    }
+    if (!/^(\d{9}|\d{12})$/.test(identity)) {
+      setCustomerLookup({ state: 'error', message: 'CCCD/CMND phải gồm 9 hoặc 12 chữ số.' });
+      return;
+    }
+
+    setCustomerLookup({ state: 'checking' });
+    try {
+      const response = await fetch(`/api/admin/customers/lookup?${new URLSearchParams({ cccd: identity })}`, { credentials: 'same-origin', cache: 'no-store' });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? 'Không thể tra cứu khách hàng.');
+      if (result.exists) {
+        setCustomerLookup({ state: 'existing', history: result.history ?? [], message: `Khách hàng cũ · ${result.bookingCount} lượt thuê đã lưu.` });
+        if (!customerName.trim() && result.customer?.name) setCustomerName(result.customer.name);
+        if (!customerPhone.trim() && result.customer?.phone) setCustomerPhone(result.customer.phone);
+      } else {
+        setCustomerLookup({ state: 'new', message: 'Đây là khách hàng mới.' });
+      }
+    } catch (error) {
+      setCustomerLookup({ state: 'error', message: error instanceof Error ? error.message : 'Không thể tra cứu khách hàng.' });
+    }
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!/^(\d{9}|\d{12})$/.test(customerCccd.trim())) {
+      showToast('Vui lòng nhập CCCD/CMND gồm 9 hoặc 12 chữ số.');
+      return;
+    }
+    setIsSaving(true);
     const daysCount = Math.max(
       1,
       Math.round(
@@ -114,59 +135,120 @@ export default function BookingManagerClient() {
           (1000 * 60 * 60 * 24)
       ) + 1
     );
+    const bookingCode = editingBooking?.id ?? `TC${Math.floor(100000 + Math.random() * 900000)}`;
+    const delivery = pickupMethod.toLocaleLowerCase('vi').startsWith('giao');
 
-    const bookingData: BookingRecord = {
-      id: editingBooking ? editingBooking.id : `TC${Math.floor(100000 + Math.random() * 900000)}`,
-      customer_name: customerName,
-      customer_phone: customerPhone,
-      product_name: productName,
-      start_date: startDate,
-      end_date: endDate,
-      total_days: daysCount,
-      total_price: Number(totalPrice),
-      deposit_amount: Number(depositAmount),
-      pickup_method: pickupMethod,
-      status: status,
-      notes: notes,
-      created_at: editingBooking?.created_at || new Date().toISOString(),
-    };
-
-    const updated = saveStoredBooking(bookingData);
-    setBookings(updated);
-    setIsModalOpen(false);
-    showToast(editingBooking ? `Đã cập nhật đơn ${bookingData.id}` : `Đã tạo đơn ${bookingData.id}`);
-  };
-
-  const handleDelete = (id: string) => {
-    if (confirm(`Bạn có chắc muốn xóa đơn thuê ${id}?`)) {
-      const updated = deleteStoredBooking(id);
-      setBookings(updated);
-      showToast(`Đã xóa đơn ${id}`);
+    try {
+      const saved = await saveAdminRecord<Record<string, unknown>>(
+        'bookings',
+        {
+          ...(editingBooking?.database_id ? { id: editingBooking.database_id } : {}),
+          booking_code: bookingCode,
+          customer_name: customerName.trim(),
+          customer_phone: customerPhone.trim(),
+          customer_email: editingBooking?.customer_email ?? null,
+          customer_cccd: customerCccd.trim(),
+          product_id: editingBooking?.product_id ?? null,
+          product_name: productName.trim(),
+          start_date: startDate,
+          end_date: endDate,
+          total_days: daysCount,
+          daily_price: editingBooking?.daily_price ?? Math.round(Number(totalPrice) / daysCount),
+          total_price: Number(totalPrice),
+          deposit_amount: Number(depositAmount),
+          pickup_method: delivery ? 'DELIVERY' : 'STORE',
+          delivery_address: delivery ? pickupMethod : null,
+          note: notes.trim() || null,
+          status,
+        },
+        editingBooking ? 'update' : 'create',
+      );
+      const bookingData: BookingRecord = {
+        id: String(saved.booking_code),
+        database_id: String(saved.id),
+        customer_name: String(saved.customer_name),
+        customer_phone: String(saved.customer_phone),
+        customer_email: typeof saved.customer_email === 'string' ? saved.customer_email : undefined,
+        customer_cccd: typeof saved.customer_cccd === 'string' ? saved.customer_cccd : undefined,
+        product_id: typeof saved.product_id === 'string' ? saved.product_id : undefined,
+        product_name: String(saved.product_name),
+        start_date: String(saved.start_date),
+        end_date: String(saved.end_date),
+        total_days: Number(saved.total_days),
+        daily_price: Number(saved.daily_price),
+        total_price: Number(saved.total_price),
+        deposit_amount: Number(saved.deposit_amount),
+        pickup_method: saved.pickup_method === 'DELIVERY'
+          ? String(saved.delivery_address ?? 'Giao tận nơi')
+          : 'ETown Tân Bình',
+        status: status,
+        notes: typeof saved.note === 'string' ? saved.note : undefined,
+        created_at: String(saved.created_at),
+      };
+      setBookings((current) => editingBooking
+        ? current.map((booking) => booking.id === editingBooking.id ? bookingData : booking)
+        : [bookingData, ...current]);
+      setIsModalOpen(false);
+      showToast(editingBooking ? `��ã cập nhật đơn ${bookingData.id}` : `Đã tạo đơn ${bookingData.id}`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể lưu đơn thuê.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleChangeStatus = (id: string, newStatus: BookingRecord['status']) => {
-    const updated = updateBookingStatus(id, newStatus);
-    setBookings(updated);
-    showToast(`Đơn ${id} chuyển sang: ${newStatus}`);
+  const handleDelete = async (id: string) => {
+    if (!confirm(`Bạn có chắc muốn xóa đơn thuê ${id}?`)) return;
+    try {
+      await deleteAdminRecord('bookings', id);
+      setBookings((current) => current.filter((booking) => booking.id !== id));
+      showToast(`Đã xóa đơn ${id}`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể xóa đơn thuê.');
+    }
+  };
+
+  const handleChangeStatus = async (id: string, newStatus: BookingRecord['status']) => {
+    const booking = bookings.find((item) => item.id === id);
+    if (!booking) return;
+    try {
+      await saveAdminRecord('bookings', {
+        id: booking.database_id,
+        booking_code: booking.id,
+        status: newStatus,
+      }, 'update');
+      setBookings((current) => current.map((item) => item.id === id ? { ...item, status: newStatus } : item));
+      showToast(`Đơn ${id} chuyển sang: ${newStatus}`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể cập nhật trạng thái đơn.');
+    }
   };
 
   // Block a date
-  const handleAddBlockedDate = (e: React.FormEvent) => {
+  const handleAddBlockedDate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!blockDateInput) return;
-    const updated = [...blockedDates, { date: blockDateInput, reason: blockReasonInput }];
-    setBlockedDates(updated);
-    localStorage.setItem('thuecam_blocked_dates', JSON.stringify(updated));
-    setBlockDateInput('');
-    showToast(`Đã khóa ngày ${blockDateInput} trên lịch máy trống`);
+    try {
+      const saved = await saveAdminRecord<BlockedDate>('blocked_dates', {
+        date: blockDateInput,
+        reason: blockReasonInput.trim(),
+      });
+      setBlockedDates((current) => [...current.filter((item) => item.date !== saved.date), saved]);
+      setBlockDateInput('');
+      showToast(`Đã khóa ngày ${saved.date} trên lịch máy trống`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể khóa ngày này.');
+    }
   };
 
-  const handleRemoveBlockedDate = (dateStr: string) => {
-    const updated = blockedDates.filter((b) => b.date !== dateStr);
-    setBlockedDates(updated);
-    localStorage.setItem('thuecam_blocked_dates', JSON.stringify(updated));
-    showToast(`Đã mở lại ngày ${dateStr}`);
+  const handleRemoveBlockedDate = async (dateStr: string) => {
+    try {
+      await deleteAdminRecord('blocked_dates', dateStr);
+      setBlockedDates((current) => current.filter((item) => item.date !== dateStr));
+      showToast(`Đã mở lại ngày ${dateStr}`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể mở lại ngày này.');
+    }
   };
 
   const filteredBookings = bookings.filter((b) => {
@@ -174,6 +256,7 @@ export default function BookingManagerClient() {
     const matchSearch =
       b.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       b.customer_phone.includes(searchTerm) ||
+      (b.customer_cccd ?? '').includes(searchTerm) ||
       b.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       b.product_name.toLowerCase().includes(searchTerm.toLowerCase());
     return matchStatus && matchSearch;
@@ -195,7 +278,7 @@ export default function BookingManagerClient() {
             <Search className="size-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Tìm theo mã, tên khách, SĐT..."
+              placeholder="Tìm mã, tên, SĐT hoặc CCCD..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 w-64"
@@ -276,7 +359,7 @@ export default function BookingManagerClient() {
                     <td className="px-4 py-3">
                       <select
                         value={b.status}
-                        onChange={(e) => handleChangeStatus(b.id, e.target.value as any)}
+                        onChange={(e) => handleChangeStatus(b.id, e.target.value as BookingRecord['status'])}
                         className={`rounded-full px-2.5 py-1 text-[10px] font-black border outline-none cursor-pointer ${badgeClass} bg-slate-900`}
                       >
                         <option value="PENDING">Chờ duyệt</option>
@@ -413,6 +496,39 @@ export default function BookingManagerClient() {
               </div>
 
               <div>
+                <label htmlFor="booking-customer-cccd" className="block font-bold text-slate-300 mb-1">CCCD/CMND khách hàng: *</label>
+                <input
+                  id="booking-customer-cccd"
+                  required
+                  inputMode="numeric"
+                  autoComplete="off"
+                  maxLength={12}
+                  value={customerCccd}
+                  onChange={(event) => {
+                    setCustomerCccd(event.target.value.replace(/\D/g, '').slice(0, 12));
+                    setCustomerLookup({ state: 'idle' });
+                  }}
+                  onBlur={handleLookupCustomer}
+                  aria-describedby="customer-identity-status"
+                  placeholder="Nhập 9 hoặc 12 chữ số, tra cứu khi rời ô"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white outline-none focus:border-emerald-500"
+                />
+                <p id="customer-identity-status" role={customerLookup.state === 'error' ? 'alert' : 'status'} aria-live="polite" className={`mt-1 text-[11px] font-semibold ${customerLookup.state === 'error' ? 'text-rose-400' : customerLookup.state === 'existing' ? 'text-sky-300' : customerLookup.state === 'new' ? 'text-emerald-300' : 'text-slate-400'}`}>
+                  {customerLookup.state === 'checking' ? 'Đang tra cứu lịch sử khách hàng…' : customerLookup.message ?? (customerCccd ? 'Rời ô để kiểm tra khách hàng và lịch thuê cũ.' : 'Nhập CCCD để tra cứu và lưu lịch sử thuê theo khách hàng.')}
+                </p>
+                {customerLookup.state === 'existing' && customerLookup.history?.length ? (
+                  <ul className="mt-2 flex flex-col gap-1 rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-[11px] text-slate-300" aria-label="Lịch sử thuê gần đây">
+                    {customerLookup.history.map((item) => (
+                      <li key={item.booking_code} className="flex flex-wrap items-center justify-between gap-2">
+                        <span><strong className="text-white">{item.product_name}</strong> · {item.start_date}–{item.end_date}</span>
+                        <span className="font-mono text-sky-300">{item.booking_code}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+
+              <div>
                 <label className="block font-bold text-slate-300 mb-1">Thiết bị thuê: *</label>
                 <input
                   required
@@ -482,7 +598,7 @@ export default function BookingManagerClient() {
                   <label className="block font-bold text-slate-300 mb-1">Trạng thái đơn:</label>
                   <select
                     value={status}
-                    onChange={(e) => setStatus(e.target.value as any)}
+                    onChange={(e) => setStatus(e.target.value as BookingRecord['status'])}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white outline-none focus:border-emerald-500 font-bold"
                   >
                     <option value="PENDING">Chờ duyệt (PENDING)</option>
@@ -513,9 +629,12 @@ export default function BookingManagerClient() {
                 </button>
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black shadow-md"
+                  disabled={isSaving}
+                  aria-busy={isSaving}
+                  className="rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-5 py-2.5 text-xs shadow-lg transition disabled:cursor-wait disabled:opacity-60"
                 >
-                  <Save className="size-4" /> Lưu Đơn Thuê
+                  {isSaving ? <Clock className="size-4 inline mr-1 animate-spin" aria-hidden="true" /> : <Save className="size-4 inline mr-1" />}
+                  {isSaving ? 'Đang lưu đơn…' : editingBooking ? 'Lưu Thay Đổi' : 'Tạo Đơn Thuê'}
                 </button>
               </div>
             </form>

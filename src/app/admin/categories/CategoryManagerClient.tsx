@@ -1,13 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Category } from '@/types';
 import { Plus, Edit, Trash2, Layers, CheckCircle2, X, Save } from 'lucide-react';
-import {
-  getStoredCategories,
-  saveStoredCategory,
-  deleteStoredCategory,
-} from '@/lib/data/admin-store';
+import { deleteAdminRecord, saveAdminRecord } from '@/lib/data/admin-api';
 import SafeButton from '@/components/common/SafeButton';
 import { isValidName, isValidPositiveNumber } from '@/lib/security/validation';
 
@@ -26,13 +22,6 @@ export default function CategoryManagerClient({
   const [icon, setIcon] = useState('Camera');
   const [displayOrder, setDisplayOrder] = useState<number>(1);
   const [toastMsg, setToastMsg] = useState('');
-
-  useEffect(() => {
-    setCategories(getStoredCategories());
-    const handleDataChanged = () => setCategories(getStoredCategories());
-    window.addEventListener('thuecam_data_changed', handleDataChanged);
-    return () => window.removeEventListener('thuecam_data_changed', handleDataChanged);
-  }, []);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -59,7 +48,7 @@ export default function CategoryManagerClient({
     setIsModalOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     const finalSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
@@ -82,17 +71,26 @@ export default function CategoryManagerClient({
       seo_description: editingCategory?.seo_description || description,
     };
 
-    const updated = saveStoredCategory(catData);
-    setCategories(updated);
-    setIsModalOpen(false);
-    showToast(editingCategory ? `Đã cập nhật danh mục "${name}"` : `Đã thêm danh mục "${name}"`);
+    try {
+      const saved = await saveAdminRecord<Category>('categories', catData);
+      setCategories((current) => editingCategory
+        ? current.map((category) => category.id === saved.id ? saved : category)
+        : [...current, saved].sort((a, b) => a.display_order - b.display_order));
+      setIsModalOpen(false);
+      showToast(editingCategory ? `Đã cập nhật danh mục "${name}"` : `Đã thêm danh mục "${name}"`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể lưu danh mục.');
+    }
   };
 
-  const handleDelete = (id: string, catName: string) => {
-    if (confirm(`Bạn có chắc muốn xóa danh mục "${catName}"?`)) {
-      const updated = deleteStoredCategory(id);
-      setCategories(updated);
+  const handleDelete = async (id: string, catName: string) => {
+    if (!confirm(`Bạn có chắc muốn xóa danh mục "${catName}"?`)) return;
+    try {
+      await deleteAdminRecord('categories', id);
+      setCategories((current) => current.filter((category) => category.id !== id));
       showToast(`Đã xóa danh mục "${catName}"`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể xóa danh mục.');
     }
   };
 

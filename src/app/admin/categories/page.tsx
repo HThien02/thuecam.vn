@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import { getCategories } from '@/lib/data';
+import { getAdminRows } from '@/lib/data/admin-server';
+import type { Category } from '@/types';
 import CategoryManagerClient from './CategoryManagerClient';
 
 export const metadata: Metadata = {
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminCategoriesPage() {
-  const categories = await getCategories();
+  const categories = await getAdminRows<Category>('categories');
 
   return (
     <div className="space-y-6">

@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import { getSeoSettings, getProducts } from '@/lib/data';
+import { getAdminRow, getAdminRows } from '@/lib/data/admin-server';
+import type { Product, SeoSettings } from '@/types';
 import SeoManagerClient from './SeoManagerClient';
 
 export const metadata: Metadata = {
@@ -12,8 +13,11 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminSeoPage() {
-  const seoSettings = await getSeoSettings();
-  const products = await getProducts();
+  const [seoSettings, products] = await Promise.all([
+    getAdminRow<SeoSettings>('seo_settings', 'global-seo-settings'),
+    getAdminRows<Product>('products'),
+  ]);
+  if (!seoSettings) throw new Error('SEO settings have not been seeded in Supabase.');
 
   return (
     <div className="space-y-8">

@@ -2,9 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Camera, MapPin, ShieldCheck, Sparkles, Store, Calendar, ArrowRight } from 'lucide-react';
-
-type HomeHeroProps = { image?: string };
+import { MapPin, ShieldCheck, Sparkles, Store, Calendar, ArrowRight, Star } from 'lucide-react';
 
 const brands = [
   { name: 'SONY', slug: 'sony', className: 'bg-[#e0f2fe] border-[#0284c7] text-[#0c2340]' },
@@ -13,14 +11,7 @@ const brands = [
   { name: 'POCKET', slug: 'pocket-camera', className: 'bg-[#fef9c3] border-[#ca8a04] text-[#713f12]' },
 ];
 
-const gear = [
-  { name: 'DJI', className: 'bg-[#e0f2fe]' },
-  { name: 'GO PRO', className: 'bg-[#f0f9ff]' },
-  { name: 'INSTA360', className: 'bg-[#e0f7fa]' },
-  { name: 'FUJIFILM', className: 'bg-[#fef9c3]' },
-];
-
-export default function HomeHero({ image }: HomeHeroProps) {
+export default function HomeHero() {
   return (
     <section className="bg-[#f0f7ff] px-4 pb-10 pt-5 sm:px-6 lg:px-8 lg:pt-6">
       <div className="mx-auto grid max-w-[1260px] gap-5 lg:grid-cols-[0.95fr_1.35fr]">
@@ -31,10 +22,13 @@ export default function HomeHero({ image }: HomeHeroProps) {
             <span className="inline-flex -rotate-2 rounded-2xl bg-[#0284c7] px-5 py-3 text-sm font-black text-white shadow-[0_8px_18px_rgba(2,132,199,0.25)]">
               ƯU ĐÃI CHIBI NHỎ XINH 🎒
             </span>
-            <p className="mt-5 text-[84px] font-black leading-none tracking-[-0.08em] text-[#0284c7] sm:text-[104px]">
-              30<span className="text-[56px] align-top tracking-normal">%</span>
-            </p>
-            <h2 className="max-w-sm text-2xl font-black leading-tight text-[#0c2340] sm:text-3xl">
+            <div className="mt-6 inline-flex -rotate-3 items-center gap-3 rounded-[26px] border-2 border-[#facc15] bg-[#fff7cc] px-5 py-3 shadow-[0_7px_0_rgba(202,138,4,0.2)] transition-transform duration-300 hover:rotate-2">
+              <p className="text-[76px] font-black leading-none tracking-[-0.08em] text-[#0284c7] sm:text-[92px]">
+                30<span className="text-[48px] align-top tracking-normal">%</span>
+              </p>
+              <span className="-rotate-3 rounded-2xl bg-white px-3 py-2 text-center text-xs font-black leading-tight text-[#b45309] shadow-sm">CUỐI<br />TUẦN</span>
+            </div>
+            <h2 className="mt-4 max-w-sm text-2xl font-black leading-tight text-[#0c2340] sm:text-3xl">
               Thuê càng lâu càng hời
             </h2>
             <p className="mt-3 max-w-sm text-base font-extrabold leading-7 text-[#334e68]">
@@ -56,38 +50,44 @@ export default function HomeHero({ image }: HomeHeroProps) {
           </div>
         </div>
 
-        <div className="relative overflow-hidden rounded-[38px] border-2 border-[#bae6fd] bg-gradient-to-br from-[#e0f2fe]/60 via-[#f0f9ff] to-white p-7 sm:p-10 lg:min-h-[550px] shadow-[0_18px_50px_rgba(2,132,199,0.08)]">
-          <div className="absolute -bottom-16 -right-14 size-72 rounded-full bg-[#bae6fd]/40" />
-          <div className="absolute -left-16 top-24 size-48 rounded-full bg-[#fef9c3]/50" />
+        <div className="relative isolate overflow-hidden rounded-[38px] border-2 border-[#bae6fd] bg-gradient-to-br from-[#e5f8ff] via-[#f8fdff] to-[#fffdf2] p-7 shadow-[0_18px_50px_rgba(2,132,199,0.1)] sm:p-10 lg:min-h-[550px]">
+          <div className="absolute -bottom-20 -right-10 size-80 rounded-full bg-[#bae6fd]/50" />
+          <div className="absolute -left-16 top-28 size-48 rounded-full bg-[#fef9c3]/65" />
+          <div className="absolute right-9 top-20 size-3 rotate-12 rounded-sm bg-[#fb923c]" />
           <div className="relative z-10">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-[#0c2340] shadow-sm border border-[#bae6fd]">
+            <div className="mb-5 inline-flex -rotate-2 items-center gap-2 rounded-full border border-[#bae6fd] bg-white px-4 py-2 text-sm font-black text-[#0c2340] shadow-[0_6px_0_rgba(186,230,253,0.7)]">
               <MapPin className="size-4 text-[#0284c7]" /> Nhận máy nhanh tại ETown Tân Bình
             </div>
-            <h1 className="max-w-2xl text-4xl font-black leading-[1.1] tracking-[-0.04em] text-[#0c2340] sm:text-6xl">
+            <h1 className="max-w-2xl text-4xl font-black leading-[1.1] tracking-[-0.04em] text-[#0c2340] sm:text-5xl">
               Bấm máy thật vui<br />Lưu chuyến đi thật xinh
             </h1>
-            <p className="mt-5 max-w-xl text-sm font-bold leading-6 text-[#334e68] sm:text-base">
+            <p className="mt-4 max-w-xl text-sm font-bold leading-6 text-[#334e68] sm:text-base">
               Máy gọn, dễ dùng, phụ kiện đủ đầy cho mọi cuộc hẹn và chuyến đi khám phá.
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
-              {brands.map((brand) => (
-                <Link key={brand.slug} href={`/thuong-hieu/${brand.slug}`} className={`rounded-full border-2 px-4 py-1.5 text-xs font-black ${brand.className}`}>
+              {brands.map((brand, index) => (
+                <Link key={brand.slug} href={`/thuong-hieu/${brand.slug}`} className={`rounded-full border-2 px-4 py-1.5 text-xs font-black shadow-sm transition hover:-translate-y-0.5 ${index % 2 === 0 ? '-rotate-2' : 'rotate-2'} ${brand.className}`}>
                   {brand.name}
                 </Link>
               ))}
             </div>
-            <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {gear.map((item, index) => (
-                <div key={`${item.name}-${index}`} className={`relative flex h-44 flex-col items-center justify-between rounded-t-[80px] rounded-b-2xl border-2 border-[#7dd3fc] p-3 ${item.className} shadow-sm transition hover:-translate-y-1`}>
-                  <span className="rounded-full border-2 border-[#0284c7] bg-white px-3 py-1 text-[10px] font-black text-[#0284c7]">{item.name}</span>
-                  {image ? (
-                    <Image src={image} alt={`${item.name} cho thuê`} width={110} height={105} className="h-24 w-24 object-contain mix-blend-multiply" />
-                  ) : (
-                    <Camera className="size-16 text-[#0284c7]" />
-                  )}
-                  <span className="absolute -bottom-2 left-1/2 size-4 -translate-x-1/2 rotate-45 bg-[#7dd3fc]" />
-                </div>
-              ))}
+            <div className="relative mx-auto mt-3 flex min-h-[270px] max-w-[620px] items-center justify-center sm:min-h-[320px]">
+              <div className="absolute bottom-5 left-[12%] size-40 rounded-full bg-white/80 blur-2xl" />
+              <Image
+                src="/images/home-hero-chibi.png"
+                alt="Bốn linh vật máy ảnh chibi nhiều màu sắc, vui nhộn"
+                width={1400}
+                height={1024}
+                priority
+                sizes="(max-width: 1024px) 90vw, 620px"
+                className="relative z-10 h-[280px] w-full max-w-[620px] -rotate-2 object-contain drop-shadow-[0_18px_16px_rgba(12,35,64,0.16)] transition-transform duration-500 hover:rotate-2 hover:scale-[1.03] sm:h-[350px]"
+              />
+              <div className="absolute left-0 top-8 z-20 flex -rotate-12 items-center gap-1 rounded-2xl border-2 border-[#bae6fd] bg-white px-3 py-2 text-[11px] font-black text-[#0284c7] shadow-[0_5px_0_rgba(125,211,252,0.6)] sm:left-2">
+                <Star className="size-3 fill-[#facc15] text-[#facc15]" /> Mang cả team đi chơi!
+              </div>
+              <div className="absolute bottom-3 right-1 z-20 rotate-6 rounded-full border-2 border-white bg-[#fef08a] px-3 py-2 text-[10px] font-black text-[#713f12] shadow-[0_5px_0_rgba(202,138,4,0.25)] sm:right-5">
+                CHỤP VUI · ĐI CHILL
+              </div>
             </div>
           </div>
         </div>

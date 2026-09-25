@@ -1,8 +1,35 @@
 'use client';
 
 import React, { useState } from 'react';
+import useSWR from 'swr';
 import { usePathname } from 'next/navigation';
-import { MessageSquare, X } from 'lucide-react';
+import { MessageSquare, Phone, X } from 'lucide-react';
+
+interface PublicContactSettings {
+  contact_manager_name: string;
+  hotline: string;
+  zalo: string;
+  facebook_url: string;
+  instagram_url: string;
+  whatsapp_url: string;
+}
+
+async function fetchContactSettings(url: string): Promise<{ settings: PublicContactSettings | null }> {
+  const response = await fetch(url);
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error ?? 'Không thể tải thông tin liên hệ.');
+  return result;
+}
+
+function safeHttpsUrl(value: string | null | undefined) {
+  if (!value?.trim()) return '';
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === 'https:' ? url.toString() : '';
+  } catch {
+    return '';
+  }
+}
 
 interface ContactChannel {
   name: string;
@@ -16,6 +43,17 @@ interface ContactChannel {
 export default function FloatingContactWidget() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(true);
+  const { data: contactData } = useSWR('/api/public/contact', fetchContactSettings, { revalidateOnFocus: false });
+  const settings = contactData?.settings;
+  const hasLoadedSettings = contactData !== undefined;
+  const managerName = settings?.contact_manager_name?.trim() || 'THUECAM';
+  const phoneDigits = settings?.hotline.replace(/\D/g, '') ?? '';
+  const hotlineHref = hasLoadedSettings
+    ? phoneDigits ? `tel:${phoneDigits.startsWith('84') ? `+${phoneDigits}` : phoneDigits}` : ''
+    : 'tel:+84932501411';
+  const zaloHref = !hasLoadedSettings
+    ? 'https://zalo.me/0932501411'
+    : safeHttpsUrl(settings?.zalo) || (phoneDigits ? `https://zalo.me/${phoneDigits}` : '');
 
   // Do not display on admin pages
   if (pathname.startsWith('/admin')) {
@@ -24,9 +62,17 @@ export default function FloatingContactWidget() {
 
   const channels: ContactChannel[] = [
     {
+      name: 'Hotline',
+      label: settings?.hotline ? `Gọi ${managerName}: ${settings.hotline}` : 'Gọi hotline THUECAM',
+      href: hotlineHref,
+      bgColor: 'bg-sky-700',
+      hoverGlow: 'hover:shadow-[0_0_18px_rgba(2,132,199,0.5)]',
+      icon: <Phone className="size-5" aria-hidden="true" />,
+    },
+    {
       name: 'Zalo',
-      label: 'Chat Zalo: 0932.501.411',
-      href: 'https://zalo.me/0932501411',
+      label: settings?.zalo ? `Chat Zalo: ${settings.zalo}` : 'Chat Zalo THUECAM',
+      href: zaloHref,
       bgColor: 'bg-[#0068FF]',
       hoverGlow: 'hover:shadow-[0_0_18px_rgba(0,104,255,0.6)]',
       icon: (
@@ -37,8 +83,8 @@ export default function FloatingContactWidget() {
     },
     {
       name: 'WhatsApp',
-      label: 'Nhắn WhatsApp: +84 932 501 411',
-      href: 'https://wa.me/84932501411',
+      label: `Nhắn WhatsApp ${managerName}`,
+      href: hasLoadedSettings ? safeHttpsUrl(settings?.whatsapp_url) : 'https://wa.me/84932501411',
       bgColor: 'bg-[#25D366]',
       hoverGlow: 'hover:shadow-[0_0_18px_rgba(37,211,102,0.6)]',
       icon: (
@@ -49,8 +95,8 @@ export default function FloatingContactWidget() {
     },
     {
       name: 'Instagram',
-      label: 'Instagram: @thuecam.vn',
-      href: 'https://instagram.com/thuecam.vn',
+      label: `Instagram ${managerName}`,
+      href: hasLoadedSettings ? safeHttpsUrl(settings?.instagram_url) : 'https://instagram.com/thuecam.vn',
       bgColor: 'bg-gradient-to-tr from-[#FD1D1D] via-[#E1306C] to-[#833AB4]',
       hoverGlow: 'hover:shadow-[0_0_18px_rgba(225,48,108,0.6)]',
       icon: (
@@ -61,8 +107,8 @@ export default function FloatingContactWidget() {
     },
     {
       name: 'Fanpage Facebook',
-      label: 'Fanpage Facebook THUECAM',
-      href: 'https://facebook.com/thuecam.vn',
+      label: `Fanpage Facebook ${managerName}`,
+      href: hasLoadedSettings ? safeHttpsUrl(settings?.facebook_url) : 'https://facebook.com/thuecam.vn',
       bgColor: 'bg-[#1877F2]',
       hoverGlow: 'hover:shadow-[0_0_18px_rgba(24,119,242,0.6)]',
       icon: (
@@ -77,11 +123,11 @@ export default function FloatingContactWidget() {
     <div
       className="fixed bottom-6 left-6 z-50 flex flex-col items-start gap-2.5 print:hidden select-none"
       role="complementary"
-      aria-label="Kênh liên hệ trực tiếp THUECAM"
+      aria-label={`Kênh liên hệ trực tiếp ${managerName}`}
     >
       {isOpen && (
         <div className="flex flex-col gap-2.5 animate-in slide-in-from-bottom-3 duration-200">
-          {channels.map((channel) => (
+          {channels.filter((channel) => channel.href).map((channel) => (
             <a
               key={channel.name}
               href={channel.href}

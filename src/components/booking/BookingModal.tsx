@@ -1,6 +1,6 @@
 'use client';
-import React, { useState } from 'react';
-import { Product } from '@/types';
+import React, { useCallback, useRef, useState } from 'react';
+import { Product, RentalAddon } from '@/types';
 import { formatVND } from '../product/ProductCard';
 import { trackEvent } from '@/lib/analytics/gtag';
 import confetti from 'canvas-confetti';
@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   Copy,
   CreditCard,
-  Sparkles,
   X,
   ShieldCheck,
   MapPin,
@@ -50,14 +49,25 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
-  const [pickupMethod, setPickupMethod] = useState<'STORE' | 'DELIVERY'>('STORE');
+  const [pickupTime, setPickupTime] = useState('09:00');
+  const pickupMethod: 'STORE' | 'DELIVERY' = pickupTime >= '08:00' && pickupTime <= '18:00' ? 'STORE' : 'DELIVERY';
   const [address, setAddress] = useState('');
+  const [rangeAvailability, setRangeAvailability] = useState<boolean | null>(null);
+  const updateRangeAvailability = useCallback((isAvailable: boolean | null) => setRangeAvailability(isAvailable), []);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
+  const [voucherInput, setVoucherInput] = useState('');
+  const [appliedVoucher, setAppliedVoucher] = useState<{ code: string; discount: number } | null>(null);
+  const [voucherMessage, setVoucherMessage] = useState('');
+  const [isCheckingVoucher, setIsCheckingVoucher] = useState(false);
+  const voucherRequestId = useRef(0);
 
   // Booking result
   const [bookingCode, setBookingCode] = useState('');
   const [copied, setCopied] = useState(false);
-  const [paymentVerified, setPaymentVerified] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmedTotalPrice, setConfirmedTotalPrice] = useState<number | null>(null);
+  const [submissionError, setSubmissionError] = useState('');
 
   if (!isOpen) return null;
 
@@ -67,14 +77,67 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
   const diffTime = Math.max(0, end.getTime() - start.getTime());
   const totalDays = Math.max(1, Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1);
 
+  const availableAddons = product.rental_addons ?? [];
+  const selectedAddons = availableAddons.filter((addon) => selectedAddonIds.includes(addon.id));
+  const addonSubtotal = selectedAddons.reduce((sum, addon) => sum + addon.price_per_day * totalDays, 0);
   const baseRentalPrice = totalDays * product.rental_price_per_day;
   const discountRate = totalDays >= 7 ? 0.2 : totalDays >= 3 ? 0.1 : 0;
-  const discountAmount = Math.round(baseRentalPrice * discountRate);
-  const totalRentalPrice = baseRentalPrice - discountAmount;
+  const rentalSubtotal = baseRentalPrice + addonSubtotal;
+  const discountAmount = Math.round(rentalSubtotal * discountRate);
+  const totalRentalPrice = rentalSubtotal - discountAmount;
+  const voucherDiscount = appliedVoucher?.discount ?? 0;
   const deposit = product.deposit_amount;
-  const totalDueNow = totalRentalPrice; // Customer pays rental fee; deposit settled upon pickup or CCCD
+  const totalDueNow = confirmedTotalPrice ?? Math.max(0, totalRentalPrice - voucherDiscount);
+
+  const clearVoucherDiscount = () => {
+    voucherRequestId.current += 1;
+    setAppliedVoucher(null);
+    setVoucherMessage('');
+    setIsCheckingVoucher(false);
+  };
+
+  const handleApplyVoucher = async () => {
+    const requestId = ++voucherRequestId.current;
+    if (!voucherInput.trim()) {
+      setIsCheckingVoucher(false);
+      setVoucherMessage('Vui lòng nhập mã voucher.');
+      return;
+    }
+    setIsCheckingVoucher(true);
+    setVoucherMessage('');
+    try {
+      const response = await fetch('/api/vouchers/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product_id: product.id,
+          start_date: startDate,
+          end_date: endDate,
+          addon_ids: selectedAddonIds,
+          code: voucherInput.trim(),
+        }),
+      });
+      const result = await response.json();
+      if (requestId !== voucherRequestId.current) return;
+      if (!response.ok || !result.valid) throw new Error(result.error ?? 'Mã voucher không hợp lệ hoặc đã hết lượt.');
+      setAppliedVoucher({ code: result.code, discount: Number(result.discount) });
+      setVoucherInput(result.code);
+      setVoucherMessage(`Đã áp dụng voucher ${result.code}.`);
+    } catch (error) {
+      if (requestId !== voucherRequestId.current) return;
+      setAppliedVoucher(null);
+      setVoucherMessage(error instanceof Error ? error.message : 'Không thể kiểm tra voucher.');
+    } finally {
+      if (requestId === voucherRequestId.current) setIsCheckingVoucher(false);
+    }
+  };
 
   const handleStartBooking = () => {
+    if (rangeAvailability !== true) {
+      setSubmissionError(rangeAvailability === false ? 'Lịch đã kín trong khoảng ngày bạn chọn.' : 'Đang kiểm tra lịch. Vui lòng chờ một chút.');
+      return;
+    }
+    setSubmissionError('');
     trackEvent({
       action: 'availability_check',
       params: {
@@ -97,79 +160,70 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
     setStep('CUSTOMER_INFO');
   };
 
-  const handleCreateBooking = (e: React.FormEvent) => {
+  const handleCreateBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+    setSubmissionError('');
 
     const newErrors: Record<string, string> = {};
-    if (!isValidName(customerName)) {
-      newErrors.customerName = NAME_VALIDATION_ERROR;
-    }
-    if (!isValidVietnamPhone(customerPhone)) {
-      newErrors.customerPhone = PHONE_VALIDATION_ERROR;
-    }
-    if (!isValidEmail(customerEmail)) {
-      newErrors.customerEmail = EMAIL_VALIDATION_ERROR;
-    }
+    if (!isValidName(customerName)) newErrors.customerName = NAME_VALIDATION_ERROR;
+    if (!isValidVietnamPhone(customerPhone)) newErrors.customerPhone = PHONE_VALIDATION_ERROR;
+    if (!isValidEmail(customerEmail)) newErrors.customerEmail = EMAIL_VALIDATION_ERROR;
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(pickupTime)) newErrors.pickupTime = 'Vui lòng chọn giờ nhận máy hợp lệ.';
+    if (rangeAvailability !== true) newErrors.availability = rangeAvailability === false ? 'Lịch đã kín trong khoảng ngày bạn chọn.' : 'Đang kiểm tra lịch trống, vui lòng chờ một chút.';
     if (pickupMethod === 'DELIVERY' && (!address || address.trim().length < 5)) {
       newErrors.address = 'Vui lòng nhập địa chỉ giao nhận cụ thể (tối thiểu 5 ký tự).';
     }
-
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
-    const generatedCode = `TC${Math.floor(100000 + Math.random() * 900000)}`;
-    setBookingCode(generatedCode);
-
-    // Save booking to admin storage so admin dashboard displays it in table immediately!
-    if (typeof window !== 'undefined') {
-      try {
-        const existing = localStorage.getItem('thuecam_bookings');
-        const bookingsList = existing ? JSON.parse(existing) : [];
-        bookingsList.unshift({
-          id: generatedCode,
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product_id: product.id,
+          start_date: startDate,
+          end_date: endDate,
           customer_name: customerName,
           customer_phone: customerPhone,
           customer_email: customerEmail,
-          product_id: product.id,
-          product_name: product.name,
-          start_date: startDate,
-          end_date: endDate,
-          total_days: totalDays,
-          total_price: totalDueNow,
-          deposit_amount: deposit,
-          pickup_method: pickupMethod === 'STORE' ? 'ETown Tân Bình' : `Giao: ${address}`,
-          status: 'PENDING',
-          created_at: new Date().toISOString(),
-        });
-        localStorage.setItem('thuecam_bookings', JSON.stringify(bookingsList));
-      } catch {
-        // ignore
-      }
+          pickup_method: pickupMethod,
+          pickup_time: pickupTime,
+          delivery_address: address,
+          addon_ids: selectedAddonIds,
+          voucher_code: appliedVoucher?.code ?? '',
+        }),
+      });
+      const booking = await response.json();
+      if (!response.ok) throw new Error(booking.error ?? 'Không thể tạo đơn thuê.');
+
+      const generatedCode = String(booking.booking_code);
+      const serverTotalPrice = Number(booking.total_price);
+      setBookingCode(generatedCode);
+      setConfirmedTotalPrice(serverTotalPrice);
+      trackEvent({
+        action: 'booking_created',
+        params: {
+          booking_code: generatedCode,
+          item_id: product.id,
+          total_days: Number(booking.total_days),
+          total_price: serverTotalPrice,
+        },
+      });
+      trackEvent({
+        action: 'payment_started',
+        params: { booking_code: generatedCode, amount: serverTotalPrice, method: 'SePay_VietQR' },
+      });
+      setStep('PAYMENT_SEPAY');
+    } catch (error) {
+      setSubmissionError(error instanceof Error ? error.message : 'Không thể tạo đơn thuê.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    trackEvent({
-      action: 'booking_created',
-      params: {
-        booking_code: generatedCode,
-        item_id: product.id,
-        total_days: totalDays,
-        total_price: totalDueNow,
-      },
-    });
-
-    trackEvent({
-      action: 'payment_started',
-      params: {
-        booking_code: generatedCode,
-        amount: totalDueNow,
-        method: 'SePay_VietQR',
-      },
-    });
-
-    setStep('PAYMENT_SEPAY');
   };
 
   const handleCopyContent = () => {
@@ -179,7 +233,6 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
   };
 
   const handleSimulateSuccessfulPayment = () => {
-    setPaymentVerified(true);
     confetti({
       particleCount: 120,
       spread: 70,
@@ -226,6 +279,12 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
               </p>
             </div>
 
+            {product.inventory_count <= 0 && (
+              <p id="booking-modal-unavailable-message" role="status" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
+                Hiện full lịch thuê. Các ngày kín bên dưới không thể chọn; bạn vẫn có thể xem lịch.
+              </p>
+            )}
+
             {/* Visual Schedule Table Component */}
             <AvailabilityCalendarTable
               productId={product.id}
@@ -235,10 +294,43 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
               startDate={startDate}
               endDate={endDate}
               onDateChange={(start, end) => {
+                setRangeAvailability(null);
                 setStartDate(start);
                 setEndDate(end);
               }}
+              onRangeAvailabilityChange={updateRangeAvailability}
             />
+
+            {availableAddons.length > 0 && (
+              <section aria-labelledby="rental-addons-heading" className="rounded-2xl border border-sky-100 bg-sky-50/60 p-4">
+                <div className="mb-3">
+                  <h4 id="rental-addons-heading" className="text-sm font-black text-slate-900">Phụ kiện thuê thêm</h4>
+                  <p className="mt-0.5 text-[11px] text-slate-500">Tùy chọn theo nhu cầu, giá tính theo ngày thuê.</p>
+                </div>
+                <div className="space-y-2">
+                  {availableAddons.map((addon: RentalAddon) => {
+                    const checked = selectedAddonIds.includes(addon.id);
+                    return (
+                      <label key={addon.id} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-sky-100 bg-white p-3">
+                        <span className="flex items-center gap-2 text-xs font-bold text-slate-800">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => {
+                              clearVoucherDiscount();
+                              setSelectedAddonIds((current) => checked ? current.filter((id) => id !== addon.id) : [...current, addon.id]);
+                            }}
+                            className="size-4 accent-sky-600"
+                          />
+                          {addon.name}
+                        </span>
+                        <span className="shrink-0 text-xs font-black text-sky-700">+{formatVND(addon.price_per_day)}/ngày</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
 
             {/* Date Pickers for precision input */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
@@ -248,9 +340,10 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
                 </label>
                 <input
                   type="date"
+                  disabled={product.inventory_count <= 0}
                   min={todayStr}
                   value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                  onChange={(e) => { setRangeAvailability(null); setStartDate(e.target.value); clearVoucherDiscount(); }}
                   className="w-full bg-sky-50/60 border border-sky-200 rounded-2xl px-3 py-2.5 text-sm text-slate-900 font-bold focus:outline-none focus:border-[#0284c7]"
                 />
               </div>
@@ -261,21 +354,25 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
                 </label>
                 <input
                   type="date"
+                  disabled={product.inventory_count <= 0}
                   min={startDate || todayStr}
                   value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
+                  onChange={(e) => { setRangeAvailability(null); setEndDate(e.target.value); clearVoucherDiscount(); }}
                   className="w-full bg-sky-50/60 border border-sky-200 rounded-2xl px-3 py-2.5 text-sm text-slate-900 font-bold focus:outline-none focus:border-[#0284c7]"
                 />
               </div>
             </div>
 
+            {rangeAvailability === false && <p role="alert" className="text-center text-xs font-bold text-rose-600">Khoảng ngày này đã kín lịch. Hãy chọn ngày khác.</p>}
+            {submissionError && <p role="alert" className="text-center text-xs font-bold text-rose-600">{submissionError}</p>}
             <button
               onClick={handleStartBooking}
-              disabled={!startDate || !endDate}
+              disabled={!startDate || !endDate || rangeAvailability !== true}
+              aria-busy={rangeAvailability === null}
               className="w-full py-3.5 rounded-full bg-gradient-candy hover:opacity-95 text-white font-black text-sm shadow-cute hover:shadow-cute-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Calendar className="w-4 h-4" />
-              <span>Tiếp Tục Đặt Máy ({totalDays} Ngày - {formatVND(totalDueNow)}) 📸</span>
+              {rangeAvailability === null ? <RotateCw className="size-4 animate-spin" aria-hidden="true" /> : <Calendar className="w-4 h-4" />}
+              <span>{rangeAvailability === null ? 'Đang kiểm tra l��ch…' : `Tiếp tục đặt máy (${totalDays} ngày - ${formatVND(totalDueNow)})`}</span>
             </button>
           </div>
         )}
@@ -291,10 +388,33 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
               </p>
             </div>
 
-            <div className="space-y-3 text-xs">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">
-                  Họ và tên của bạn: *
+            <section aria-label="Tổng tiền thuê" className="space-y-2 rounded-2xl border border-sky-100 bg-sky-50/60 p-4 text-xs">
+              <div className="flex justify-between gap-3"><span className="text-slate-600">Tiền thuê thiết bị</span><span className="font-bold text-slate-800">{formatVND(baseRentalPrice)}</span></div>
+              {selectedAddons.map((addon) => <div key={addon.id} className="flex justify-between gap-3"><span className="text-slate-600">{addon.name} × {totalDays} ngày</span><span className="font-bold text-slate-800">{formatVND(addon.price_per_day * totalDays)}</span></div>)}
+              {discountAmount > 0 && <div className="flex justify-between gap-3 text-emerald-700"><span>Ưu đãi thuê dài ngày</span><span className="font-bold">−{formatVND(discountAmount)}</span></div>}
+              {appliedVoucher && <div className="flex justify-between gap-3 text-emerald-700"><span>Voucher {appliedVoucher.code}</span><span className="font-bold">−{formatVND(voucherDiscount)}</span></div>}
+              <div className="flex items-center justify-between gap-3 border-t border-sky-200 pt-2 text-sm"><span className="font-black text-slate-900">Tổng thanh toán</span><span className="font-black text-[#0284c7]">{formatVND(totalDueNow)}</span></div>
+            </section>
+
+            <section aria-label="Áp dụng voucher" className="rounded-2xl border border-slate-200 p-3">
+              <label htmlFor="booking-voucher" className="mb-1.5 block text-xs font-bold text-slate-700">Mã voucher</label>
+              <div className="relative">
+                <input id="booking-voucher" value={voucherInput} onChange={(e) => { clearVoucherDiscount(); setVoucherInput(e.target.value.toUpperCase()); }} onBlur={handleApplyVoucher} placeholder="Nhập mã giảm giá" maxLength={64} aria-describedby="voucher-status" className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 pr-10 text-sm font-bold uppercase text-slate-900 outline-none focus:border-sky-500" />
+                {isCheckingVoucher && <RotateCw className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-sky-600" aria-label="Đang kiểm tra voucher" />}
+              </div>
+              <p className="mt-1 text-[10px] text-slate-500">Voucher sẽ được kiểm tra tự động khi bạn rời khỏi ô nhập.</p>
+              {voucherMessage && <p id="voucher-status" role="status" aria-live="polite" className={`mt-2 text-[11px] font-semibold ${appliedVoucher ? 'text-emerald-700' : 'text-rose-600'}`}>{voucherMessage}</p>}
+            </section>
+
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1" htmlFor="booking-pickup-time">Giờ nhận máy: *</label>
+                  <input id="booking-pickup-time" type="time" required value={pickupTime} onChange={(e) => setPickupTime(e.target.value)} aria-describedby="booking-pickup-guidance" className="w-full rounded-2xl border border-sky-200 bg-sky-50/60 px-3.5 py-2.5 text-sm font-bold text-slate-900 focus:border-sky-500 focus:outline-none" />
+                  <p id="booking-pickup-guidance" className="mt-1 text-[10px] text-slate-500">08:00–18:00 nhận tại ETown; ngoài giờ sẽ tự chọn giao hỏa tốc.</p>
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Họ và tên của bạn: *
                 </label>
                 <input
                   type="text"
@@ -376,38 +496,13 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
                 <label className="block font-bold text-slate-700 mb-1">
                   Địa điểm & Hình thức nhận máy:
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPickupMethod('STORE')}
-                    className={`py-3 px-3 rounded-2xl border text-left transition-all font-bold flex items-center gap-2 ${
-                      pickupMethod === 'STORE'
-                        ? 'bg-sky-50 border-[#0284c7] text-[#0284c7]'
-                        : 'bg-white border-slate-200 text-slate-600 hover:border-sky-200'
-                    }`}
-                  >
-                    <MapPin className="size-4 shrink-0 text-[#0284c7]" />
-                    <div>
-                      <span className="block text-xs">Nhận tại điểm hẹn ETown</span>
-                      <span className="block text-[10px] text-slate-500 font-normal">Tân Bình, TP HCM</span>
-                    </div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPickupMethod('DELIVERY')}
-                    className={`py-3 px-3 rounded-2xl border text-left transition-all font-bold flex items-center gap-2 ${
-                      pickupMethod === 'DELIVERY'
-                        ? 'bg-sky-50 border-[#0284c7] text-[#0284c7]'
-                        : 'bg-white border-slate-200 text-slate-600 hover:border-sky-200'
-                    }`}
-                  >
-                    <Truck className="size-4 shrink-0 text-[#0284c7]" />
-                    <div>
-                      <span className="block text-xs">Giao hỏa tốc 30 phút</span>
-                      <span className="block text-[10px] text-slate-500 font-normal">Giao tận nơi toàn TP.HCM</span>
-                    </div>
-                  </button>
-                </div>
+                <div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-3 text-xs text-slate-700" role="status" aria-live="polite">
+                {pickupMethod === 'STORE' ? (
+                  <span className="flex items-center gap-2 font-bold"><MapPin className="size-4 text-sky-700" /> Nhận máy tại ETown Tân Bình lúc {pickupTime}.</span>
+                ) : (
+                  <span className="flex items-center gap-2 font-bold"><Truck className="size-4 text-sky-700" /> Ngoài giờ hành chính — giao hỏa tốc lúc {pickupTime}.</span>
+                )}
+              </div>
               </div>
 
               {pickupMethod === 'DELIVERY' && (
@@ -439,6 +534,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
               )}
             </div>
 
+            {submissionError && <p role="alert" className="text-xs font-semibold text-rose-600">{submissionError}</p>}
             <div className="flex gap-3 pt-3">
               <button
                 type="button"
@@ -449,6 +545,8 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
               </button>
               <SafeButton
                 type="submit"
+                disabled={isSubmitting}
+                isLoading={isSubmitting}
                 loadingText="Đang tạo đơn..."
                 className="w-2/3 py-3 rounded-full bg-gradient-candy hover:opacity-95 text-white font-black text-xs shadow-cute flex items-center justify-center gap-1.5"
               >

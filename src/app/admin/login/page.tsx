@@ -1,17 +1,18 @@
 'use client';
 
 import { FormEvent, useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { ShieldCheck, Lock, Mail, AlertCircle, ArrowRight } from 'lucide-react';
-import SafeButton from '@/components/common/SafeButton';
+import { useSearchParams } from 'next/navigation';
+import { Lock, Mail, AlertCircle, ArrowRight } from 'lucide-react';
 import { isValidEmail } from '@/lib/security/validation';
 
 function LoginFormContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTarget = searchParams.get('from') || '/admin';
+  const requestedRedirect = searchParams.get('from') || '/admin';
+  const redirectTarget = requestedRedirect.startsWith('/') && !requestedRedirect.startsWith('//')
+    ? requestedRedirect
+    : '/admin';
 
-  const [email, setEmail] = useState('admin@gmail.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,22 +22,23 @@ function LoginFormContent() {
     setError('');
 
     // Input validation
-    if (!email.trim() || !isValidEmail(email)) {
-      setError('Vui lòng nhập định dạng email hợp lệ (ví dụ: admin@gmail.com).');
+    const normalizedEmail = email.trim();
+    if (!isValidEmail(normalizedEmail)) {
+      setError('Vui lòng nhập địa chỉ email hợp lệ.');
       return;
     }
 
-    if (!password || password.length < 6) {
-      setError('Mật khẩu quản trị phải có ít nhất 6 ký tự.');
+    if (!password) {
+      setError('Vui lòng nhập mật khẩu.');
       return;
     }
 
     setLoading(true);
 
     try {
-      // Authenticate via secure server API (sets HttpOnly session cookie, zero localStorage)
       const res = await fetch('/api/admin/auth/login', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim(), password }),
       });
@@ -49,8 +51,17 @@ function LoginFormContent() {
         return;
       }
 
-      // Hard redirect to clear any state and load session in layout
-      window.location.href = redirectTarget;
+      const sessionResponse = await fetch('/api/admin/auth/me', {
+        credentials: 'same-origin',
+        cache: 'no-store',
+      });
+      if (!sessionResponse.ok) {
+        setError('Đăng nhập thành công nhưng phiên chưa được lưu. Vui lòng tải lại trang và thử lại.');
+        setLoading(false);
+        return;
+      }
+
+      window.location.assign(redirectTarget);
     } catch {
       setError('Không thể kết nối đến máy chủ xác thực. Vui lòng thử lại.');
       setLoading(false);
@@ -69,7 +80,7 @@ function LoginFormContent() {
           </div>
 
           {error && (
-            <div className="flex items-start gap-2.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 p-3.5 text-xs text-rose-300 animate-in fade-in">
+            <div role="alert" aria-live="assertive" className="flex items-start gap-2.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 p-3.5 text-xs text-rose-300 animate-in fade-in">
               <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-rose-400" />
               <span>{error}</span>
             </div>
@@ -85,6 +96,8 @@ function LoginFormContent() {
                 <input
                   required
                   type="email"
+                  autoComplete="username"
+                  placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full rounded-xl border border-slate-700 bg-slate-950/80 pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition"
@@ -101,6 +114,8 @@ function LoginFormContent() {
                 <input
                   required
                   type="password"
+                  autoComplete="current-password"
+                  placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full rounded-xl border border-slate-700 bg-slate-950/80 pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition"
@@ -109,15 +124,14 @@ function LoginFormContent() {
             </div>
           </div>
 
-          <SafeButton
+          <button
             type="submit"
             disabled={loading}
-            loadingText="Đang xác thực bảo mật..."
-            className="w-full rounded-xl bg-gradient-to-r from-cyan-400 to-sky-500 hover:from-cyan-300 hover:to-sky-400 py-3.5 font-black text-slate-950 text-sm shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 transition"
+            className="w-full rounded-xl bg-gradient-to-r from-cyan-400 to-sky-500 hover:from-cyan-300 hover:to-sky-400 py-3.5 font-black text-slate-950 text-sm shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 transition disabled:cursor-not-allowed disabled:opacity-70"
           >
-            <span>Đăng Nhập Quản Trị</span>
-            <ArrowRight className="w-4 h-4" />
-          </SafeButton>
+            <span>{loading ? 'Đang xác thực bảo mật...' : 'Đăng Nhập Quản Trị'}</span>
+            {!loading && <ArrowRight className="w-4 h-4" />}
+          </button>
         </form>
       </div>
     </main>

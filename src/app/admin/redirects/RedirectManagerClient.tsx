@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { RedirectRule } from '@/types';
 import { Plus, Trash2, ArrowRight, CornerDownRight, AlertCircle } from 'lucide-react';
+import { deleteAdminRecord, saveAdminRecord } from '@/lib/data/admin-api';
 
 interface Props {
   initialRedirects: RedirectRule[];
@@ -14,34 +15,43 @@ export default function RedirectManagerClient({ initialRedirects }: Props) {
   const [newUrl, setNewUrl] = useState('');
   const [statusCode, setStatusCode] = useState<301 | 302>(301);
 
-  const handleAddRedirect = (e: React.FormEvent) => {
+  const handleAddRedirect = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!oldUrl.startsWith('/')) {
-      alert('Đường dẫn cũ phải bắt đầu bằng dấu gạch chéo /, ví dụ: /thue-pocket-4');
+    const source = oldUrl.trim();
+    const destination = newUrl.trim();
+    const isLocalPath = destination.startsWith('/') && !destination.startsWith('//');
+    const isHttpsUrl = /^https:\/\//i.test(destination);
+    if (!source.startsWith('/') || source.startsWith('//')) {
+      alert('Đường dẫn cũ phải là đường dẫn nội bộ bắt đầu bằng /, ví dụ: /thue-pocket-4');
       return;
     }
-    if (!newUrl.startsWith('/') && !newUrl.startsWith('http')) {
-      alert('Đường dẫn mới phải bắt đầu bằng / hoặc https://');
+    if (!isLocalPath && !isHttpsUrl) {
+      alert('Đường dẫn đích phải là đường dẫn nội bộ hoặc URL HTTPS.');
       return;
     }
 
-    const newRule: RedirectRule = {
-      id: `redir-${Date.now()}`,
-      old_url: oldUrl.trim(),
-      new_url: newUrl.trim(),
-      status_code: statusCode,
-      is_active: true,
-      created_at: new Date().toISOString(),
-    };
-
-    setRedirects([newRule, ...redirects]);
-    setOldUrl('');
-    setNewUrl('');
+    try {
+      const saved = await saveAdminRecord<RedirectRule>('redirects', {
+        old_url: source,
+        new_url: destination,
+        status_code: statusCode,
+        is_active: true,
+      });
+      setRedirects((current) => [saved, ...current]);
+      setOldUrl('');
+      setNewUrl('');
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Không thể tạo chuyển hướng.');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm('Bạn có chắc muốn xóa quy tắc chuyển hướng này?')) {
-      setRedirects(redirects.filter((r) => r.id !== id));
+  const handleDelete = async (id: string) => {
+    if (!confirm('Bạn có chắc muốn xóa quy tắc chuyển hướng này?')) return;
+    try {
+      await deleteAdminRecord('redirects', id);
+      setRedirects((current) => current.filter((rule) => rule.id !== id));
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Không thể xóa chuyển hướng.');
     }
   };
 

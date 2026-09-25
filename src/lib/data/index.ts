@@ -1,4 +1,4 @@
-import {
+import type {
   Product,
   Category,
   UseCase,
@@ -9,155 +9,289 @@ import {
   RedirectRule,
   SeoSettings,
 } from '@/types';
-import {
-  PRODUCTS,
-  CATEGORIES,
-  USE_CASES,
-  BRANDS,
-  LOCATIONS,
-  ARTICLES,
-  REVIEWS,
-  REDIRECTS,
-  INITIAL_SEO_SETTINGS,
-} from './mock-data';
+import { CAMERA_FORMULA_PILLAR } from '@/lib/camera-formulas';
+import { createClient } from '@/lib/supabase/server';
 
-// Helper to populate product relationships
-function populateProduct(p: Product): Product {
-  const brand = BRANDS.find((b) => b.id === p.brand_id);
-  const category = CATEGORIES.find((c) => c.id === p.category_id);
-  const approvedReviews = REVIEWS.filter(
-    (r) => r.product_id === p.id && r.status === 'APPROVED'
-  );
-
-  const review_count = approvedReviews.length;
-  const rating =
-    review_count > 0
-      ? Number(
-          (
-            approvedReviews.reduce((sum, r) => sum + r.rating, 0) / review_count
-          ).toFixed(1)
-        )
-      : undefined;
-
-  return {
-    ...p,
-    brand,
-    category,
-    reviews: approvedReviews,
-    rating,
-    review_count,
-  };
+function requireData<T>(data: T | null, error: { message: string } | null): T {
+  if (error) throw new Error(`Supabase query failed: ${error.message}`);
+  if (data === null) throw new Error('Supabase returned no data.');
+  return data;
 }
 
-// ---------------- PRODUCTS ----------------
+async function getProductRelations(products: Product[]): Promise<Product[]> {
+  if (!products.length) return products;
+
+  const supabase = await createClient();
+  const productIds = products.map((product) => product.id);
+  const [{ data: brands, error: brandError }, { data: categories, error: categoryError }, { data: reviews, error: reviewError }] = await Promise.all([
+    supabase.from('brands').select('*'),
+    supabase.from('categories').select('*'),
+    supabase.from('reviews').select('*').in('product_id', productIds).eq('status', 'APPROVED'),
+  ]);
+
+  if (brandError) throw new Error(`Supabase brands query failed: ${brandError.message}`);
+  if (categoryError) throw new Error(`Supabase categories query failed: ${categoryError.message}`);
+  if (reviewError) throw new Error(`Supabase reviews query failed: ${reviewError.message}`);
+
+  const brandById = new Map((brands ?? []).map((brand) => [brand.id, brand as Brand]));
+  const categoryById = new Map((categories ?? []).map((category) => [category.id, category as Category]));
+  const reviewsByProduct = new Map<string, Review[]>();
+  for (const review of (reviews ?? []) as Review[]) {
+    if (!review.product_id) continue;
+    const current = reviewsByProduct.get(review.product_id) ?? [];
+    current.push(review);
+    reviewsByProduct.set(review.product_id, current);
+  }
+
+  return products.map((product) => {
+    const approvedReviews = reviewsByProduct.get(product.id) ?? [];
+    const rating = approvedReviews.length
+      ? Number((approvedReviews.reduce((sum, review) => sum + review.rating, 0) / approvedReviews.length).toFixed(1))
+      : undefined;
+
+    return {
+      ...product,
+      brand: product.brand_id ? brandById.get(product.brand_id) : undefined,
+      category: product.category_id ? categoryById.get(product.category_id) : undefined,
+      reviews: approvedReviews,
+      rating,
+      review_count: approvedReviews.length,
+    };
+  });
+}
+
 export async function getProducts(): Promise<Product[]> {
-  return PRODUCTS.map(populateProduct);
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+  return getProductRelations(requireData(data, error) as Product[]);
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  const p = PRODUCTS.find((item) => item.slug === slug);
-  if (!p) return null;
-  return populateProduct(p);
+  const products = await getProducts();
+  return products.find((product) => product.slug === slug) ?? null;
 }
 
 export async function getProductsByCategory(categorySlug: string): Promise<Product[]> {
-  const category = CATEGORIES.find((c) => c.slug === categorySlug);
+  const category = await getCategoryBySlug(categorySlug);
   if (!category) return [];
-  return PRODUCTS.filter((p) => p.category_id === category.id).map(populateProduct);
+  return (await getProducts()).filter((product) => product.category_id === category.id);
 }
 
 export async function getProductsByBrand(brandSlug: string): Promise<Product[]> {
-  const brand = BRANDS.find((b) => b.slug === brandSlug);
+  const brand = await getBrandBySlug(brandSlug);
   if (!brand) return [];
-  return PRODUCTS.filter((p) => p.brand_id === brand.id).map(populateProduct);
+  return (await getProducts()).filter((product) => product.brand_id === brand.id);
 }
 
-// ---------------- CATEGORIES ----------------
 export async function getCategories(): Promise<Category[]> {
-  return [...CATEGORIES].sort((a, b) => a.display_order - b.display_order);
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('categories').select('*').eq('indexable', true).order('display_order');
+  return requireData(data, error) as Category[];
 }
 
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {
-  const c = CATEGORIES.find((item) => item.slug === slug);
-  return c || null;
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('categories').select('*').eq('slug', slug).eq('indexable', true).maybeSingle();
+  if (error) throw new Error(`Supabase category query failed: ${error.message}`);
+  return data as Category | null;
 }
 
-// ---------------- USE CASES ----------------
 export async function getUseCases(): Promise<UseCase[]> {
-  return [...USE_CASES];
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('use_cases').select('*').eq('indexable', true).order('name');
+  return requireData(data, error) as UseCase[];
 }
 
 export async function getUseCaseBySlug(slug: string): Promise<UseCase | null> {
-  const uc = USE_CASES.find((item) => item.slug === slug);
-  return uc || null;
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('use_cases').select('*').eq('slug', slug).eq('indexable', true).maybeSingle();
+  if (error) throw new Error(`Supabase use case query failed: ${error.message}`);
+  return data as UseCase | null;
 }
 
-// ---------------- BRANDS ----------------
 export async function getBrands(): Promise<Brand[]> {
-  return [...BRANDS];
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('brands').select('*').eq('indexable', true).order('name');
+  return requireData(data, error) as Brand[];
 }
 
 export async function getBrandBySlug(slug: string): Promise<Brand | null> {
-  const b = BRANDS.find((item) => item.slug === slug);
-  return b || null;
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('brands').select('*').eq('slug', slug).eq('indexable', true).maybeSingle();
+  if (error) throw new Error(`Supabase brand query failed: ${error.message}`);
+  return data as Brand | null;
 }
 
-// ---------------- LOCATIONS ----------------
 export async function getLocations(): Promise<Location[]> {
-  return [...LOCATIONS];
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('locations').select('*').eq('indexable', true).order('name');
+  return requireData(data, error) as Location[];
 }
 
 export async function getLocationBySlug(slug: string): Promise<Location | null> {
-  const loc = LOCATIONS.find((item) => item.slug === slug);
-  return loc || null;
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('locations').select('*').eq('slug', slug).eq('indexable', true).maybeSingle();
+  if (error) throw new Error(`Supabase location query failed: ${error.message}`);
+  return data as Location | null;
 }
 
-// ---------------- ARTICLES (BLOG / GUIDES / COMPARISONS / LANDINGS) ----------------
-export async function getArticles(type?: 'blog' | 'guide' | 'comparison' | 'landing'): Promise<Article[]> {
-  if (type) {
-    return ARTICLES.filter((a) => a.type === type && a.status === 'PUBLISHED');
-  }
-  return ARTICLES.filter((a) => a.status === 'PUBLISHED');
+export async function getArticles(type?: Article['type']): Promise<Article[]> {
+  const supabase = await createClient();
+  let query = supabase.from('articles').select('*').eq('status', 'PUBLISHED').eq('indexable', true).order('published_at', { ascending: false });
+  if (type) query = query.eq('type', type);
+  const { data, error } = await query;
+  return (requireData(data, error) as Article[]).filter((article) => article.pillar_slug !== CAMERA_FORMULA_PILLAR);
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
-  const a = ARTICLES.find((item) => item.slug === slug && item.status === 'PUBLISHED');
-  return a || null;
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('articles').select('*').eq('slug', slug).eq('status', 'PUBLISHED').eq('indexable', true).maybeSingle();
+  if (error) throw new Error(`Supabase article query failed: ${error.message}`);
+  return data as Article | null;
 }
 
 export async function getClusterArticles(pillarSlug: string): Promise<Article[]> {
-  return ARTICLES.filter(
-    (a) => a.pillar_slug === pillarSlug && a.status === 'PUBLISHED'
-  );
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('articles').select('*').eq('pillar_slug', pillarSlug).eq('status', 'PUBLISHED').eq('indexable', true).order('published_at', { ascending: false });
+  return requireData(data, error) as Article[];
 }
 
-// ---------------- REVIEWS ----------------
 export async function getApprovedReviews(productId?: string): Promise<Review[]> {
-  if (productId) {
-    return REVIEWS.filter(
-      (r) => r.product_id === productId && r.status === 'APPROVED'
-    );
-  }
-  return REVIEWS.filter((r) => r.status === 'APPROVED');
+  const supabase = await createClient();
+  let query = supabase.from('reviews').select('*').eq('status', 'APPROVED').order('created_at', { ascending: false });
+  if (productId) query = query.eq('product_id', productId);
+  const { data, error } = await query;
+  return requireData(data, error) as Review[];
 }
 
-export async function getAllReviewsForAdmin(): Promise<Review[]> {
-  return [...REVIEWS];
-}
-
-// ---------------- REDIRECTS ----------------
 export async function getRedirectRules(): Promise<RedirectRule[]> {
-  return [...REDIRECTS];
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('redirects').select('*').eq('is_active', true);
+  return requireData(data, error) as RedirectRule[];
 }
-
-// ---------------- SEO SETTINGS ----------------
-let currentSeoSettings = { ...INITIAL_SEO_SETTINGS };
 
 export async function getSeoSettings(): Promise<SeoSettings> {
-  return { ...currentSeoSettings };
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('seo_settings').select('*').eq('id', 'global-seo-settings').single();
+  return requireData(data, error) as SeoSettings;
 }
 
-export async function updateSeoSettings(updates: Partial<SeoSettings>): Promise<SeoSettings> {
-  currentSeoSettings = { ...currentSeoSettings, ...updates, updated_at: new Date().toISOString() };
-  return { ...currentSeoSettings };
+export async function getSiteSettings() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('site_settings').select('*').eq('id', 'global').single();
+  return requireData(data, error);
+}
+
+export async function getPublicRedirect(pathname: string): Promise<RedirectRule | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('redirects').select('*').eq('old_url', pathname).eq('is_active', true).maybeSingle();
+  if (error) throw new Error(`Supabase redirect query failed: ${error.message}`);
+  return data as RedirectRule | null;
+}
+
+export async function getBlockedDates(): Promise<{ date: string; reason: string }[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('blocked_dates').select('date,reason').order('date');
+  return requireData(data, error) as { date: string; reason: string }[];
+}
+
+export async function getBookingsForAvailability(startDate: string, endDate: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('bookings').select('product_id,start_date,end_date,status').in('status', ['PENDING', 'CONFIRMED', 'RENTING', 'PAID', 'ACTIVE']).lte('start_date', endDate).gte('end_date', startDate);
+  return requireData(data, error);
+}
+
+export async function getBookingByCode(bookingCode: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('bookings').select('id,booking_code,status,total_price,deposit_amount,start_date,end_date,product_name').eq('booking_code', bookingCode).maybeSingle();
+  if (error) throw new Error(`Supabase booking query failed: ${error.message}`);
+  return data;
+}
+
+export async function getBookingProducts(): Promise<Product[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('products').select('*').eq('status', 'ACTIVE').order('created_at', { ascending: false });
+  return getProductRelations(requireData(data, error) as Product[]);
+}
+
+export async function getCameraFormulas(): Promise<Article[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('articles')
+    .select('*')
+    .eq('pillar_slug', CAMERA_FORMULA_PILLAR)
+    .eq('status', 'PUBLISHED')
+    .eq('indexable', true)
+    .order('published_at', { ascending: false });
+  return requireData(data, error) as Article[];
+}
+
+export async function getCameraFormulaBySlug(slug: string): Promise<Article | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('articles')
+    .select('*')
+    .eq('slug', slug)
+    .eq('pillar_slug', CAMERA_FORMULA_PILLAR)
+    .eq('status', 'PUBLISHED')
+    .eq('indexable', true)
+    .maybeSingle();
+  if (error) throw new Error(`Supabase camera formula query failed: ${error.message}`);
+  return data as Article | null;
+}
+
+export async function getProductsForSearch(query: string) {
+  const normalized = query.trim().toLocaleLowerCase('vi');
+  if (!normalized) return [];
+  return (await getProducts()).filter((product) => `${product.name} ${product.excerpt} ${product.description}`.toLocaleLowerCase('vi').includes(normalized));
+}
+
+export async function getProductsForSitemap() {
+  return getProducts();
+}
+
+export async function getArticlesForSitemap() {
+  return getArticles();
+}
+
+export async function getBrandsForSitemap() {
+  return getBrands();
+}
+
+export async function getCategoriesForSitemap() {
+  return getCategories();
+}
+
+export async function getUseCasesForSitemap() {
+  return getUseCases();
+}
+
+export async function getLocationsForSitemap() {
+  return getLocations();
+}
+
+export async function getProductCount() {
+  return (await getProducts()).length;
+}
+
+export async function getTopRatedProducts(limit = 6) {
+  return (await getProducts()).sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)).slice(0, limit);
+}
+
+export async function getLatestArticles(limit = 6) {
+  return (await getArticles()).slice(0, limit);
+}
+
+export async function getArticleRecommendations(article: Article) {
+  const products = await getProducts();
+  return products.filter((product) => article.related_product_ids?.includes(product.id));
+}
+
+export async function getProductsForUseCase(_useCaseSlug: string) {
+  return getProducts();
+}
+
+export async function getRelatedProducts(productId: string, categoryId?: string) {
+  const products = await getProducts();
+  return products.filter((product) => product.id !== productId && (!categoryId || product.category_id === categoryId));
 }

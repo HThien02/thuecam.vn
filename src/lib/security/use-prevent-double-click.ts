@@ -26,12 +26,7 @@ export function usePreventDoubleClick(
       setIsLocked(true);
 
       try {
-        if (callback) {
-          const result: any = callback(e);
-          if (result && typeof result.then === 'function') {
-            await result;
-          }
-        }
+        if (callback) await callback(e);
       } finally {
         setTimeout(() => {
           setIsLocked(false);

@@ -8,6 +8,7 @@ export interface SafeButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
   cooldownMs?: number;
   loadingText?: string;
   showSpinner?: boolean;
+  isLoading?: boolean;
 }
 
 export default function SafeButton({
@@ -17,6 +18,7 @@ export default function SafeButton({
   cooldownMs = 1200,
   loadingText,
   showSpinner = true,
+  isLoading = false,
   className = '',
   type = 'button',
   ...props
@@ -28,7 +30,7 @@ export default function SafeButton({
     const now = Date.now();
 
     // Prevent spam if processing or clicked too rapidly within cooldown
-    if (isProcessing || disabled || now - lastClickedTimeRef.current < cooldownMs) {
+    if (isProcessing || isLoading || disabled || now - lastClickedTimeRef.current < cooldownMs) {
       e.preventDefault();
       e.stopPropagation();
       return;
@@ -39,8 +41,8 @@ export default function SafeButton({
 
     try {
       if (onClick) {
-        const result: any = onClick(e);
-        if (result && typeof result.then === 'function') {
+        const result = (onClick as (event: React.MouseEvent<HTMLButtonElement>) => unknown)(e);
+        if (result && typeof result === 'object' && 'then' in result && typeof result.then === 'function') {
           await result;
         }
       }
@@ -51,7 +53,8 @@ export default function SafeButton({
     }
   };
 
-  const isDisabled = disabled || isProcessing;
+  const isDisabled = disabled || isProcessing || isLoading;
+  const shouldShowSpinner = isProcessing || isLoading;
 
   return (
     <button
@@ -63,7 +66,7 @@ export default function SafeButton({
         isDisabled ? 'opacity-70 cursor-not-allowed pointer-events-none' : ''
       } transition-all`}
     >
-      {isProcessing && showSpinner ? (
+      {shouldShowSpinner && showSpinner ? (
         <span className="inline-flex items-center justify-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin shrink-0" />
           <span>{loadingText || children}</span>

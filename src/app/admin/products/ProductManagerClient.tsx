@@ -18,7 +18,7 @@ import {
   Loader2,
   Check,
 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { deleteAdminRecord, saveAdminRecord } from '@/lib/data/admin-api';
 import { compressImageToBase64 } from '@/lib/utils/image-compress';
 import SafeButton from '@/components/common/SafeButton';
 import { isValidPositiveNumber } from '@/lib/security/validation';
@@ -44,16 +44,17 @@ export default function ProductManagerClient({
   const [categoryId, setCategoryId] = useState(categories[0]?.id || '');
   const [brandId, setBrandId] = useState(brands[0]?.id || '');
   const [rentalPrice, setRentalPrice] = useState<number>(250000);
+  const [rentalAddonText, setRentalAddonText] = useState('');
   const [depositAmount, setDepositAmount] = useState<number>(3000000);
   const [primaryImage, setPrimaryImage] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [status, setStatus] = useState<'ACTIVE' | 'INACTIVE' | 'MAINTENANCE' | 'ARCHIVED'>('ACTIVE');
+  const [hasInventory, setHasInventory] = useState(true);
   const [toastMsg, setToastMsg] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [validationError, setValidationError] = useState('');
 
-  const supabase = createClient();
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -67,10 +68,12 @@ export default function ProductManagerClient({
     setCategoryId(categories[0]?.id || '');
     setBrandId(brands[0]?.id || '');
     setRentalPrice(250000);
+    setRentalAddonText('');
     setDepositAmount(3000000);
     setPrimaryImage('');
     setExcerpt('Bộ máy quay nhỏ gọn kèm đầy đủ thẻ nhớ và phụ kiện, nhận máy tại ETown Tân Bình.');
     setStatus('ACTIVE');
+    setHasInventory(true);
     setValidationError('');
     setIsModalOpen(true);
   };
@@ -82,10 +85,12 @@ export default function ProductManagerClient({
     setCategoryId(prod.category_id || '');
     setBrandId(prod.brand_id || '');
     setRentalPrice(prod.rental_price_per_day);
+    setRentalAddonText((prod.rental_addons ?? []).map((addon) => `${addon.name}|${addon.price_per_day}`).join('\n'));
     setDepositAmount(prod.deposit_amount);
     setPrimaryImage(prod.primary_image);
     setExcerpt(prod.excerpt);
     setStatus(prod.status);
+    setHasInventory(prod.inventory_count > 0);
     setValidationError('');
     setIsModalOpen(true);
   };
@@ -137,6 +142,23 @@ export default function ProductManagerClient({
       return;
     }
 
+    const addonLines = rentalAddonText.split('\n').map((line) => line.trim()).filter(Boolean);
+    const rentalAddons = addonLines.map((line) => {
+      const separator = line.lastIndexOf('|');
+      const addonName = line.slice(0, separator).trim();
+      const pricePerDay = Number(line.slice(separator + 1).trim());
+      const id = addonName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      return { id, name: addonName, price_per_day: pricePerDay };
+    });
+    if (rentalAddons.some((addon) => !addon.id || !addon.name || !Number.isSafeInteger(addon.price_per_day) || addon.price_per_day <= 0)) {
+      setValidationError('Mỗi phụ kiện cần đúng định dạng Tên|Giá/ngày, giá phải là số nguyên lớn hơn 0.');
+      return;
+    }
+    if (new Set(rentalAddons.map((addon) => addon.id)).size !== rentalAddons.length) {
+      setValidationError('Tên phụ kiện cần khác nhau để không bị trùng lựa chọn.');
+      return;
+    }
+
     const finalSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
     const category = categories.find((c) => c.id === categoryId);
     const brand = brands.find((b) => b.id === brandId);
@@ -151,6 +173,7 @@ export default function ProductManagerClient({
       category,
       brand,
       rental_price_per_day: Number(rentalPrice),
+      rental_addons: rentalAddons,
       deposit_amount: Number(depositAmount),
       primary_image: primaryImage,
       gallery_images: editingProduct?.gallery_images || [primaryImage],
@@ -159,7 +182,7 @@ export default function ProductManagerClient({
       features: editingProduct?.features || ['Cảm biến 1-inch', 'Chống rung 3 trục', 'Tặng thẻ 128GB'],
       accessories_included: editingProduct?.accessories_included || editingProduct?.included_accessories || ['Thẻ nhớ SanDisk Extreme 128GB', '2x Pin sạc đầy', 'Hộp chống sốc'],
       included_accessories: editingProduct?.included_accessories || ['Thẻ nhớ SanDisk Extreme 128GB', '2x Pin sạc đầy', 'Hộp chống sốc'],
-      inventory_count: editingProduct?.inventory_count || 1,
+      inventory_count: hasInventory ? Math.max(editingProduct?.inventory_count ?? 1, 1) : 0,
       specs: editingProduct?.specs || { 'Độ phân giải': '4K/60fps', 'Cảm biến': '1 inch CMOS', 'Trọng lượng': '179g' },
       status,
       indexable: true,
@@ -178,6 +201,7 @@ export default function ProductManagerClient({
       excerpt: productData.excerpt,
       description: productData.description,
       rental_price_per_day: productData.rental_price_per_day,
+      rental_addons: productData.rental_addons,
       deposit_amount: productData.deposit_amount,
       primary_image: productData.primary_image,
       gallery_images: productData.gallery_images,
@@ -187,50 +211,52 @@ export default function ProductManagerClient({
     };
 
     try {
-      const result = editingProduct
-        ? await supabase.from('products').update(payload).eq('id', editingProduct.id).select().single()
-        : await supabase.from('products').insert(payload).select().single();
-
-      if (result.data) {
-        setProducts((current) => editingProduct
-          ? current.map((item) => item.id === editingProduct.id ? { ...item, ...result.data } as Product : item)
-          : [{ ...productData, ...result.data } as Product, ...current]);
-      } else {
-        setProducts((current) => editingProduct
-          ? current.map((item) => item.id === editingProduct.id ? { ...item, ...payload } as Product : item)
-          : [productData, ...current]);
-      }
-    } catch {
-      // Fallback in case of network or offline dummy db
+      const saved = await saveAdminRecord<Product>('products', {
+        ...payload,
+        id: productData.id,
+        description: productData.description,
+        specs: productData.specs,
+        accessories_included: productData.accessories_included,
+        seo_title: productData.seo_title,
+        seo_description: productData.seo_description,
+        canonical_url: productData.canonical_url,
+        og_title: productData.og_title,
+        og_description: productData.og_description,
+        og_image: productData.og_image,
+        created_at: productData.created_at,
+        updated_at: productData.updated_at,
+      });
+      const savedProduct = { ...productData, ...saved, brand, category } as Product;
       setProducts((current) => editingProduct
-        ? current.map((item) => item.id === editingProduct.id ? { ...item, ...payload } as Product : item)
-        : [productData, ...current]);
+        ? current.map((item) => item.id === editingProduct.id ? savedProduct : item)
+        : [savedProduct, ...current]);
+      setIsModalOpen(false);
+      showToast(editingProduct ? `Đã cập nhật máy "${name}"` : `Đã thêm mới thiết bị "${name}"`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể lưu thiết bị.');
     }
-
-    setIsModalOpen(false);
-    showToast(editingProduct ? `Đã cập nhật máy "${name}" (Đã lưu ảnh trong DB)` : `Đã thêm mới thiết bị "${name}" (Đã lưu ảnh trong DB)`);
   };
 
   const handleDelete = async (id: string, prodName: string) => {
     if (!confirm(`Bạn có chắc muốn xóa thiết bị "${prodName}" khỏi hệ thống?`)) return;
-    const { error } = await supabase.from('products').delete().eq('id', id);
-    if (error) {
-      showToast(`Không thể xóa thiết bị: ${error.message}`);
-      return;
+    try {
+      await deleteAdminRecord('products', id);
+      setProducts((current) => current.filter((item) => item.id !== id));
+      showToast(`Đã xóa thiết bị "${prodName}"`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể xóa thiết bị.');
     }
-    setProducts((current) => current.filter((item) => item.id !== id));
-    showToast(`Đã xóa thiết bị "${prodName}"`);
   };
 
   const handleToggleStatus = async (prod: Product) => {
     const nextStatus = prod.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-    const { error } = await supabase.from('products').update({ status: nextStatus }).eq('id', prod.id);
-    if (error) {
-      showToast(`Không thể đổi trạng thái: ${error.message}`);
-      return;
+    try {
+      await saveAdminRecord('products', { id: prod.id, status: nextStatus }, 'update');
+      setProducts((current) => current.map((item) => item.id === prod.id ? { ...item, status: nextStatus } : item));
+      showToast(`Đã chuyển trạng thái sang ${nextStatus}`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể đổi trạng thái.');
     }
-    setProducts((current) => current.map((item) => item.id === prod.id ? { ...item, status: nextStatus } : item));
-    showToast(`Đã chuyển trạng thái sang ${nextStatus}`);
   };
 
   // Filter products
@@ -304,6 +330,7 @@ export default function ProductManagerClient({
                 <th className="px-4 py-3.5">Giá 1 ngày</th>
                 <th className="px-4 py-3.5">Giá 3 ngày (-10%)</th>
                 <th className="px-4 py-3.5">Tiền cọc</th>
+                <th className="px-4 py-3.5">Tình trạng máy</th>
                 <th className="px-4 py-3.5">Trạng th��i</th>
                 <th className="px-4 py-3.5 text-right">Thao tác</th>
               </tr>
@@ -354,6 +381,19 @@ export default function ProductManagerClient({
                     {/* Deposit */}
                     <td className="px-4 py-3 text-amber-400 font-medium">
                       {p.deposit_amount.toLocaleString('vi-VN')}đ
+                    </td>
+
+                    {/* Inventory */}
+                    <td className="px-4 py-3">
+                      {p.inventory_count > 0 ? (
+                        <span className="inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400">
+                          Có máy ({p.inventory_count})
+                        </span>
+                      ) : (
+                        <span className="inline-flex rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-bold text-amber-300">
+                          Chưa có máy · Kín lịch
+                        </span>
+                      )}
                     </td>
 
                     {/* Status */}
@@ -474,6 +514,34 @@ export default function ProductManagerClient({
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-amber-400 font-black text-sm outline-none focus:border-sky-500"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label htmlFor="rental-addons" className="block font-bold text-slate-300 mb-1">Phụ kiện thuê thêm (giá/ngày):</label>
+                <textarea
+                  id="rental-addons"
+                  rows={3}
+                  value={rentalAddonText}
+                  onChange={(e) => setRentalAddonText(e.target.value)}
+                  placeholder={'Gimbal|150000\nNâng cấp thẻ nhớ 256GB|50000'}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-white outline-none focus:border-sky-500 font-mono text-xs"
+                />
+                <p className="mt-1 text-[10px] text-slate-400">Mỗi dòng nhập Tên phụ kiện|Giá thuê mỗi ngày (VNĐ). Khách sẽ chọn khi đặt thuê.</p>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-300 mb-1">Tình trạng máy:</label>
+                <select
+                  value={hasInventory ? 'IN_STOCK' : 'NO_UNIT'}
+                  onChange={(e) => setHasInventory(e.target.value === 'IN_STOCK')}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white outline-none focus:border-sky-500 font-bold"
+                >
+                  <option value="IN_STOCK">Có máy, cho phép đặt theo lịch</option>
+                  <option value="NO_UNIT">Chưa có máy — luôn kín lịch, không nhận đặt</option>
+                </select>
+                <p className="mt-1 text-[10px] text-slate-400">
+                  Khi chọn “Chưa có máy”, lịch thuê sẽ kín toàn bộ ngày và hệ thống sẽ từ chối đơn đặt mới.
+                </p>
               </div>
 
               {/* Validation Error Alert */}
@@ -618,7 +686,7 @@ export default function ProductManagerClient({
                   <label className="block font-bold text-slate-300 mb-1">Trạng thái:</label>
                   <select
                     value={status}
-                    onChange={(e) => setStatus(e.target.value as any)}
+                    onChange={(e) => setStatus(e.target.value as Product['status'])}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white outline-none focus:border-sky-500 font-bold"
                   >
                     <option value="ACTIVE">ACTIVE (Sẵn sàng cho thuê)</option>
