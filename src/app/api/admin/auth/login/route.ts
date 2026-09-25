@@ -51,7 +51,12 @@ export async function POST(request: NextRequest) {
     }
 
     const normalizedEmail = authData.user.email.trim().toLowerCase();
-    await setAdminSessionCookie({ userId: authData.user.id, email: normalizedEmail });
+    const forwardedProtocol = request.headers.get('x-forwarded-proto')?.split(',')[0].trim();
+    const secureRequest = forwardedProtocol === 'https' || request.nextUrl.protocol === 'https:';
+    await setAdminSessionCookie(
+      { userId: authData.user.id, email: normalizedEmail },
+      { secure: secureRequest }
+    );
     return NextResponse.json({
       success: true,
       message: 'Đăng nhập thành công',

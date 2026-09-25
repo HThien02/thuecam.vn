@@ -83,14 +83,17 @@ export function verifySession(token: string | undefined | null): AdminSession | 
 /**
  * Set session cookie in Server Action or Route Handler
  */
-export async function setAdminSessionCookie(sessionPayload: { userId: string; email: string }): Promise<void> {
+export async function setAdminSessionCookie(
+  sessionPayload: { userId: string; email: string },
+  options: { secure: boolean } = { secure: process.env.NODE_ENV === 'production' }
+): Promise<void> {
   const token = signSession({ userId: sessionPayload.userId, email: sessionPayload.email, role: 'admin' });
   const cookieStore = await cookies();
 
   cookieStore.set(SESSION_COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: options.secure,
+    sameSite: options.secure ? 'none' : 'lax',
     path: '/',
     maxAge: SESSION_DURATION_SECONDS,
   });
@@ -99,12 +102,14 @@ export async function setAdminSessionCookie(sessionPayload: { userId: string; em
 /**
  * Clear session cookie (Logout)
  */
-export async function clearAdminSessionCookie(): Promise<void> {
+export async function clearAdminSessionCookie(
+  options: { secure: boolean } = { secure: process.env.NODE_ENV === 'production' }
+): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE_NAME, '', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: options.secure,
+    sameSite: options.secure ? 'none' : 'lax',
     path: '/',
     maxAge: 0,
   });
