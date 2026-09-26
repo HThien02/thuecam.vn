@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { SITE_URL } from '@/lib/seo/metadata';
 import {
   getProducts,
   getCategories,
@@ -181,7 +182,7 @@ export default async function AdminSeoHealthPage() {
 
         <div className="text-right shrink-0">
           <span className="text-xs text-slate-400 block">Sitemap đồng bộ:</span>
-          <span className="text-xs text-cyan-400 font-mono font-bold">https://thuecam.vn/sitemap.xml</span>
+          <span className="text-xs text-cyan-400 font-mono font-bold">{`${SITE_URL}/sitemap.xml`}</span>
         </div>
       </div>
 

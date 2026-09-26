@@ -101,22 +101,14 @@ export async function proxy(request: NextRequest) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow');
   }
 
-  // 4. Global HTTP Security Headers
-  response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('X-Frame-Options', 'SAMEORIGIN');
-  response.headers.set('X-XSS-Protection', '1; mode=block');
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-
-  // 5. Canonical www to non-www 301 Redirect
-  if (host.startsWith('www.thuecam.vn')) {
-    const nonWwwUrl = new URL(
-      `${pathname}${search}`,
-      `https://thuecam.vn`
-    );
-    return NextResponse.redirect(nonWwwUrl, 301);
+  // 4. Canonical apex to www redirect
+  if (request.nextUrl.hostname.toLowerCase() === 'thuecam.vn') {
+    const wwwUrl = new URL(request.url);
+    wwwUrl.hostname = 'www.thuecam.vn';
+    return NextResponse.redirect(wwwUrl, 301);
   }
 
-  // 6. Configured 301 Redirect Rules (e.g. /thue-pocket-4 -> /thiet-bi/dji-pocket-4-creator)
+  // 5. Configured 301 Redirect Rules (e.g. /thue-pocket-4 -> /thiet-bi/dji-pocket-4-creator)
   const fullPath = `${pathname}${search}`;
   const matchedRedirect = pathname.startsWith('/admin') || pathname.startsWith('/api/')
     ? null

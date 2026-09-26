@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { saveAdminRecord } from '@/lib/data/admin-api';
+import { SITE_URL } from '@/lib/seo/metadata';
 import { SeoSettings, Product } from '@/types';
 import {
   Search,
@@ -31,7 +32,7 @@ export default function SeoManagerClient({
   // Working state
   const [seoTitle, setSeoTitle] = useState(initialSettings.site_title);
   const [seoDescription, setSeoDescription] = useState(initialSettings.site_description);
-  const [canonicalUrl, setCanonicalUrl] = useState('https://thuecam.vn');
+  const [canonicalUrl, setCanonicalUrl] = useState(SITE_URL);
   const [ogImage, setOgImage] = useState(initialSettings.default_og_image);
   const [indexable, setIndexable] = useState(true);
 
@@ -48,7 +49,7 @@ export default function SeoManagerClient({
     if (target === 'GLOBAL') {
       setSeoTitle(initialSettings.site_title);
       setSeoDescription(initialSettings.site_description);
-      setCanonicalUrl('https://thuecam.vn');
+      setCanonicalUrl(SITE_URL);
       setOgImage(initialSettings.default_og_image);
       setIndexable(true);
     } else {
@@ -59,7 +60,7 @@ export default function SeoManagerClient({
           prod.seo_description ||
           `Thuê ${prod.name} với giá từ 200.000đ/ngày. Kiểm tra lịch trống, đặt thuê online và thanh toán nhanh tại THUECAM.`
         );
-        setCanonicalUrl(`https://thuecam.vn/thiet-bi/${prod.slug}`);
+        setCanonicalUrl(`${SITE_URL}/thiet-bi/${prod.slug}`);
         setOgImage(prod.og_image || prod.primary_image);
         setIndexable(prod.indexable);
       }
@@ -107,8 +108,8 @@ export default function SeoManagerClient({
       } else {
         const product = products.find((item) => item.slug === selectedTarget);
         if (!product) throw new Error('Không tìm thấy thiết bị cần cập nhật.');
-        if (!canonicalUrl.startsWith('https://thuecam.vn/')) {
-          throw new Error('Canonical URL cần dùng domain https://thuecam.vn.');
+        if (!canonicalUrl.startsWith(`${SITE_URL}/`)) {
+          throw new Error(`Canonical URL cần dùng domain ${SITE_URL}.`);
         }
         await saveAdminRecord('products', {
           id: product.id,
@@ -252,7 +253,7 @@ export default function SeoManagerClient({
             {/* Canonical URL Input */}
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-slate-600">
-                Canonical URL (Bắt buộc dùng domain https://thuecam.vn):
+                {`Canonical URL (Bắt buộc dùng domain ${SITE_URL}):`}
               </label>
               <input
                 type="text"

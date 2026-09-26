@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://thuecam.vn';
+export const SITE_URL = 'https://www.thuecam.vn';
 
 interface ConstructMetadataParams {
   title?: string;

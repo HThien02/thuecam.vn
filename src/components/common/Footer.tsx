@@ -203,10 +203,6 @@ export default function Footer() {
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
               <span>© {new Date().getFullYear()} THUECAM.VN - Dịch vụ cho thuê camera & thiết bị sáng tạo nội dung hàng đầu. Điểm hẹn ETown Tân Bình, TP.HCM.</span>
             </div>
-            <div className="flex items-center gap-4 text-slate-500 font-medium">
-              <span className="text-[#0284c7] font-bold">Canonical: https://thuecam.vn</span>
-
-            </div>
           </div>
         </div>
       </footer>
