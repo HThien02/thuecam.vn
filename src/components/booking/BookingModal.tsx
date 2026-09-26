@@ -242,9 +242,16 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
               </p>
             </div>
 
-            {product.inventory_count <= 0 && (
+            {(product.status !== 'ACTIVE' || product.inventory_count <= 0) && (
               <p id="booking-modal-unavailable-message" role="status" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
-                Hiện full lịch thuê. Các ngày kín bên dưới không thể chọn; bạn vẫn có thể xem lịch.
+                {product.status === 'MAINTENANCE'
+                  ? 'Thiết bị đang bảo trì.'
+                  : product.status === 'ARCHIVED'
+                    ? 'Thiết bị đã ngừng kinh doanh.'
+                    : product.status === 'INACTIVE'
+                      ? 'Thiết bị đang tạm ngưng cho thuê.'
+                      : 'Thiết bị hiện full lịch thuê.'}{' '}
+                Lịch bên dưới vẫn hiển thị để bạn kiểm tra; ngày kín sẽ không thể chọn.
               </p>
             )}
 

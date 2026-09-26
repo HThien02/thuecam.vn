@@ -16,10 +16,14 @@ export function formatVND(amount: number) {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const availabilityLabel = product.status === 'ACTIVE'
-    ? product.inventory_count > 0 ? 'Sẵn sàng cho thuê' : 'Full lịch thuê'
-    : 'Đang bảo trì';
   const canBook = product.status === 'ACTIVE' && product.inventory_count > 0;
+  const availabilityLabel = product.status === 'MAINTENANCE'
+    ? 'Đang bảo trì'
+    : product.status === 'ARCHIVED'
+      ? 'Ngừng kinh doanh'
+      : product.status === 'INACTIVE'
+        ? 'Tạm ngưng cho thuê'
+        : canBook ? 'Có thể thuê' : 'Full lịch thuê';
 
   return (
     <article className="group rounded-[28px] overflow-hidden card-hover flex flex-col bg-white border-2 border-sky-100 shadow-cute">
@@ -53,6 +57,9 @@ export default function ProductCard({ product }: ProductCardProps) {
             )}
           </div>
         )}
+        <span className={`absolute bottom-3 left-3 z-10 rounded-full border px-2.5 py-1 text-[10px] font-extrabold shadow-sm backdrop-blur-sm ${canBook ? 'border-emerald-200 bg-emerald-50/95 text-emerald-800' : 'border-amber-200 bg-amber-50/95 text-amber-900'}`}>
+          {availabilityLabel}
+        </span>
       </div>
 
       {/* Product Details */}
@@ -93,7 +100,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           <Link
             href={`/thiet-bi/${product.slug}`}
-            className="px-4 py-2 rounded-full bg-sky-50 text-[#0284c7] group-hover:bg-gradient-candy group-hover:text-[#1e3a8a] text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-sm group-hover:shadow-cute"
+            className="px-4 py-2 rounded-full bg-sky-50 text-[#0284c7] group-hover:bg-gradient-candy group-hover:text-white text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-sm group-hover:shadow-cute"
             aria-label={canBook ? `Xem chi tiết và thuê ${product.name}` : `Xem chi tiết ${product.name}; ${availabilityLabel.toLocaleLowerCase('vi')}`}
           >
             <span>{canBook ? 'Thuê Ngay' : 'Xem Chi Tiết'}</span>

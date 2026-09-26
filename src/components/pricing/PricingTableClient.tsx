@@ -18,7 +18,7 @@ export default function PricingTableClient({ categories, products }: PricingTabl
   const [activeCategory, setActiveCategory] = useState<string>(categories[0]?.slug || '');
   const [selectedProductForBooking, setSelectedProductForBooking] = useState<Product | null>(null);
 
-  const activeProducts = products.filter((p) => p.status === 'ACTIVE');
+  const displayedProducts = products;
 
   // Smooth scroll handler with offset for fixed header
   const scrollToCategory = (slug: string) => {
@@ -65,7 +65,7 @@ export default function PricingTableClient({ categories, products }: PricingTabl
           <Layers className="size-3.5 text-[#0284c7]" /> Danh mục:
         </span>
         {categories.map((category) => {
-          const count = activeProducts.filter((p) => p.category_id === category.id).length;
+          const count = displayedProducts.filter((p) => p.category_id === category.id).length;
           if (count === 0) return null;
           const isActive = activeCategory === category.slug;
           return (
@@ -95,7 +95,7 @@ export default function PricingTableClient({ categories, products }: PricingTabl
           </div>
           <nav className="mt-3 flex flex-col gap-1.5">
             {categories.map((category) => {
-              const count = activeProducts.filter((p) => p.category_id === category.id).length;
+              const count = displayedProducts.filter((p) => p.category_id === category.id).length;
               if (count === 0) return null;
               const isActive = activeCategory === category.slug;
               return (
@@ -132,7 +132,7 @@ export default function PricingTableClient({ categories, products }: PricingTabl
         {/* Right Content Sections */}
         <div className="space-y-10">
           {categories.map((category) => {
-            const categoryProducts = activeProducts.filter((product) => product.category_id === category.id);
+            const categoryProducts = displayedProducts.filter((product) => product.category_id === category.id);
             if (categoryProducts.length === 0) return null;
 
             return (
@@ -189,7 +189,7 @@ export default function PricingTableClient({ categories, products }: PricingTabl
                               {product.name}
                             </Link>
                             <span className="text-xs text-slate-500 font-medium">
-                              {product.inventory_count > 0 ? 'Tặng kèm thẻ nhớ + pin đầy' : 'Tạm hết máy · Kín lịch thuê'}
+                              {product.status === 'MAINTENANCE' ? 'Đang bảo trì' : product.status === 'ARCHIVED' ? 'Ngừng kinh doanh' : product.status === 'INACTIVE' ? 'Tạm ngưng cho thuê' : product.inventory_count > 0 ? 'Tặng kèm thẻ nhớ + pin đầy' : 'Full lịch thuê · Xem lịch'}
                             </span>
                           </div>
                         </div>
@@ -221,7 +221,7 @@ export default function PricingTableClient({ categories, products }: PricingTabl
                             onClick={() => setSelectedProductForBooking(product)}
                             className="inline-flex items-center gap-1.5 rounded-full bg-[#0284c7] px-4 py-2 text-xs font-black text-white shadow-sm hover:bg-[#0369a1] transition hover:scale-105"
                           >
-                            <Calendar className="size-3" /> {product.inventory_count > 0 ? 'Thuê máy' : 'Xem lịch'}
+                            <Calendar className="size-3" /> {product.status === 'ACTIVE' && product.inventory_count > 0 ? 'Thuê máy' : 'Xem lịch'}
                           </button>
                           <Link
                             href={`/thiet-bi/${product.slug}`}

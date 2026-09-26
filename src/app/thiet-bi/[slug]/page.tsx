@@ -98,7 +98,7 @@ export default async function ProductDetailPage({ params }: Props) {
           />
 
           {/* Verification Badge */}
-          <div className="p-4 rounded-2xl bg-white border border-pink-100 flex items-center justify-between text-xs shadow-sm">
+          <div className="p-4 rounded-2xl bg-white border border-sky-100 flex items-center justify-between text-xs shadow-sm">
             <div className="flex items-center gap-2 text-emerald-700 font-bold">
               <ShieldCheck className="w-4 h-4" />
               <span>Thiết bị khử trùng, sạc đầy và test kỹ thuật 100% trước khi bàn giao</span>
@@ -123,7 +123,7 @@ export default async function ProductDetailPage({ params }: Props) {
               {product.category && (
                 <Link
                   href={`/danh-muc/${product.category.slug}`}
-                  className="px-3 py-1 rounded-full text-xs font-bold bg-pink-50 text-[#FF3877] border border-pink-100"
+                  className="px-3 py-1 rounded-full text-xs font-bold bg-sky-50 text-[#0284c7] border border-sky-100"
                 >
                   {product.category.name}
                 </Link>
@@ -160,9 +160,9 @@ export default async function ProductDetailPage({ params }: Props) {
 
           {/* Accessories Included */}
           {product.accessories_included && (
-            <div className="p-5 rounded-3xl bg-white border border-pink-100 shadow-sm space-y-3">
+            <div className="p-5 rounded-3xl bg-white border border-sky-100 shadow-sm space-y-3">
               <div className="flex items-center gap-2 text-xs font-black text-slate-900 uppercase tracking-wider">
-                <PackageCheck className="w-4 h-4 text-[#FF3877]" />
+                <PackageCheck className="w-4 h-4 text-[#0284c7]" />
                 <span>Trọn Bộ Phụ Kiện Tặng Kèm Khi Thuê:</span>
               </div>
               <ul className="space-y-2 text-xs text-slate-700 font-medium">
@@ -179,12 +179,12 @@ export default async function ProductDetailPage({ params }: Props) {
       </div>
 
       {/* 4. Specifications & Detailed Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 pt-6 border-t border-pink-100">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 pt-6 border-t border-sky-100">
         {/* Left: Long description & Guides */}
         <div className="lg:col-span-8 space-y-8">
-          <div className="p-6 sm:p-8 rounded-3xl bg-white border border-pink-100 shadow-sm space-y-4">
+          <div className="p-6 sm:p-8 rounded-3xl bg-white border border-sky-100 shadow-sm space-y-4">
             <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
-              <FileText className="w-5 h-5 text-[#FF3877]" />
+              <FileText className="w-5 h-5 text-[#0284c7]" />
               Chi Tiết Thiết Bị & Lý Do Nên Thuê {product.name}
             </h2>
             <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-line space-y-4 font-medium">
@@ -193,58 +193,58 @@ export default async function ProductDetailPage({ params }: Props) {
           </div>
 
           {/* Internal Linking: Topic Cluster & Related Articles */}
-          <div className="p-6 rounded-3xl bg-gradient-to-br from-pink-50/70 to-white border border-pink-100 space-y-4">
+          <div className="p-6 rounded-3xl bg-gradient-to-br from-sky-50/70 to-white border border-sky-100 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-                <Layers className="w-4 h-4 text-[#FF3877]" />
+                <Layers className="w-4 h-4 text-[#0284c7]" />
                 Cẩm Nang & So Sánh Liên Quan Đến {product.name}
               </h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <Link
                 href="/so-sanh/dji-pocket-4-vs-pocket-3"
-                className="p-3.5 rounded-2xl bg-white border border-pink-100 hover:border-pink-300 flex flex-col justify-between group shadow-sm"
+                className="p-3.5 rounded-2xl bg-white border border-sky-100 hover:border-sky-300 flex flex-col justify-between group shadow-sm"
               >
-                <span className="font-bold text-slate-900 group-hover:text-[#FF3877]">
+                <span className="font-bold text-slate-900 group-hover:text-[#0284c7]">
                   So Sánh DJI Pocket 4 vs Pocket 3: Nên thuê máy nào?
                 </span>
-                <span className="text-[11px] text-[#FF3877] font-bold mt-2 flex items-center gap-1">
+                <span className="text-[11px] text-[#0284c7] font-bold mt-2 flex items-center gap-1">
                   Đọc so sánh <ArrowRight className="w-3 h-3" />
                 </span>
               </Link>
 
               <Link
                 href="/huong-dan/dji-pocket-4-quay-du-lich"
-                className="p-3.5 rounded-2xl bg-white border border-pink-100 hover:border-pink-300 flex flex-col justify-between group shadow-sm"
+                className="p-3.5 rounded-2xl bg-white border border-sky-100 hover:border-sky-300 flex flex-col justify-between group shadow-sm"
               >
-                <span className="font-bold text-slate-900 group-hover:text-[#FF3877]">
+                <span className="font-bold text-slate-900 group-hover:text-[#0284c7]">
                   Hướng dẫn cài đặt DJI Pocket 4 quay du lịch sắc nét từ A-Z
                 </span>
-                <span className="text-[11px] text-[#FF3877] font-bold mt-2 flex items-center gap-1">
+                <span className="text-[11px] text-[#0284c7] font-bold mt-2 flex items-center gap-1">
                   Xem hướng dẫn <ArrowRight className="w-3 h-3" />
                 </span>
               </Link>
 
               <Link
                 href="/thue-camera-du-lich"
-                className="p-3.5 rounded-2xl bg-white border border-pink-100 hover:border-pink-300 flex flex-col justify-between group shadow-sm"
+                className="p-3.5 rounded-2xl bg-white border border-sky-100 hover:border-sky-300 flex flex-col justify-between group shadow-sm"
               >
-                <span className="font-bold text-slate-900 group-hover:text-[#FF3877]">
+                <span className="font-bold text-slate-900 group-hover:text-[#0284c7]">
                   Pillar: Trọn bộ cẩm nang thuê camera du lịch
                 </span>
-                <span className="text-[11px] text-[#FF3877] font-bold mt-2 flex items-center gap-1">
+                <span className="text-[11px] text-[#0284c7] font-bold mt-2 flex items-center gap-1">
                   Xem pillar page <ArrowRight className="w-3 h-3" />
                 </span>
               </Link>
 
               <Link
                 href="/nhu-cau/quay-vlog"
-                className="p-3.5 rounded-2xl bg-white border border-pink-100 hover:border-pink-300 flex flex-col justify-between group shadow-sm"
+                className="p-3.5 rounded-2xl bg-white border border-sky-100 hover:border-sky-300 flex flex-col justify-between group shadow-sm"
               >
-                <span className="font-bold text-slate-900 group-hover:text-[#FF3877]">
+                <span className="font-bold text-slate-900 group-hover:text-[#0284c7]">
                   Gói combo thiết bị chuyên dụng cho quay Vlog
                 </span>
-                <span className="text-[11px] text-[#FF3877] font-bold mt-2 flex items-center gap-1">
+                <span className="text-[11px] text-[#0284c7] font-bold mt-2 flex items-center gap-1">
                   Xem gợi ý <ArrowRight className="w-3 h-3" />
                 </span>
               </Link>
@@ -262,7 +262,7 @@ export default async function ProductDetailPage({ params }: Props) {
                 {product.reviews.map((rev) => (
                   <div
                     key={rev.id}
-                    className="p-5 rounded-3xl bg-white border border-pink-100 text-xs space-y-2 shadow-sm"
+                    className="p-5 rounded-3xl bg-white border border-sky-100 text-xs space-y-2 shadow-sm"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -291,11 +291,11 @@ export default async function ProductDetailPage({ params }: Props) {
 
         {/* Right: Technical Specifications Box */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="p-6 rounded-3xl bg-white border border-pink-100 shadow-sm space-y-4">
-            <h3 className="text-base font-black text-slate-900 border-b border-pink-100 pb-3">
+          <div className="p-6 rounded-3xl bg-white border border-sky-100 shadow-sm space-y-4">
+            <h3 className="text-base font-black text-slate-900 border-b border-sky-100 pb-3">
               Thông Số Kỹ Thuật Chuẩn
             </h3>
-            <div className="divide-y divide-pink-50 text-xs">
+            <div className="divide-y divide-sky-100 text-xs">
               {Object.entries(product.specs).map(([key, val]) => (
                 <div key={key} className="py-2.5 flex justify-between gap-4">
                   <span className="text-slate-500 font-medium">{key}:</span>
@@ -306,13 +306,13 @@ export default async function ProductDetailPage({ params }: Props) {
           </div>
 
           {/* Internal links: Categories & Brands */}
-          <div className="p-5 rounded-3xl bg-gradient-to-br from-pink-50/50 to-white border border-pink-100 space-y-3 text-xs">
+          <div className="p-5 rounded-3xl bg-gradient-to-br from-sky-50/50 to-white border border-sky-100 space-y-3 text-xs">
             <span className="text-slate-700 font-black block">Khám phá thêm:</span>
             <div className="flex flex-wrap gap-2">
               {product.category && (
                 <Link
                   href={`/danh-muc/${product.category.slug}`}
-                  className="px-3 py-1.5 rounded-full bg-white border border-pink-200 text-slate-700 font-bold hover:bg-gradient-candy hover:text-white transition-all shadow-sm"
+                  className="px-3 py-1.5 rounded-full bg-white border border-sky-200 text-slate-700 font-bold hover:bg-gradient-candy hover:text-white transition-all shadow-sm"
                 >
                   {product.category.name}
                 </Link>
@@ -320,20 +320,20 @@ export default async function ProductDetailPage({ params }: Props) {
               {product.brand && (
                 <Link
                   href={`/thuong-hieu/${product.brand.slug}`}
-                  className="px-3 py-1.5 rounded-full bg-white border border-pink-200 text-slate-700 font-bold hover:bg-gradient-candy hover:text-white transition-all shadow-sm"
+                  className="px-3 py-1.5 rounded-full bg-white border border-sky-200 text-slate-700 font-bold hover:bg-gradient-candy hover:text-white transition-all shadow-sm"
                 >
                   Hãng {product.brand.name}
                 </Link>
               )}
               <Link
                 href="/dia-diem/tphcm"
-                className="px-3 py-1.5 rounded-full bg-white border border-pink-200 text-slate-700 font-bold hover:bg-gradient-candy hover:text-white transition-all shadow-sm"
+                className="px-3 py-1.5 rounded-full bg-white border border-sky-200 text-slate-700 font-bold hover:bg-gradient-candy hover:text-white transition-all shadow-sm"
               >
                 Nhận máy tại TP.HCM
               </Link>
               <Link
                 href="/dia-diem/ha-noi"
-                className="px-3 py-1.5 rounded-full bg-white border border-pink-200 text-slate-700 font-bold hover:bg-gradient-candy hover:text-white transition-all shadow-sm"
+                className="px-3 py-1.5 rounded-full bg-white border border-sky-200 text-slate-700 font-bold hover:bg-gradient-candy hover:text-white transition-all shadow-sm"
               >
                 Nhận máy tại Hà Nội
               </Link>
@@ -344,14 +344,14 @@ export default async function ProductDetailPage({ params }: Props) {
 
       {/* 5. Related Products Grid */}
       {relatedProducts.length > 0 && (
-        <div className="pt-8 border-t border-pink-100 space-y-6">
+        <div className="pt-8 border-t border-sky-100 space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-xl sm:text-2xl font-black text-slate-900">
               Thiết Bị Tương Đương Nên Xem 📸
             </h2>
             <Link
               href="/thiet-bi"
-              className="text-xs text-[#FF3877] hover:text-[#e02462] font-black flex items-center gap-1"
+              className="text-xs text-[#0284c7] hover:text-[#e02462] font-black flex items-center gap-1"
             >
               <span>Xem tất cả</span>
               <ArrowRight className="w-3.5 h-3.5" />

@@ -236,15 +236,22 @@ export default function RentalRequestForm({
           >
             {products.map((item) => (
               <option key={item.id} value={item.slug}>
-                {item.name} — {item.rental_price_per_day.toLocaleString('vi-VN')}đ/ngày{item.inventory_count <= 0 ? ' · Full lịch thuê' : ''}
+                {item.name} — {item.rental_price_per_day.toLocaleString('vi-VN')}đ/ngày{item.status === 'MAINTENANCE' ? ' · Đang bảo trì' : item.status === 'ARCHIVED' ? ' · Ngừng kinh doanh' : item.status === 'INACTIVE' ? ' · Tạm ngưng cho thuê' : item.inventory_count <= 0 ? ' · Full lịch thuê' : ''}
               </option>
             ))}
           </select>
         </label>
 
-        {product?.inventory_count <= 0 && (
+        {product && (product.status !== 'ACTIVE' || product.inventory_count <= 0) && (
           <p role="status" className="sm:col-span-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
-            Sản phẩm hiện full lịch thuê. Bạn vẫn có thể xem lịch; các ngày full sẽ không chọn được.
+            {product.status === 'MAINTENANCE'
+              ? 'Thiết bị đang bảo trì.'
+              : product.status === 'ARCHIVED'
+                ? 'Thiết bị đã ngừng kinh doanh.'
+                : product.status === 'INACTIVE'
+                  ? 'Thiết bị đang tạm ngưng cho thuê.'
+                  : 'Thiết bị hiện full lịch thuê.'}{' '}
+            Bạn vẫn có thể xem lịch; các ngày kín sẽ không chọn được.
           </p>
         )}
 
@@ -347,7 +354,7 @@ export default function RentalRequestForm({
             className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-sm font-bold text-slate-900 outline-none focus:border-[#0284c7]"
           />
           <span id="pickup-time-guidance" className="mt-1 block text-[11px] font-medium text-slate-500">
-            08:00–18:00 nhận tại ETown; ngoài khung giờ sẽ tự chuyển sang giao hỏa tốc.
+            08:00���18:00 nhận tại ETown; ngoài khung giờ sẽ tự chuyển sang giao hỏa tốc.
           </span>
         </label>
 

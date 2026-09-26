@@ -122,7 +122,7 @@ export default function SearchFilterClient({
           <div>
             <div className="flex justify-between text-slate-400 mb-1">
               <span className="font-semibold">Giá tối đa / ngày:</span>
-              <span className="text-cyan-400 font-bold">
+              <span className="text-sky-700 font-bold">
                 {new Intl.NumberFormat('vi-VN').format(maxPrice)}đ
               </span>
             </div>
@@ -133,7 +133,7 @@ export default function SearchFilterClient({
               step={20000}
               value={maxPrice}
               onChange={(e) => setMaxPrice(Number(e.target.value))}
-              className="w-full accent-cyan-400 cursor-pointer"
+              className="w-full accent-sky-600 cursor-pointer"
             />
           </div>
         </div>
@@ -145,7 +145,7 @@ export default function SearchFilterClient({
           </span>
           <button
             onClick={handleReset}
-            className="flex items-center gap-1 hover:text-cyan-400 transition-colors"
+            className="flex items-center gap-1 hover:text-sky-700 transition-colors"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Đặt lại bộ lọc</span>
@@ -165,7 +165,7 @@ export default function SearchFilterClient({
           <p className="text-slate-600 font-medium">Không tìm thấy thiết bị nào khớp với bộ lọc của bạn.</p>
           <button
             onClick={handleReset}
-            className="px-4 py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs"
+            className="px-4 py-2 rounded-xl bg-[#0284c7] text-white font-bold text-xs transition-colors hover:bg-[#0369a1]"
           >
             Xóa bộ lọc để xem lại toàn bộ máy
           </button>

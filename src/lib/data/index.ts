@@ -210,7 +210,7 @@ export async function getBookingByCode(bookingCode: string) {
 
 export async function getBookingProducts(): Promise<Product[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.from('products').select('*').eq('status', 'ACTIVE').order('created_at', { ascending: false });
+  const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
   return getProductRelations(requireData(data, error) as Product[]);
 }
 

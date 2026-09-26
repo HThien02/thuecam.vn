@@ -12,9 +12,13 @@ interface ProductClientActionsProps {
 
 export default function ProductClientActions({ product }: ProductClientActionsProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const canRent = product.status === 'ACTIVE';
-  const actionLabel = !canRent
-    ? product.status === 'MAINTENANCE' ? 'Đang bảo trì' : product.status === 'ARCHIVED' ? 'Ngừng kinh doanh' : 'Tạm ngưng cho thuê'
+  const unavailableLabel = product.status === 'MAINTENANCE'
+    ? 'Đang bảo trì'
+    : product.status === 'ARCHIVED'
+      ? 'Ngừng kinh doanh'
+      : 'Tạm ngưng cho thuê';
+  const actionLabel = product.status !== 'ACTIVE'
+    ? `Xem lịch · ${unavailableLabel}`
     : product.inventory_count <= 0 ? 'Xem lịch thuê' : 'Kiểm Tra Lịch & Đặt Thuê';
 
   return (
@@ -39,7 +43,6 @@ export default function ProductClientActions({ product }: ProductClientActionsPr
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
-            disabled={!canRent}
             className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-gradient-candy hover:opacity-95 text-white font-black text-sm shadow-cute hover:shadow-cute-lg transition-all flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
           >
             <Calendar className="w-4 h-4" />

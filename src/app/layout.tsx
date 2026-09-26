@@ -10,7 +10,7 @@ import { constructMetadata } from '@/lib/seo/metadata';
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#6D55C7',
+  themeColor: '#0284c7',
 };
 
 export const metadata: Metadata = constructMetadata({
@@ -32,7 +32,7 @@ export default function RootLayout({
       <head>
         <JsonLdScript data={organizationJsonLd} />
       </head>
-      <body className="min-h-screen flex flex-col bg-[#FFF8F9] text-slate-900 selection:bg-pink-400 selection:text-white antialiased">
+      <body className="site-theme min-h-screen flex flex-col bg-[#f0f7ff] text-slate-900 selection:bg-sky-200 selection:text-sky-950 antialiased">
         <NavigationProgress />
         <PublicHeader />
         <main className="flex-1">{children}</main>

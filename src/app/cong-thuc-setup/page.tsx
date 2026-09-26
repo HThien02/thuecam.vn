@@ -18,7 +18,7 @@ export default async function CameraFormulaIndexPage() {
     <main className="min-h-screen bg-slate-950 px-4 py-12 text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <header className="max-w-3xl">
-          <span className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-300">
+          <span className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700">
             <Aperture className="size-4" aria-hidden="true" /> THUECAM FIELD NOTES
           </span>
           <h1 className="mt-5 text-3xl font-black tracking-tight sm:text-5xl">Công thức setup camera</h1>
@@ -28,7 +28,7 @@ export default async function CameraFormulaIndexPage() {
         {formulas.length ? (
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {formulas.map((formula) => (
-              <article key={formula.id} className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] transition hover:border-cyan-300/40 hover:bg-white/[0.07]">
+              <article key={formula.id} className="group overflow-hidden rounded-3xl border border-sky-100 bg-white transition hover:border-sky-300 hover:bg-sky-50">
                 <Link href={`/cong-thuc-setup/${formula.slug}`} className="block">
                   <div className="relative aspect-[4/3] overflow-hidden bg-slate-900">
                     {formula.featured_image && (
@@ -36,7 +36,7 @@ export default async function CameraFormulaIndexPage() {
                     )}
                   </div>
                   <div className="space-y-3 p-5">
-                    <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-cyan-300">
+                    <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-sky-700">
                       <Camera className="size-3.5" aria-hidden="true" /> Setup guide
                     </div>
                     <h2 className="text-lg font-bold leading-snug">{formula.title}</h2>
@@ -46,15 +46,15 @@ export default async function CameraFormulaIndexPage() {
                 </Link>
                 {!!formula.camera_settings?.length && (
                   <div className="flex items-center gap-2 border-t border-white/10 px-5 py-3 text-xs text-slate-400">
-                    <SlidersHorizontal className="size-3.5 text-cyan-300" aria-hidden="true" /> {formula.camera_settings.length} thông số setup
+                    <SlidersHorizontal className="size-3.5 text-sky-700" aria-hidden="true" /> {formula.camera_settings.length} thông số setup
                   </div>
                 )}
               </article>
             ))}
           </div>
         ) : (
-          <section className="mt-10 rounded-3xl border border-white/10 bg-white/[0.04] p-8 text-center sm:p-12">
-            <Camera className="mx-auto size-9 text-cyan-300" aria-hidden="true" />
+          <section className="mt-10 rounded-3xl border border-sky-100 bg-white p-8 text-center sm:p-12">
+            <Camera className="mx-auto size-9 text-sky-700" aria-hidden="true" />
             <h2 className="mt-4 text-xl font-bold">Công thức mới đang được chuẩn bị</h2>
             <p className="mt-2 text-sm text-slate-400">Các bài setup camera sẽ xuất hiện tại đây sau khi được xuất bản.</p>
           </section>

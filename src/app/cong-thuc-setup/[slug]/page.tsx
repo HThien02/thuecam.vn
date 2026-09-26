@@ -35,11 +35,11 @@ export default async function CameraFormulaDetailPage({ params }: Props) {
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-10 text-white sm:px-6 lg:px-8">
       <article className="mx-auto max-w-4xl space-y-8">
-        <Link href="/cong-thuc-setup" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-cyan-300">
+        <Link href="/cong-thuc-setup" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-sky-700">
           <ArrowLeft className="size-4" aria-hidden="true" /> Tất cả công thức
         </Link>
         <header className="space-y-4">
-          <span className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-300">
+          <span className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700">
             <Camera className="size-4" aria-hidden="true" /> CAMERA SETUP
           </span>
           <h1 className="text-3xl font-black tracking-tight sm:text-5xl">{formula.title}</h1>
@@ -54,11 +54,11 @@ export default async function CameraFormulaDetailPage({ params }: Props) {
         )}
 
         {!!formula.camera_settings?.length && (
-          <section className="rounded-3xl border border-cyan-300/20 bg-cyan-300/[0.06] p-5 sm:p-7" aria-labelledby="settings-heading">
-            <h2 id="settings-heading" className="flex items-center gap-2 text-lg font-bold"><SlidersHorizontal className="size-5 text-cyan-300" aria-hidden="true" /> Thông số công thức</h2>
+          <section className="rounded-3xl border border-sky-200 bg-sky-50 p-5 sm:p-7" aria-labelledby="settings-heading">
+            <h2 id="settings-heading" className="flex items-center gap-2 text-lg font-bold"><SlidersHorizontal className="size-5 text-sky-700" aria-hidden="true" /> Thông số công thức</h2>
             <dl className="mt-4 grid gap-3 sm:grid-cols-2">
               {formula.camera_settings.filter((setting) => setting.label || setting.value).map((setting, index) => (
-                <div key={`${setting.label}-${index}`} className="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3">
+                <div key={`${setting.label}-${index}`} className="flex items-center justify-between gap-4 rounded-xl border border-sky-100 bg-sky-50 px-4 py-3">
                   <dt className="text-sm text-slate-400">{setting.label}</dt>
                   <dd className="text-right text-sm font-bold text-white">{setting.value}</dd>
                 </div>
