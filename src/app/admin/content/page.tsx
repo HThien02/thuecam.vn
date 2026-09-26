@@ -15,7 +15,7 @@ export default async function AdminContentPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-black">
           Quản Lý Nội Dung CMS (Blog, Hướng Dẫn, So Sánh & Landing)
         </h1>
         <p className="text-xs sm:text-sm text-slate-400 mt-1">

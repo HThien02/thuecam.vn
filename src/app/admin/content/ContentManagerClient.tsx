@@ -182,7 +182,7 @@ export default function ContentManagerClient({ initialArticles }: Props) {
             className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
               filterType === 'ALL'
                 ? 'bg-cyan-500 text-slate-950 font-bold'
-                : 'bg-slate-800 text-slate-300 hover:text-white'
+                : 'bg-slate-800 text-slate-600 hover:text-white'
             }`}
           >
             Tất cả ({articles.length})
@@ -192,7 +192,7 @@ export default function ContentManagerClient({ initialArticles }: Props) {
             className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
               filterType === 'blog'
                 ? 'bg-cyan-500 text-slate-950 font-bold'
-                : 'bg-slate-800 text-slate-300 hover:text-white'
+                : 'bg-slate-800 text-slate-600 hover:text-white'
             }`}
           >
             Blog Guides
@@ -202,7 +202,7 @@ export default function ContentManagerClient({ initialArticles }: Props) {
             className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
               filterType === 'comparison'
                 ? 'bg-cyan-500 text-slate-950 font-bold'
-                : 'bg-slate-800 text-slate-300 hover:text-white'
+                : 'bg-slate-800 text-slate-600 hover:text-white'
             }`}
           >
             So Sánh
@@ -212,7 +212,7 @@ export default function ContentManagerClient({ initialArticles }: Props) {
             className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
               filterType === 'guide'
                 ? 'bg-cyan-500 text-slate-950 font-bold'
-                : 'bg-slate-800 text-slate-300 hover:text-white'
+                : 'bg-slate-800 text-slate-600 hover:text-white'
             }`}
           >
             Hướng Dẫn
@@ -222,7 +222,7 @@ export default function ContentManagerClient({ initialArticles }: Props) {
             className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
               filterType === 'formula'
                 ? 'bg-cyan-500 text-slate-950 font-bold'
-                : 'bg-slate-800 text-slate-300 hover:text-white'
+                : 'bg-slate-800 text-slate-600 hover:text-white'
             }`}
           >
             Công thức camera
@@ -262,7 +262,7 @@ export default function ContentManagerClient({ initialArticles }: Props) {
               <th className="py-3 px-3 text-right">Thao tác</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/60 text-slate-300">
+          <tbody className="divide-y divide-slate-800/60 text-slate-600">
             {filteredArticles.map((art) => (
               <tr key={art.id} className="hover:bg-slate-800/30">
                 <td className="py-3.5 px-3">
@@ -343,7 +343,7 @@ export default function ContentManagerClient({ initialArticles }: Props) {
             <form onSubmit={handleSave} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Tiêu đề bài viết: *</label>
+                  <label className="block text-slate-600 font-semibold mb-1">Tiêu đề bài viết: *</label>
                   <input
                     type="text"
                     required
@@ -354,7 +354,7 @@ export default function ContentManagerClient({ initialArticles }: Props) {
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">URL Slug (không dấu, cách bằng gạch nối): *</label>
+                  <label className="block text-slate-600 font-semibold mb-1">URL Slug (không dấu, cách bằng gạch nối): *</label>
                   <input
                     type="text"
                     required
@@ -367,7 +367,7 @@ export default function ContentManagerClient({ initialArticles }: Props) {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Loại nội dung:</label>
+                  <label className="block text-slate-600 font-semibold mb-1">Loại nội dung:</label>
                   <select
                     value={type}
                     onChange={(e) => setType(e.target.value as 'blog' | 'guide' | 'comparison' | 'landing')}
@@ -381,7 +381,7 @@ export default function ContentManagerClient({ initialArticles }: Props) {
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Trạng thái:</label>
+                  <label className="block text-slate-600 font-semibold mb-1">Trạng thái:</label>
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value as 'DRAFT' | 'PUBLISHED' | 'ARCHIVED')}
@@ -394,7 +394,7 @@ export default function ContentManagerClient({ initialArticles }: Props) {
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Topic Cluster Pillar:</label>
+                  <label className="block text-slate-600 font-semibold mb-1">Topic Cluster Pillar:</label>
                   <input
                     type="text"
                     value={pillarSlug}
@@ -406,7 +406,7 @@ export default function ContentManagerClient({ initialArticles }: Props) {
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Đoạn trích tóm tắt (Excerpt):</label>
+                <label className="block text-slate-600 font-semibold mb-1">Đoạn trích tóm tắt (Excerpt):</label>
                 <textarea
                   rows={2}
                   value={excerpt}
@@ -486,7 +486,7 @@ export default function ContentManagerClient({ initialArticles }: Props) {
               )}
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Nội dung chi tiết (Markdown):</label>
+                <label className="block text-slate-600 font-semibold mb-1">Nội dung chi tiết (Markdown):</label>
                 <textarea
                   rows={10}
                   value={content}
@@ -497,7 +497,7 @@ export default function ContentManagerClient({ initialArticles }: Props) {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Tác giả (Author):</label>
+                  <label className="block text-slate-600 font-semibold mb-1">Tác giả (Author):</label>
                   <input
                     type="text"
                     value={authorName}
@@ -507,7 +507,7 @@ export default function ContentManagerClient({ initialArticles }: Props) {
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Người duyệt (Reviewer):</label>
+                  <label className="block text-slate-600 font-semibold mb-1">Người duyệt (Reviewer):</label>
                   <input
                     type="text"
                     value={reviewerName}
@@ -520,7 +520,7 @@ export default function ContentManagerClient({ initialArticles }: Props) {
               <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
                 <span className="font-bold text-cyan-400 block">Tùy Chỉnh SEO Cho Bài Viết</span>
                 <div>
-                  <label className="block text-slate-300 mb-1">SEO Title:</label>
+                  <label className="block text-slate-600 mb-1">SEO Title:</label>
                   <input
                     type="text"
                     value={seoTitle}
@@ -530,7 +530,7 @@ export default function ContentManagerClient({ initialArticles }: Props) {
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-300 mb-1">SEO Meta Description:</label>
+                  <label className="block text-slate-600 mb-1">SEO Meta Description:</label>
                   <textarea
                     rows={2}
                     value={seoDescription}
@@ -545,7 +545,7 @@ export default function ContentManagerClient({ initialArticles }: Props) {
                 <button
                   type="button"
                   onClick={() => setIsEditorOpen(false)}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold"
+                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-600 font-semibold"
                 >
                   Hủy
                 </button>

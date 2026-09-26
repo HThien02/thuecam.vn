@@ -422,7 +422,7 @@ export default function ProductManagerClient({
           </div>
 
           {/* Category filter */}
-          <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300">
+          <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-600">
             <Filter className="size-3.5 text-sky-400" />
             <select
               value={selectedCategory}
@@ -465,7 +465,7 @@ export default function ProductManagerClient({
                 <th className="px-4 py-3.5 text-right">Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-slate-300">
+            <tbody className="divide-y divide-slate-800/60 text-slate-600">
               {filteredProducts.map((p) => {
                 const catName = categories.find((c) => c.id === p.category_id)?.name || 'Chưa gán';
                 const brandName = brands.find((b) => b.id === p.brand_id)?.name || 'Khác';
@@ -587,7 +587,7 @@ export default function ProductManagerClient({
 
             <form onSubmit={handleSave} className="mt-4 space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-slate-300 mb-1">Tên thiết bị: *</label>
+                <label className="block font-bold text-slate-600 mb-1">Tên thiết bị: *</label>
                 <input
                   required
                   value={name}
@@ -599,7 +599,7 @@ export default function ProductManagerClient({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-300 mb-1">Slug URL (tùy chọn):</label>
+                  <label className="block font-bold text-slate-600 mb-1">Slug URL (tùy chọn):</label>
                   <input
                     value={slug}
                     onChange={(e) => setSlug(e.target.value)}
@@ -608,7 +608,7 @@ export default function ProductManagerClient({
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-300 mb-1">Danh mục: *</label>
+                  <label className="block font-bold text-slate-600 mb-1">Danh mục: *</label>
                   <select
                     value={categoryId}
                     onChange={(e) => setCategoryId(e.target.value)}
@@ -625,7 +625,7 @@ export default function ProductManagerClient({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-300 mb-1">Giá thuê 1 ngày (VNĐ): *</label>
+                  <label className="block font-bold text-slate-600 mb-1">Giá thuê 1 ngày (VNĐ): *</label>
                   <input
                     type="number"
                     required
@@ -635,7 +635,7 @@ export default function ProductManagerClient({
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-300 mb-1">Tiền cọc định mức (VNĐ): *</label>
+                  <label className="block font-bold text-slate-600 mb-1">Tiền cọc định mức (VNĐ): *</label>
                   <input
                     type="number"
                     required
@@ -731,7 +731,7 @@ export default function ProductManagerClient({
               </section>
 
               <div>
-                <label className="block font-bold text-slate-300 mb-1">Tình trạng máy:</label>
+                <label className="block font-bold text-slate-600 mb-1">Tình trạng máy:</label>
                 <select
                   value={hasInventory ? 'IN_STOCK' : 'NO_UNIT'}
                   onChange={(e) => setHasInventory(e.target.value === 'IN_STOCK')}
@@ -754,7 +754,7 @@ export default function ProductManagerClient({
 
               {/* Product image gallery */}
               <div>
-                <label htmlFor="product-file-input" className="mb-1.5 block font-bold text-slate-300">
+                <label htmlFor="product-file-input" className="mb-1.5 block font-bold text-slate-600">
                   Ảnh thiết bị: * <span className="font-normal text-slate-400">Ảnh đầu tiên là ảnh đại diện</span>
                 </label>
                 <input
@@ -852,7 +852,7 @@ export default function ProductManagerClient({
               </div>
 
               <div>
-                <label className="block font-bold text-slate-300 mb-1">Mô tả ngắn gọn: *</label>
+                <label className="block font-bold text-slate-600 mb-1">Mô tả ngắn gọn: *</label>
                 <textarea
                   rows={3}
                   required
@@ -864,7 +864,7 @@ export default function ProductManagerClient({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-300 mb-1">Thương hiệu:</label>
+                  <label className="block font-bold text-slate-600 mb-1">Thương hiệu:</label>
                   <select
                     value={brandId}
                     onChange={(e) => setBrandId(e.target.value)}
@@ -878,7 +878,7 @@ export default function ProductManagerClient({
                   </select>
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-300 mb-1">Trạng thái:</label>
+                  <label className="block font-bold text-slate-600 mb-1">Trạng thái:</label>
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value as Product['status'])}
@@ -895,7 +895,7 @@ export default function ProductManagerClient({
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold"
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-600 font-bold"
                 >
                   Hủy
                 </button>

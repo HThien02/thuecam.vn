@@ -59,11 +59,11 @@ export default async function BrandDetailPage({ params }: Props) {
           <span>Hệ sinh thái chính hãng</span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-black tracking-tight">
           Cho Thuê Thiết Bị {brand.name} Chính Hãng
         </h1>
 
-        <p className="text-sm text-slate-300 max-w-3xl leading-relaxed">
+        <p className="text-sm text-slate-600 max-w-3xl leading-relaxed">
           {brand.description}
         </p>
 
@@ -87,7 +87,7 @@ export default async function BrandDetailPage({ params }: Props) {
 
       {/* Products list */}
       <div className="space-y-6">
-        <h2 className="text-xl font-bold text-white">
+        <h2 className="text-xl font-bold text-black">
           Các Dòng Máy {brand.name} Sẵn Hàng Cho Thuê ({products.length} máy)
         </h2>
 

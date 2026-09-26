@@ -62,7 +62,7 @@ export default function RedirectManagerClient({ initialRedirects }: Props) {
         <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
         <div className="space-y-1">
           <span className="font-bold block">Nguyên tắc SEO khi đổi URL Slug:</span>
-          <p className="text-slate-300 leading-relaxed">
+          <p className="text-slate-600 leading-relaxed">
             Hạn chế đổi slug các trang đã được Google lập chỉ mục (index). Nếu bắt buộc phải đổi, hãy tạo ngay một lệnh chuyển hướng <strong>301 Permanent Redirect</strong> từ URL cũ sang URL mới để không làm mất thứ hạng và tránh lỗi 404 cho người dùng.
           </p>
         </div>
@@ -77,7 +77,7 @@ export default function RedirectManagerClient({ initialRedirects }: Props) {
 
         <form onSubmit={handleAddRedirect} className="grid grid-cols-1 sm:grid-cols-12 gap-3 text-xs">
           <div className="sm:col-span-5">
-            <label className="block text-slate-300 font-semibold mb-1">
+            <label className="block text-slate-600 font-semibold mb-1">
               Đường dẫn cũ (Old URL): *
             </label>
             <input
@@ -91,7 +91,7 @@ export default function RedirectManagerClient({ initialRedirects }: Props) {
           </div>
 
           <div className="sm:col-span-5">
-            <label className="block text-slate-300 font-semibold mb-1">
+            <label className="block text-slate-600 font-semibold mb-1">
               Đường dẫn đích mới (New URL): *
             </label>
             <input
@@ -127,7 +127,7 @@ export default function RedirectManagerClient({ initialRedirects }: Props) {
               <th className="py-3 px-3 text-right">Xóa</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/60 text-slate-300">
+          <tbody className="divide-y divide-slate-800/60 text-slate-600">
             {redirects.map((rule) => (
               <tr key={rule.id} className="hover:bg-slate-800/30 font-mono">
                 <td className="py-3 px-3 text-rose-300">{rule.old_url}</td>

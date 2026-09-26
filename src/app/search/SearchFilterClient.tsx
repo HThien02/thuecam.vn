@@ -162,7 +162,7 @@ export default function SearchFilterClient({
         </div>
       ) : (
         <div className="text-center py-16 rounded-2xl bg-slate-900/30 border border-slate-800 space-y-3">
-          <p className="text-slate-300 font-medium">Không tìm thấy thiết bị nào khớp với bộ lọc của bạn.</p>
+          <p className="text-slate-600 font-medium">Không tìm thấy thiết bị nào khớp với bộ lọc của bạn.</p>
           <button
             onClick={handleReset}
             className="px-4 py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs"

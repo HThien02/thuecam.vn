@@ -142,7 +142,7 @@ export default async function ProductDetailPage({ params }: Props) {
                   <Star className="w-4 h-4 fill-amber-400" />
                   <span>{product.rating}</span>
                 </div>
-                <span className="text-slate-300">|</span>
+                <span className="text-slate-600">|</span>
                 <span className="text-slate-500">
                   {product.review_count} lượt đánh giá thực tế từ khách thuê
                 </span>

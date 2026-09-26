@@ -42,7 +42,7 @@ export default function ContactFormClient() {
       <div className="p-8 text-center space-y-3 rounded-2xl bg-slate-950 border border-emerald-500/30 text-xs">
         <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
         <h3 className="font-bold text-white text-base">Gửi Yêu Cầu Thành Công!</h3>
-        <p className="text-slate-300">
+        <p className="text-slate-600">
           Cảm ơn bạn <strong className="text-cyan-400">{name}</strong>. Đội ngũ kỹ thuật viên THUECAM sẽ liên hệ lại qua số điện thoại <strong className="text-white">{phone}</strong> trong vòng 10 phút.
         </p>
       </div>
@@ -52,7 +52,7 @@ export default function ContactFormClient() {
   return (
     <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
       <div>
-        <label className="block text-slate-300 mb-1 font-semibold">Họ và tên của bạn: *</label>
+        <label className="block text-slate-600 mb-1 font-semibold">Họ và tên của bạn: *</label>
         <input
           type="text"
           required
@@ -74,7 +74,7 @@ export default function ContactFormClient() {
       </div>
 
       <div>
-        <label className="block text-slate-300 mb-1 font-semibold">
+        <label className="block text-slate-600 mb-1 font-semibold">
           Số điện thoại Zalo (Bắt đầu từ 0, đủ 10 số): *
         </label>
         <input
@@ -98,7 +98,7 @@ export default function ContactFormClient() {
       </div>
 
       <div>
-        <label className="block text-slate-300 mb-1 font-semibold">Nhu cầu hoặc máy bạn quan tâm:</label>
+        <label className="block text-slate-600 mb-1 font-semibold">Nhu cầu hoặc máy bạn quan tâm:</label>
         <textarea
           rows={3}
           placeholder="Ví dụ: Tôi muốn thuê DJI Pocket 4 đi Đà Lạt 3 ngày cuối tuần này..."

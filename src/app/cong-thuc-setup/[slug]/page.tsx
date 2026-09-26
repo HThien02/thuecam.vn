@@ -35,7 +35,7 @@ export default async function CameraFormulaDetailPage({ params }: Props) {
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-10 text-white sm:px-6 lg:px-8">
       <article className="mx-auto max-w-4xl space-y-8">
-        <Link href="/cong-thuc-setup" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-300 transition hover:text-cyan-300">
+        <Link href="/cong-thuc-setup" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-cyan-300">
           <ArrowLeft className="size-4" aria-hidden="true" /> Tất cả công thức
         </Link>
         <header className="space-y-4">
@@ -43,7 +43,7 @@ export default async function CameraFormulaDetailPage({ params }: Props) {
             <Camera className="size-4" aria-hidden="true" /> CAMERA SETUP
           </span>
           <h1 className="text-3xl font-black tracking-tight sm:text-5xl">{formula.title}</h1>
-          {formula.excerpt && <p className="max-w-3xl text-base leading-7 text-slate-300">{formula.excerpt}</p>}
+          {formula.excerpt && <p className="max-w-3xl text-base leading-7 text-slate-600">{formula.excerpt}</p>}
           <p className="text-xs text-slate-500">Chia sẻ bởi {formula.author_name} · {formula.published_at.slice(0, 10)}</p>
         </header>
 

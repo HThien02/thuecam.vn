@@ -18,21 +18,21 @@ export default function GioiThieuPage() {
 
       <div className="border-b border-white/10 pb-6 space-y-3">
         <span className="badge-verified">Về Chúng Tôi</span>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-black tracking-tight">
           THUECAM - Đồng Hành Cùng Mọi Chuyến Đi & Thước Phim Sáng Tạo
         </h1>
-        <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+        <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
           Được thành lập với mục tiêu mang lại giải pháp tiếp cận các thiết bị công nghệ quay phim mới nhất với chi phí tối ưu nhất cho người Việt.
         </p>
       </div>
 
-      <div className="prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed space-y-6">
-        <h2 className="text-xl font-bold text-white">1. Sứ mệnh của THUECAM</h2>
+      <div className="prose prose-invert max-w-none text-slate-600 text-sm leading-relaxed space-y-6">
+        <h2 className="text-xl font-bold text-black">1. Sứ mệnh của THUECAM</h2>
         <p>
           Trong kỷ nguyên bùng nổ của nội dung số (TikTok, YouTube, Reels), mỗi chuyến du lịch hay dự án sáng tạo đều xứng đáng có những thước phim sắc nét chuẩn điện ảnh. Thay vì phải đầu tư hàng chục triệu đồng để mua máy rồi để tủ, khách hàng của THUECAM có thể trải nghiệm các thiết bị công nghệ đỉnh cao (DJI Pocket 4, GoPro 13, Insta360 X4, Sony FX3) chỉ từ 100.000đ/ngày.
         </p>
 
-        <h2 className="text-xl font-bold text-white">2. Cam kết chất lượng thiết bị</h2>
+        <h2 className="text-xl font-bold text-black">2. Cam kết chất lượng thiết bị</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 not-prose my-4">
           <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
             <ShieldCheck className="w-5 h-5 text-cyan-400" />
@@ -50,7 +50,7 @@ export default function GioiThieuPage() {
           </div>
         </div>
 
-        <h2 className="text-xl font-bold text-white">3. Hệ thống Showroom thực tế</h2>
+        <h2 className="text-xl font-bold text-black">3. Hệ thống Showroom thực tế</h2>
         <p>
           Chúng tôi có văn phòng và showroom hoạt động thực tế tại trung tâm 2 thành phố lớn:
         </p>

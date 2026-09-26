@@ -126,7 +126,7 @@ export default function CategoryManagerClient({
               <th className="px-5 py-3.5 text-right">Thao tác</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/60 text-slate-300">
+          <tbody className="divide-y divide-slate-800/60 text-slate-600">
             {categories.map((c) => (
               <tr key={c.id} className="hover:bg-slate-800/40 transition">
                 <td className="px-5 py-3.5 font-bold text-sky-400">#{c.display_order}</td>
@@ -178,7 +178,7 @@ export default function CategoryManagerClient({
 
             <form onSubmit={handleSave} className="mt-4 space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-slate-300 mb-1">Tên danh mục: *</label>
+                <label className="block font-bold text-slate-600 mb-1">Tên danh mục: *</label>
                 <input
                   required
                   value={name}
@@ -189,7 +189,7 @@ export default function CategoryManagerClient({
               </div>
 
               <div>
-                <label className="block font-bold text-slate-300 mb-1">Slug URL:</label>
+                <label className="block font-bold text-slate-600 mb-1">Slug URL:</label>
                 <input
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
@@ -199,7 +199,7 @@ export default function CategoryManagerClient({
               </div>
 
               <div>
-                <label className="block font-bold text-slate-300 mb-1">Thứ tự hiển thị:</label>
+                <label className="block font-bold text-slate-600 mb-1">Thứ tự hiển thị:</label>
                 <input
                   type="number"
                   value={displayOrder}
@@ -209,7 +209,7 @@ export default function CategoryManagerClient({
               </div>
 
               <div>
-                <label className="block font-bold text-slate-300 mb-1">Mô tả danh mục:</label>
+                <label className="block font-bold text-slate-600 mb-1">Mô tả danh mục:</label>
                 <textarea
                   rows={3}
                   value={description}
@@ -222,7 +222,7 @@ export default function CategoryManagerClient({
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold"
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-600 font-bold"
                 >
                   Hủy
                 </button>

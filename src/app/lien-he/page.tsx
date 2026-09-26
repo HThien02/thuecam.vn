@@ -19,7 +19,7 @@ export default function LienHePage() {
 
       <div className="border-b border-white/10 pb-6 space-y-2">
         <span className="badge-verified">Hỗ Trợ Khách Hàng 24/7</span>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-black tracking-tight">
           Liên Hệ Hệ Thống Cho Thuê Thiết Bị THUECAM
         </h1>
         <p className="text-sm text-slate-400">
@@ -35,7 +35,7 @@ export default function LienHePage() {
               <MapPin className="w-5 h-5 text-cyan-400" />
               Chi Nhánh TP. Hồ Chí Minh
             </h2>
-            <div className="space-y-2 text-xs text-slate-300">
+            <div className="space-y-2 text-xs text-slate-600">
               <p><strong>Địa chỉ:</strong> ETown Cộng Hòa, 364 Cộng Hòa, Phường 13, Quận Tân Bình, TP.HCM</p>
               <p><strong>Hotline / Zalo:</strong> <span className="text-cyan-400 font-bold">0932.501.411</span></p>
               <p><strong>Email:</strong> hcm@thuecam.vn</p>
@@ -48,7 +48,7 @@ export default function LienHePage() {
               <MapPin className="w-5 h-5 text-cyan-400" />
               Chi Nhánh Hà Nội
             </h2>
-            <div className="space-y-2 text-xs text-slate-300">
+            <div className="space-y-2 text-xs text-slate-600">
               <p><strong>Địa chỉ:</strong> 45 Phố Giảng Võ, Phường Cát Linh, Quận Đống Đa, Hà Nội</p>
               <p><strong>Hotline / Zalo:</strong> <span className="text-cyan-400 font-bold">0902.345.678</span></p>
               <p><strong>Email:</strong> hanoi@thuecam.vn</p>

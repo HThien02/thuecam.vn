@@ -38,11 +38,11 @@ export default async function BlogIndexPage() {
           <span>Kiến thức & Kinh nghiệm thực chiến</span>
         </div>
 
-        <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+        <h1 className="text-3xl sm:text-5xl font-extrabold text-black tracking-tight">
           Cẩm Nang Thuê Máy & Kỹ Thuật Quay Chụp
         </h1>
 
-        <p className="text-sm sm:text-base text-slate-300 max-w-3xl leading-relaxed">
+        <p className="text-sm sm:text-base text-slate-600 max-w-3xl leading-relaxed">
           Nơi đội ngũ kỹ thuật THUECAM chia sẻ hướng dẫn thực tế, so sánh trực diện và kinh nghiệm tối ưu thiết bị quay chụp cho các vlogger, travel blogger và nhà sáng tạo nội dung.
         </p>
 
@@ -96,7 +96,7 @@ export default async function BlogIndexPage() {
 
               <div className="p-5 flex flex-col flex-1 justify-between gap-4">
                 <div>
-                  <h2 className="text-base font-bold text-white group-hover:text-cyan-400 transition-colors line-clamp-2 leading-snug">
+                  <h2 className="text-base font-bold text-black group-hover:text-cyan-400 transition-colors line-clamp-2 leading-snug">
                     <Link href={href}>{art.title}</Link>
                   </h2>
                   <p className="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">

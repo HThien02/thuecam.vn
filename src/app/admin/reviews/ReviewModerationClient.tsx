@@ -79,7 +79,7 @@ export default function ReviewModerationClient({
             className={`px-3 py-1.5 rounded-lg transition-colors ${
               statusFilter === 'ALL'
                 ? 'bg-cyan-500 text-slate-950 font-bold'
-                : 'bg-slate-800 text-slate-300 hover:text-white'
+                : 'bg-slate-800 text-slate-600 hover:text-white'
             }`}
           >
             Tất cả ({reviews.length})
@@ -89,7 +89,7 @@ export default function ReviewModerationClient({
             className={`px-3 py-1.5 rounded-lg transition-colors ${
               statusFilter === 'APPROVED'
                 ? 'bg-emerald-500 text-slate-950 font-bold'
-                : 'bg-slate-800 text-slate-300 hover:text-white'
+                : 'bg-slate-800 text-slate-600 hover:text-white'
             }`}
           >
             Đã Duyệt ({approvedCount})
@@ -99,7 +99,7 @@ export default function ReviewModerationClient({
             className={`px-3 py-1.5 rounded-lg transition-colors ${
               statusFilter === 'PENDING'
                 ? 'bg-amber-500 text-slate-950 font-bold'
-                : 'bg-slate-800 text-slate-300 hover:text-white'
+                : 'bg-slate-800 text-slate-600 hover:text-white'
             }`}
           >
             Chờ Duyệt ({reviews.filter((r) => r.status === 'PENDING').length})
@@ -158,7 +158,7 @@ export default function ReviewModerationClient({
                 ))}
               </div>
 
-              <p className="text-slate-300 leading-relaxed">&ldquo;{rev.comment}&rdquo;</p>
+              <p className="text-slate-600 leading-relaxed">&ldquo;{rev.comment}&rdquo;</p>
 
               {/* Moderation Actions */}
               <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-800/60">
@@ -174,7 +174,7 @@ export default function ReviewModerationClient({
                 {rev.status !== 'REJECTED' && (
                   <button
                     onClick={() => handleReject(rev.id)}
-                    className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center gap-1 transition-colors"
+                    className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-600 flex items-center gap-1 transition-colors"
                   >
                     <XCircle className="w-3.5 h-3.5 text-amber-400" />
                     <span>Từ Chối</span>

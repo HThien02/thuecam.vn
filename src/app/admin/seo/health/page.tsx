@@ -173,7 +173,7 @@ export default async function AdminSeoHealthPage() {
               <ShieldCheck className="w-5 h-5 text-emerald-400" />
               <span className="font-bold text-white text-base">Điểm Sức Khỏe Kỹ Thuật SEO: Tuyệt Vời (Hạng A+)</span>
             </div>
-            <p className="text-xs text-slate-300">
+            <p className="text-xs text-slate-600">
               Tất cả {indexablePages} trang chỉ mục đều có Title, Meta Description, Canonical URL và thẻ OpenGraph đầy đủ. Không phát hiện link gãy hay trùng lặp.
             </p>
           </div>
@@ -245,7 +245,7 @@ export default async function AdminSeoHealthPage() {
                 <th className="py-3 px-3 text-right">Xem trang</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-slate-300">
+            <tbody className="divide-y divide-slate-800/60 text-slate-600">
               {auditList.map((item, idx) => (
                 <tr key={idx} className="hover:bg-slate-800/30">
                   <td className="py-3 px-3 font-mono text-cyan-400 font-medium">{item.url}</td>

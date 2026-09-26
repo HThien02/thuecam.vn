@@ -63,11 +63,11 @@ export default async function GuideDetailPage({ params }: Props) {
           <span>Cẩm Nang Hướng Dẫn Kỹ Thuật</span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-black tracking-tight">
           {article.title}
         </h1>
 
-        <p className="text-sm text-slate-300 leading-relaxed italic border-l-2 border-cyan-400 pl-4">
+        <p className="text-sm text-slate-600 leading-relaxed italic border-l-2 border-cyan-400 pl-4">
           {article.excerpt}
         </p>
 
@@ -79,7 +79,7 @@ export default async function GuideDetailPage({ params }: Props) {
       </div>
 
       {/* Guide Content */}
-      <div className="p-8 rounded-3xl bg-slate-900/60 border border-slate-800 space-y-6 text-sm text-slate-300 leading-relaxed">
+      <div className="p-8 rounded-3xl bg-slate-900/60 border border-slate-800 space-y-6 text-sm text-slate-600 leading-relaxed">
         <div className="prose prose-invert max-w-none space-y-4 whitespace-pre-line">
           {article.content}
         </div>
@@ -88,7 +88,7 @@ export default async function GuideDetailPage({ params }: Props) {
       {/* Recommended Device */}
       {relatedProducts.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-lg font-bold text-white">Thiết Bị Dùng Trong Bài Hướng Dẫn</h2>
+          <h2 className="text-lg font-bold text-black">Thiết Bị Dùng Trong Bài Hướng Dẫn</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {relatedProducts.map((p) => (
               <ProductCard key={p.id} product={p} />

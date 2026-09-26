@@ -64,13 +64,13 @@ export default async function LocationDetailPage({ params }: Props) {
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
             Thuê Camera & Thiết Bị Quay Phim Tại {location.name}
           </h1>
-          <p className="text-sm text-slate-300 max-w-3xl leading-relaxed">
+          <p className="text-sm text-slate-600 max-w-3xl leading-relaxed">
             {location.intro_content}
           </p>
         </div>
 
         {/* Store details card */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-slate-800 text-xs text-slate-300">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-slate-800 text-xs text-slate-600">
           <div className="space-y-1">
             <span className="text-slate-500 font-semibold flex items-center gap-1">
               <MapPin className="w-3.5 h-3.5 text-cyan-400" />
@@ -114,7 +114,7 @@ export default async function LocationDetailPage({ params }: Props) {
               className={`px-3 py-1 rounded-lg transition-colors ${
                 loc.slug === location.slug
                   ? 'bg-cyan-500 text-slate-950 font-bold'
-                  : 'bg-slate-800 text-slate-300 hover:text-white'
+                  : 'bg-slate-800 text-slate-600 hover:text-white'
               }`}
             >
               {loc.name}
@@ -125,7 +125,7 @@ export default async function LocationDetailPage({ params }: Props) {
 
       {/* Available Equipment at this location */}
       <div className="space-y-6">
-        <h2 className="text-xl font-bold text-white">
+        <h2 className="text-xl font-bold text-black">
           Thiết Bị Sẵn Sàng Bàn Giao Hỏa Tốc Tại {location.name}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -16,7 +16,7 @@ export default function ChinhSachDatCocPage() {
       <Breadcrumbs items={[{ name: 'Chính sách đặt cọc', url: '/chinh-sach-dat-coc' }]} />
 
       <div className="border-b border-white/10 pb-6">
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-black">
           Chính Sách Đặt Cọc & Hồ Sơ Thuê Thiết Bị
         </h1>
         <p className="text-sm text-slate-400 mt-2">
@@ -24,15 +24,15 @@ export default function ChinhSachDatCocPage() {
         </p>
       </div>
 
-      <div className="prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed space-y-6">
-        <h2 className="text-lg font-bold text-white">1. Hình thức 1: Giữ Căn cước công dân (CCCD)</h2>
+      <div className="prose prose-invert max-w-none text-slate-600 text-sm leading-relaxed space-y-6">
+        <h2 className="text-lg font-bold text-black">1. Hình thức 1: Giữ Căn cước công dân (CCCD)</h2>
         <p>
           - Áp dụng cho khách hàng có CCCD gắn chip chính chủ còn hiệu lực.<br />
           - Khách hàng ký hợp đồng thuê máy và gửi lại bản gốc CCCD gắn chip tại quầy giao dịch.<br />
           - Với hình thức này, quý khách được miễn giảm từ 70% đến 100% tiền mặt đặt cọc tùy theo giá trị máy.
         </p>
 
-        <h2 className="text-lg font-bold text-white">2. Hình thức 2: Đặt cọc tiền mặt hoặc chuyển khoản</h2>
+        <h2 className="text-lg font-bold text-black">2. Hình thức 2: Đặt cọc tiền mặt hoặc chuyển khoản</h2>
         <p>
           - Dành cho khách hàng cần giữ lại giấy tờ tùy thân để đi máy bay hoặc làm thủ tục khách sạn.<br />
           - Số tiền đặt cọc tương đương mức được niêm yết rõ ràng trên trang chi tiết sản phẩm (ví dụ: DJI Pocket 4 cọc 3.000.000đ).<br />

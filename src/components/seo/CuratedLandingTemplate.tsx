@@ -85,7 +85,7 @@ export default function CuratedLandingTemplate({
 
       {/* In-depth Editorial Content */}
       {detailedContent && (
-        <div className="p-8 rounded-3xl bg-slate-900/40 border border-slate-800 space-y-4 text-sm text-slate-300 leading-relaxed">
+        <div className="p-8 rounded-3xl bg-slate-900/40 border border-slate-800 space-y-4 text-sm text-slate-600 leading-relaxed">
           <div className="prose prose-invert max-w-none space-y-4 whitespace-pre-line">
             {detailedContent}
           </div>

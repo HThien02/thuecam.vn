@@ -18,7 +18,7 @@ export default async function AdminCategoriesPage() {
         <p className="text-xs font-black uppercase tracking-wider text-indigo-400">
           THUECAM TAXONOMY CONTROL
         </p>
-        <h1 className="mt-1 text-2xl sm:text-3xl font-black text-white">
+        <h1 className="mt-1 text-2xl sm:text-3xl font-black text-black">
           Quản Lý Danh Mục Bảng Giá
         </h1>
         <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">

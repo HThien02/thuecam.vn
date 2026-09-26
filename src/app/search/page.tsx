@@ -23,7 +23,7 @@ export default async function SearchPage() {
       <Breadcrumbs items={[{ name: 'Tìm kiếm thiết bị', url: '/search' }]} />
 
       <div className="border-b border-white/10 pb-4">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-black">
           Tìm Kiếm & Lọc Thiết Bị Theo Nhu Cầu
         </h1>
         <p className="text-xs sm:text-sm text-slate-400 mt-1">

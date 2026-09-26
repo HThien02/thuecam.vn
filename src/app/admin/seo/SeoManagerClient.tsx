@@ -132,7 +132,7 @@ export default function SeoManagerClient({
       <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Globe className="w-5 h-5 text-cyan-400" />
-          <span className="text-xs font-semibold text-slate-300">Đang chỉnh sửa SEO cho:</span>
+          <span className="text-xs font-semibold text-slate-600">Đang chỉnh sửa SEO cho:</span>
           <select
             value={selectedTarget}
             onChange={(e) => handleSelectTarget(e.target.value)}
@@ -171,7 +171,7 @@ export default function SeoManagerClient({
           className={`p-4 rounded-2xl border flex items-center justify-between gap-4 transition-colors ${
             globalNoindex
               ? 'bg-rose-950/40 border-rose-500/50 text-rose-300'
-              : 'bg-slate-900/40 border-slate-800 text-slate-300'
+              : 'bg-slate-900/40 border-slate-800 text-slate-600'
           }`}
         >
           <div className="flex items-center gap-3 text-xs">
@@ -216,7 +216,7 @@ export default function SeoManagerClient({
             {/* SEO Title Input */}
             <div className="space-y-1.5">
               <div className="flex justify-between text-xs">
-                <label className="font-semibold text-slate-300">SEO Title (Tiêu Đề Trang):</label>
+                <label className="font-semibold text-slate-600">SEO Title (Tiêu Đề Trang):</label>
                 <span
                   className={`font-mono font-bold ${
                     isTitleOptimal ? 'text-emerald-400' : 'text-amber-400'
@@ -236,7 +236,7 @@ export default function SeoManagerClient({
             {/* Meta Description Input */}
             <div className="space-y-1.5">
               <div className="flex justify-between text-xs">
-                <label className="font-semibold text-slate-300">Meta Description (Mô Tả):</label>
+                <label className="font-semibold text-slate-600">Meta Description (Mô Tả):</label>
                 <span
                   className={`font-mono font-bold ${
                     isDescOptimal ? 'text-emerald-400' : 'text-amber-400'
@@ -255,7 +255,7 @@ export default function SeoManagerClient({
 
             {/* Canonical URL Input */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-300">
+              <label className="block text-xs font-semibold text-slate-600">
                 Canonical URL (Bắt buộc dùng domain https://thuecam.vn):
               </label>
               <input
@@ -271,7 +271,7 @@ export default function SeoManagerClient({
 
             {/* OG Image */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-300">
+              <label className="block text-xs font-semibold text-slate-600">
                 OpenGraph Image URL (Chia sẻ Facebook & Zalo):
               </label>
               <input
@@ -425,12 +425,12 @@ export default function SeoManagerClient({
               </div>
             </div>
 
-            <p className="text-xs text-slate-300 leading-relaxed">
+            <p className="text-xs text-slate-600 leading-relaxed">
               Nếu bạn bật chế độ này, thẻ <code>noindex</code> sẽ được kích hoạt trên <strong>toàn bộ trang web</strong>. Google và các công cụ tìm kiếm sẽ gỡ bỏ website khỏi kết quả tìm kiếm!
             </p>
 
             <div className="space-y-2 text-xs">
-              <label className="block text-slate-300 font-semibold">
+              <label className="block text-slate-600 font-semibold">
                 Để tiếp tục, vui lòng nhập chính xác cụm từ <span className="text-rose-400 font-bold">CHẶN CHỈ MỤC</span> vào ô bên dưới:
               </label>
               <input
@@ -449,7 +449,7 @@ export default function SeoManagerClient({
                   setIsSafetyModalOpen(false);
                   setSafetyConfirmationText('');
                 }}
-                className="w-1/2 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                className="w-1/2 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-600 text-xs font-semibold"
               >
                 Hủy Bỏ (Khuyên dùng)
               </button>

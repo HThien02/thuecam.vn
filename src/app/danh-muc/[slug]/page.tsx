@@ -61,11 +61,11 @@ export default async function CategoryDetailPage({ params }: Props) {
           <span>Danh mục thiết bị chuyên dụng</span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-black tracking-tight">
           {category.h1}
         </h1>
 
-        <p className="text-sm text-slate-300 max-w-3xl leading-relaxed">
+        <p className="text-sm text-slate-600 max-w-3xl leading-relaxed">
           {category.intro_content}
         </p>
 
@@ -90,7 +90,7 @@ export default async function CategoryDetailPage({ params }: Props) {
       {/* Products Grid */}
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold text-white">
+          <h2 className="text-xl font-bold text-black">
             Các Thiết Bị Thuộc Nhóm {category.name} ({products.length} máy)
           </h2>
         </div>
@@ -118,7 +118,7 @@ export default async function CategoryDetailPage({ params }: Props) {
             <Link
               key={brand.id}
               href={`/thuong-hieu/${brand.slug}`}
-              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-slate-300 text-xs transition-colors"
+              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-slate-600 text-xs transition-colors"
             >
               Máy quay {brand.name}
             </Link>

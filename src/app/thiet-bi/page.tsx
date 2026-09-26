@@ -56,7 +56,7 @@ export default async function EquipmentCatalogPage() {
             <Link
               key={cat.id}
               href={`/danh-muc/${cat.slug}`}
-              className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-500/50 text-slate-300 hover:text-white text-xs font-medium transition-colors"
+              className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-500/50 text-slate-600 hover:text-white text-xs font-medium transition-colors"
             >
               {cat.name}
             </Link>

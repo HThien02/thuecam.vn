@@ -175,7 +175,7 @@ export default function FloatingContactWidget() {
           <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500" />
         </span>
         {isOpen ? (
-          <X className="w-5 h-5 text-slate-300 group-hover:text-white transition-colors" />
+          <X className="w-5 h-5 text-slate-600 group-hover:text-white transition-colors" />
         ) : (
           <MessageSquare className="w-5 h-5 text-sky-400 group-hover:scale-110 transition-transform" />
         )}

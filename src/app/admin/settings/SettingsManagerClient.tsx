@@ -77,7 +77,7 @@ export default function SettingsManagerClient({ initialSettings }: { initialSett
 
           <div className="space-y-3 text-xs">
             <div>
-              <label className="block font-bold text-slate-300 mb-1">
+              <label className="block font-bold text-slate-600 mb-1">
                 Địa chỉ Showroom / Điểm hẹn nhận máy TP.HCM: *
               </label>
               <input
@@ -104,7 +104,7 @@ export default function SettingsManagerClient({ initialSettings }: { initialSett
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
-              <label className="block font-bold text-slate-300 mb-1">Số điện thoại Hotline: *</label>
+              <label className="block font-bold text-slate-600 mb-1">Số điện thoại Hotline: *</label>
               <input
                 required
                 value={settings.hotline}
@@ -113,7 +113,7 @@ export default function SettingsManagerClient({ initialSettings }: { initialSett
               />
             </div>
             <div>
-              <label className="block font-bold text-slate-300 mb-1">Số Zalo CSKH: *</label>
+              <label className="block font-bold text-slate-600 mb-1">Số Zalo CSKH: *</label>
               <input
                 required
                 value={settings.zalo}
@@ -122,7 +122,7 @@ export default function SettingsManagerClient({ initialSettings }: { initialSett
               />
             </div>
             <div>
-              <label className="block font-bold text-slate-300 mb-1">Email liên hệ: *</label>
+              <label className="block font-bold text-slate-600 mb-1">Email liên hệ: *</label>
               <input
                 required
                 type="email"
@@ -132,7 +132,7 @@ export default function SettingsManagerClient({ initialSettings }: { initialSett
               />
             </div>
             <div>
-              <label className="block font-bold text-slate-300 mb-1">Thời gian làm việc: *</label>
+              <label className="block font-bold text-slate-600 mb-1">Thời gian làm việc: *</label>
               <input
                 required
                 value={settings.openHours}
@@ -148,19 +148,19 @@ export default function SettingsManagerClient({ initialSettings }: { initialSett
             <Share2 className="size-4 text-sky-400" /> Người quản lý & liên kết liên hệ
           </h2>
           <div className="grid grid-cols-1 gap-4 text-xs sm:grid-cols-2">
-            <label className="flex flex-col gap-1 font-bold text-slate-300">
+            <label className="flex flex-col gap-1 font-bold text-slate-600">
               Tên người quản lý
               <input value={settings.contactManagerName} onChange={(event) => setSettings({ ...settings, contactManagerName: event.target.value })} placeholder="Quản lý THUECAM" className="rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-white outline-none focus:border-sky-500" />
             </label>
-            <label className="flex flex-col gap-1 font-bold text-slate-300">
+            <label className="flex flex-col gap-1 font-bold text-slate-600">
               Facebook URL
               <input type="url" value={settings.facebookUrl} onChange={(event) => setSettings({ ...settings, facebookUrl: event.target.value })} placeholder="https://facebook.com/..." className="rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-white outline-none focus:border-sky-500" />
             </label>
-            <label className="flex flex-col gap-1 font-bold text-slate-300">
+            <label className="flex flex-col gap-1 font-bold text-slate-600">
               Instagram URL
               <input type="url" value={settings.instagramUrl} onChange={(event) => setSettings({ ...settings, instagramUrl: event.target.value })} placeholder="https://instagram.com/..." className="rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-white outline-none focus:border-sky-500" />
             </label>
-            <label className="flex flex-col gap-1 font-bold text-slate-300">
+            <label className="flex flex-col gap-1 font-bold text-slate-600">
               Số điện thoại WhatsApp
               <input type="tel" inputMode="tel" autoComplete="tel" value={getWhatsappPhone(settings.whatsappUrl)} onChange={(event) => setSettings({ ...settings, whatsappUrl: event.target.value })} placeholder="+84 932 501 411" className="rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-white outline-none focus:border-sky-500" />
             </label>
@@ -177,7 +177,7 @@ export default function SettingsManagerClient({ initialSettings }: { initialSett
 
           <div className="space-y-3 text-xs">
             <div>
-              <label className="block font-bold text-slate-300 mb-1">
+              <label className="block font-bold text-slate-600 mb-1">
                 Dòng chữ thông báo trên thanh Header (Promo Banner):
               </label>
               <input
@@ -190,7 +190,7 @@ export default function SettingsManagerClient({ initialSettings }: { initialSett
             </div>
 
             <div>
-              <label className="block font-bold text-slate-300 mb-1">
+              <label className="block font-bold text-slate-600 mb-1">
                 Chính sách cọc tóm tắt hiển thị trong booking form:
               </label>
               <textarea

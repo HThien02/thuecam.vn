@@ -224,7 +224,7 @@ export default async function AdminDashboardPage() {
                 <th className="px-5 py-3.5 text-right">Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-slate-300">
+            <tbody className="divide-y divide-slate-800/60 text-slate-600">
               {modules.map((m) => (
                 <tr key={m.name} className="hover:bg-slate-800/40 transition">
                   <td className="px-5 py-4 font-black text-white text-sm">

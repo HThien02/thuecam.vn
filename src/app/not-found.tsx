@@ -12,7 +12,7 @@ export default function NotFound() {
 
         <div className="space-y-2">
           <span className="text-4xl font-extrabold text-cyan-400 font-mono">404</span>
-          <h1 className="text-2xl font-bold text-white">Không Tìm Thấy Trang Yêu Cầu</h1>
+          <h1 className="text-2xl font-bold text-black">Không Tìm Thấy Trang Yêu Cầu</h1>
           <p className="text-xs text-slate-400 leading-relaxed">
             Đường dẫn bạn truy cập có thể đã được cập nhật hoặc không còn tồn tại trên hệ thống THUECAM.
           </p>

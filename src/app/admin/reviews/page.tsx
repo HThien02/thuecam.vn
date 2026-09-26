@@ -18,7 +18,7 @@ export default async function AdminReviewsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-black">
           Kiểm Duyệt Đánh Giá Khách Hàng (Customer Reviews Moderation)
         </h1>
         <p className="text-xs sm:text-sm text-slate-400 mt-1">

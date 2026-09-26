@@ -64,11 +64,11 @@ export default async function ComparisonDetailPage({ params }: Props) {
           <span>So Sánh Trực Diện & Tư Vấn Chọn Thuê</span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-black tracking-tight">
           {article.title}
         </h1>
 
-        <p className="text-sm text-slate-300 leading-relaxed italic border-l-2 border-cyan-400 pl-4">
+        <p className="text-sm text-slate-600 leading-relaxed italic border-l-2 border-cyan-400 pl-4">
           {article.excerpt}
         </p>
 
@@ -82,7 +82,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
       {/* Compared Products Grid */}
       {comparedProducts.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-lg font-bold text-white">2 Thiết Bị Đang Được So Sánh</h2>
+          <h2 className="text-lg font-bold text-black">2 Thiết Bị Đang Được So Sánh</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {comparedProducts.map((p) => (
               <ProductCard key={p.id} product={p} />
@@ -92,7 +92,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
       )}
 
       {/* Content & Comparison Matrix */}
-      <div className="p-8 rounded-3xl bg-slate-900/60 border border-slate-800 space-y-6 text-sm text-slate-300 leading-relaxed">
+      <div className="p-8 rounded-3xl bg-slate-900/60 border border-slate-800 space-y-6 text-sm text-slate-600 leading-relaxed">
         <div className="prose prose-invert max-w-none space-y-4 whitespace-pre-line">
           {article.content}
         </div>
@@ -106,13 +106,13 @@ export default async function ComparisonDetailPage({ params }: Props) {
         <div className="flex flex-wrap gap-2">
           <Link
             href="/thue-camera-du-lich"
-            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-slate-300 transition-colors"
+            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-slate-600 transition-colors"
           >
             Pillar: Thuê camera du lịch
           </Link>
           <Link
             href="/huong-dan/dji-pocket-4-quay-du-lich"
-            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-slate-300 transition-colors"
+            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-slate-600 transition-colors"
           >
             Hướng dẫn cài đặt DJI Pocket 4
           </Link>
