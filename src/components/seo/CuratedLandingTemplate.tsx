@@ -103,12 +103,12 @@ export default function CuratedLandingTemplate({
             <Link
               key={idx}
               href={item.href}
-              className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-cyan-500/50 flex flex-col justify-between group transition-colors"
-            >
-              <span className="font-semibold text-white group-hover:text-cyan-400 transition-colors">
+className="p-3.5 rounded-xl bg-sky-50 border border-sky-200 hover:bg-cyan-50 hover:border-sky-300 flex flex-col justify-between group transition-colors"
+              >
+                <span className="font-semibold text-slate-900 group-hover:text-sky-700 transition-colors">
                 {item.title}
               </span>
-              <span className="text-[11px] text-slate-400 mt-2 flex items-center gap-1">
+              <span className="text-[11px] text-slate-600 mt-2 flex items-center gap-1">
                 Xem chi tiết <ArrowRight className="w-3 h-3 text-cyan-400" />
               </span>
             </Link>

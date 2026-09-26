@@ -170,7 +170,7 @@ export default function VoucherManagerClient({ initialVouchers }: { initialVouch
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/70">
           <table className="w-full min-w-[760px] text-left text-xs">
-            <thead className="bg-slate-950/70 text-[10px] uppercase tracking-wide text-slate-500">
+            <thead className="bg-sky-100 text-[10px] uppercase tracking-wide text-sky-900">
               <tr><th className="px-4 py-3">Mã voucher</th><th className="px-4 py-3">Ưu đãi</th><th className="px-4 py-3">Đã dùng / giới hạn</th><th className="px-4 py-3">Thời hạn</th><th className="px-4 py-3">Trạng thái</th><th className="px-4 py-3 text-right">Thao tác</th></tr>
             </thead>
             <tbody className="divide-y divide-slate-800">

@@ -538,11 +538,11 @@ export default function BookingManagerClient({
                   {customerLookup.state === 'checking' ? 'Đang tra cứu lịch sử khách hàng…' : customerLookup.message ?? (customerCccd ? 'Rời ô để kiểm tra khách hàng và lịch thuê cũ.' : 'Nhập CCCD để tra cứu và lưu lịch sử thuê theo khách hàng.')}
                 </p>
                 {customerLookup.state === 'existing' && customerLookup.history?.length ? (
-                  <ul className="mt-2 flex flex-col gap-1 rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-[11px] text-slate-600" aria-label="Lịch sử thuê gần đây">
+                  <ul className="mt-2 flex flex-col gap-1 rounded-xl border border-sky-200 bg-sky-100 p-3 text-[11px] text-slate-700" aria-label="Lịch sử thuê gần đây">
                     {customerLookup.history.map((item) => (
                       <li key={item.booking_code} className="flex flex-wrap items-center justify-between gap-2">
-                        <span><strong className="text-white">{item.product_name}</strong> · {item.start_date}–{item.end_date}</span>
-                        <span className="font-mono text-sky-300">{item.booking_code}</span>
+                        <span><strong className="text-slate-900">{item.product_name}</strong> · {item.start_date}–{item.end_date}</span>
+                        <span className="font-mono text-sky-700">{item.booking_code}</span>
                       </li>
                     ))}
                   </ul>

@@ -221,7 +221,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-sky-950/70 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="relative w-full max-w-2xl rounded-[32px] bg-white border-2 border-sky-100 shadow-2xl p-5 sm:p-7 text-slate-800 max-h-[92vh] overflow-y-auto">
         {/* Close Button */}
         <button

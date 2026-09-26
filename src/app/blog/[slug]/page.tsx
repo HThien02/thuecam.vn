@@ -179,20 +179,20 @@ export default async function BlogDetailPage({ params }: Props) {
       {/* Topic Cluster: Pillar & Related Articles */}
       {clusterArticles.length > 0 && (
         <div className="pt-8 border-t border-white/5 space-y-4">
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <Compass className="w-4 h-4 text-cyan-400" />
+          <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+            <Compass className="w-4 h-4 text-cyan-500" />
             Các Bài Viết Cùng Cụm Chủ Đề Du Lịch
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <Link
               href="/thue-camera-du-lich"
-              className="p-4 rounded-xl bg-cyan-950/40 border border-cyan-500/40 hover:border-cyan-400 flex flex-col justify-between group"
-            >
-              <span className="font-bold text-cyan-300 group-hover:text-white">
+className="p-4 rounded-xl bg-sky-50 border border-sky-200 hover:bg-cyan-50 hover:border-sky-300 flex flex-col justify-between group transition-colors"
+              >
+                <span className="font-bold text-slate-900 group-hover:text-sky-700 transition-colors">
                 ★ Pillar Page: Dịch vụ thuê camera du lịch trọn gói
               </span>
               <span className="text-[11px] text-slate-400 mt-2 flex items-center gap-1">
-                Xem cẩm nang tổng hợp <ArrowRight className="w-3 h-3 text-cyan-400" />
+                Xem cẩm nang tổng hợp <ArrowRight className="w-3 h-3 text-cyan-500" />
               </span>
             </Link>
 
@@ -203,12 +203,12 @@ export default async function BlogDetailPage({ params }: Props) {
                 <Link
                   key={cArt.id}
                   href={`/blog/${cArt.slug}`}
-                  className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-cyan-500/50 flex flex-col justify-between group"
+                  className="p-4 rounded-xl bg-sky-50 border border-sky-200 hover:bg-cyan-50 hover:border-sky-300 flex flex-col justify-between group transition-colors"
                 >
-                  <span className="font-semibold text-white group-hover:text-cyan-400">
+                  <span className="font-semibold text-slate-900 group-hover:text-sky-700 transition-colors">
                     {cArt.title}
                   </span>
-                  <span className="text-[11px] text-slate-500 mt-2">
+                  <span className="text-[11px] text-slate-600 mt-2">
                     {cArt.published_at.split('T')[0]}
                   </span>
                 </Link>
