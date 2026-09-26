@@ -2,7 +2,6 @@ import React from 'react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { getProductBySlug, getProducts, getClusterArticles } from '@/lib/data';
 import { constructMetadata } from '@/lib/seo/metadata';
 import {
@@ -11,6 +10,7 @@ import {
 } from '@/lib/seo/jsonld';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import ProductClientActions from '@/components/product/ProductClientActions';
+import ProductImageGallery from '@/components/product/ProductImageGallery';
 import ProductCard, { formatVND } from '@/components/product/ProductCard';
 import {
   ShieldCheck,
@@ -92,37 +92,10 @@ export default async function ProductDetailPage({ params }: Props) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* Left Column: Product images */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-pink-100 bg-white shadow-sm">
-            <Image
-              src={product.primary_image}
-              alt={product.name}
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 58vw"
-              className="object-contain"
-            />
-          </div>
-
-          {/* Gallery thumbnails */}
-          {product.gallery_images && product.gallery_images.length > 1 && (
-            <div className="flex items-center gap-3 overflow-x-auto pb-2">
-              {product.gallery_images.map((imgUrl, idx) => (
-                <div
-                  key={idx}
-                  className="relative w-20 h-16 rounded-2xl overflow-hidden border border-pink-100 shrink-0 bg-pink-50 shadow-sm"
-                >
-                  <Image
-                    src={imgUrl}
-                    alt={`${product.name} góc chụp ${idx + 1}`}
-                    fill
-                    sizes="80px"
-                    className="object-cover"
-                    loading="lazy"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
+          <ProductImageGallery
+            productName={product.name}
+            images={[product.primary_image, ...(product.gallery_images ?? [])]}
+          />
 
           {/* Verification Badge */}
           <div className="p-4 rounded-2xl bg-white border border-pink-100 flex items-center justify-between text-xs shadow-sm">
