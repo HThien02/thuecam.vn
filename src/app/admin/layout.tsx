@@ -42,10 +42,10 @@ export default function AdminLayout({
 
   const navClass = (href: string) => {
     const active = isNavActive(href);
-      return `flex items-center gap-2.5 rounded-xl px-3 py-2.5 transition-all text-xs font-bold ${
+      return `flex items-center gap-2.5 rounded-xl px-3 py-2.5 transition-colors text-[13px] font-semibold ${
       active
-        ? 'bg-sky-500/15 text-sky-200 border-l-4 border-sky-400 ring-1 ring-sky-400/20 shadow-sm'
-        : 'text-slate-400 hover:text-sky-200 hover:bg-sky-500/10'
+        ? 'bg-blue-50 text-blue-900 border-l-[3px] border-blue-700'
+        : 'text-slate-600 hover:text-blue-800 hover:bg-slate-100'
     }`;
   };
 
@@ -61,13 +61,13 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="admin-shell min-h-screen bg-[#071426] text-slate-100 flex flex-col md:flex-row">
+    <div className="admin-shell min-h-screen bg-slate-50 text-slate-900 flex flex-col md:flex-row">
       {/* Sidebar */}
-      <aside className="w-full md:w-64 md:sticky md:top-0 md:h-screen md:overflow-y-auto bg-[#0b1c31] border-r border-slate-800 p-5 flex flex-col justify-between shrink-0">
+      <aside className="w-full md:w-64 md:sticky md:top-0 md:h-screen md:overflow-y-auto bg-white border-r border-slate-200 p-5 flex flex-col justify-between shrink-0">
         <div className="space-y-6">
           {/* Admin brand */}
           <Link href="/admin" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-sky-400 flex items-center justify-center text-slate-950 font-black shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-800 font-black border border-blue-100 group-hover:bg-blue-100 transition-colors">
               <Sliders className="w-5 h-5" />
             </div>
             <div>
@@ -164,7 +164,7 @@ export default function AdminLayout({
           <Link
             href="/"
             target="_blank"
-            className="flex items-center justify-between text-slate-400 hover:text-cyan-400 transition-colors p-2.5 rounded-xl bg-slate-900 border border-slate-800"
+            className="flex items-center justify-between text-slate-600 hover:text-blue-800 transition-colors p-2.5 rounded-xl bg-slate-50 border border-slate-200"
           >
             <span className="font-bold">Xem Website Công Khai</span>
             <ExternalLink className="w-3.5 h-3.5" />
@@ -174,7 +174,7 @@ export default function AdminLayout({
             onClick={handleLogout}
             disabled={loggingOut}
             loadingText="Đang đăng xuất..."
-            className="w-full flex items-center justify-center gap-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 p-2.5 font-bold transition-all text-xs"
+            className="w-full flex items-center justify-center gap-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 p-2.5 font-semibold transition-colors text-xs"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Đăng Xuất Khỏi Admin</span>
