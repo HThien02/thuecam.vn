@@ -18,13 +18,13 @@ export function formatVND(amount: number) {
 export default function ProductCard({ product }: ProductCardProps) {
   const availabilityLabel = product.status === 'ACTIVE'
     ? product.inventory_count > 0 ? 'Sẵn sàng cho thuê' : 'Full lịch thuê'
-    : product.status === 'MAINTENANCE' ? 'Đang bảo trì' : 'Ngừng kinh doanh';
+    : 'Đang bảo trì';
   const availabilityClass = product.status === 'ACTIVE'
     ? product.inventory_count > 0
       ? 'bg-emerald-100/95 text-emerald-900 border-emerald-200'
       : 'bg-amber-100/95 text-amber-900 border-amber-200'
     : 'bg-slate-100/95 text-slate-700 border-slate-200';
-  const showAvailabilityBadge = product.status !== 'ACTIVE' || product.inventory_count <= 0;
+  const showAvailabilityBadge = product.status === 'MAINTENANCE' || (product.status === 'ACTIVE' && product.inventory_count <= 0);
   const canBook = product.status === 'ACTIVE' && product.inventory_count > 0;
 
   return (
