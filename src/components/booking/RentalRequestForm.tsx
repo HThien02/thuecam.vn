@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useCallback, useRef, useState } from 'react';
-import Image from 'next/image';
 import { Product } from '@/types';
 import { CheckCircle2, Clock3, CalendarDays, Send, MapPin, Truck } from 'lucide-react';
 import AvailabilityCalendarTable from './AvailabilityCalendarTable';
+import AccessoryImagePreview from './AccessoryImagePreview';
 import SafeButton from '@/components/common/SafeButton';
 import {
   isValidVietnamPhone,
@@ -269,8 +269,8 @@ export default function RentalRequestForm({
                 const checked = selectedAddonIds.includes(addon.id);
                 const addonPrice = Number(addon.price_per_rental ?? addon.price_per_day ?? 0);
                 return (
-                  <label key={addon.id} className="flex cursor-pointer items-start justify-between gap-3 rounded-xl border border-sky-100 bg-white p-3 text-xs">
-                    <span className="flex min-w-0 items-start gap-2 font-bold text-slate-800">
+                  <div key={addon.id} className="flex items-start justify-between gap-3 rounded-xl border border-sky-100 bg-white p-3 text-xs">
+                    <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-2 font-bold text-slate-800">
                       <input
                         type="checkbox"
                         checked={checked}
@@ -280,14 +280,14 @@ export default function RentalRequestForm({
                         }}
                         className="mt-0.5 size-4 shrink-0 accent-sky-600"
                       />
-                      {addon.image && <Image src={addon.image} alt={addon.name} width={48} height={48} className="size-12 shrink-0 rounded-lg object-cover" />}
                       <span className="min-w-0">
                         <span className="block">{addon.name}</span>
                         {addon.description && <span className="mt-0.5 block font-normal text-slate-500">{addon.description}</span>}
                       </span>
-                    </span>
+                    </label>
+                    {addon.image && <AccessoryImagePreview src={addon.image} alt={`Phụ kiện: ${addon.name}`} />}
                     <span className="shrink-0 font-black text-sky-700">+{addonPrice.toLocaleString('vi-VN')}đ / lần thuê</span>
-                  </label>
+                  </div>
                 );
               })}
             </div>
@@ -346,7 +346,7 @@ export default function RentalRequestForm({
 
         {/* Customer Details */}
         <label className="text-xs font-bold text-slate-700">
-          Họ và tên của bạn: *
+          H��� và tên của bạn: *
           <input
             required
             value={fullName}
@@ -506,7 +506,7 @@ export default function RentalRequestForm({
 
       <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-sky-100">
         <p className="text-xs text-slate-500">
-          Sau khi gửi, THUECAM sẽ liên hệ xác nhận lịch và giữ máy cho bạn ngay.
+          Sau khi gửi, THUECAM s��� liên hệ xác nhận lịch và giữ máy cho bạn ngay.
         </p>
 
       {rangeAvailability === false && <p role="alert" className="text-sm font-semibold text-rose-600 sm:text-right">Khoảng ngày đang chọn đã kín lịch. Hãy chọn ngày khác.</p>}

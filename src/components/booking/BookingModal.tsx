@@ -1,6 +1,5 @@
 'use client';
 import React, { useCallback, useRef, useState } from 'react';
-import Image from 'next/image';
 import { Product, RentalAddon } from '@/types';
 import { formatVND } from '../product/ProductCard';
 import { trackEvent } from '@/lib/analytics/gtag';
@@ -17,6 +16,7 @@ import {
   RotateCw,
 } from 'lucide-react';
 import AvailabilityCalendarTable from './AvailabilityCalendarTable';
+import AccessoryImagePreview from './AccessoryImagePreview';
 import SafeButton from '@/components/common/SafeButton';
 import {
   isValidVietnamPhone,
@@ -313,8 +313,8 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
                     const checked = selectedAddonIds.includes(addon.id);
                     const addonPrice = Number(addon.price_per_rental ?? addon.price_per_day ?? 0);
                     return (
-                      <label key={addon.id} className="flex cursor-pointer items-start justify-between gap-3 rounded-xl border border-sky-100 bg-white p-3">
-                        <span className="flex min-w-0 items-start gap-2 text-xs font-bold text-slate-800">
+                      <div key={addon.id} className="flex items-start justify-between gap-3 rounded-xl border border-sky-100 bg-white p-3">
+                        <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-2 text-xs font-bold text-slate-800">
                           <input
                             type="checkbox"
                             checked={checked}
@@ -324,14 +324,14 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
                             }}
                             className="mt-0.5 size-4 shrink-0 accent-sky-600"
                           />
-                          {addon.image && <Image src={addon.image} alt={addon.name} width={48} height={48} unoptimized className="size-12 shrink-0 rounded-lg object-cover" />}
                           <span className="min-w-0">
                             <span className="block">{addon.name}</span>
                             {addon.description && <span className="mt-0.5 block font-normal text-slate-500">{addon.description}</span>}
                           </span>
-                        </span>
+                        </label>
+                        {addon.image && <AccessoryImagePreview src={addon.image} alt={`Phụ kiện: ${addon.name}`} />}
                         <span className="shrink-0 text-xs font-black text-sky-700">+{formatVND(addonPrice)} / lần thuê</span>
-                      </label>
+                      </div>
                     );
                   })}
                 </div>
