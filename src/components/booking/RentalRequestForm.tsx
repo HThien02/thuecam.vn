@@ -346,7 +346,7 @@ export default function RentalRequestForm({
 
         {/* Customer Details */}
         <label className="text-xs font-bold text-slate-700">
-          H��� và tên của bạn: *
+          Họ và tên của bạn: *
           <input
             required
             value={fullName}
@@ -506,7 +506,7 @@ export default function RentalRequestForm({
 
       <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-sky-100">
         <p className="text-xs text-slate-500">
-          Sau khi gửi, THUECAM s��� liên hệ xác nhận lịch và giữ máy cho bạn ngay.
+          Sau khi gửi, THUECAM sẽ liên hệ xác nhận lịch và giữ máy cho bạn ngay.
         </p>
 
       {rangeAvailability === false && <p role="alert" className="text-sm font-semibold text-rose-600 sm:text-right">Khoảng ngày đang chọn đã kín lịch. Hãy chọn ngày khác.</p>}
