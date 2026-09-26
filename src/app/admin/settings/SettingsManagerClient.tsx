@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import Image from 'next/image';
 import type { SiteSettings } from '@/lib/data/admin-types';
 import { saveAdminRecord } from '@/lib/data/admin-api';
-import { Save, CheckCircle2, MapPin, Phone, Gift, Loader2, Share2 } from 'lucide-react';
+import { Save, CheckCircle2, MapPin, Phone, Gift, Loader2, Share2, Camera, Upload } from 'lucide-react';
 
 function getWhatsappPhone(value: string) {
   const trimmed = value.trim();
@@ -21,14 +22,55 @@ function getWhatsappPhone(value: string) {
   }
 }
 
-export default function SettingsManagerClient({ initialSettings }: { initialSettings: SiteSettings }) {
+export default function SettingsManagerClient({
+  initialSettings,
+  initialLogoUrl,
+}: {
+  initialSettings: SiteSettings;
+  initialLogoUrl: string | null;
+}) {
   const [settings, setSettings] = useState<SiteSettings>(initialSettings);
+  const [logoUrl, setLogoUrl] = useState(initialLogoUrl);
+  const [logoPreviewAvailable, setLogoPreviewAvailable] = useState(Boolean(initialLogoUrl));
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(''), 3000);
+  };
+
+  const handleLogoUpload = async () => {
+    if (!logoFile) return;
+
+    setIsUploadingLogo(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', logoFile);
+      const response = await fetch('/api/admin/site-logo', {
+        method: 'POST',
+        credentials: 'same-origin',
+        body: formData,
+        signal: AbortSignal.timeout(60_000),
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok || typeof result?.url !== 'string') {
+        throw new Error(result?.error ?? 'Không thể tải logo lên.');
+      }
+
+      setLogoUrl(result.url);
+      setLogoPreviewAvailable(true);
+      setLogoFile(null);
+      if (logoInputRef.current) logoInputRef.current.value = '';
+      showToast('Đã cập nhật logo website thành công!');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể tải logo lên.');
+    } finally {
+      setIsUploadingLogo(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,6 +110,61 @@ export default function SettingsManagerClient({ initialSettings }: { initialSett
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 space-y-4" aria-labelledby="site-logo-heading">
+          <div>
+            <h2 id="site-logo-heading" className="flex items-center gap-2 text-sm font-black text-black">
+              <Camera className="size-4 text-sky-400" /> Logo website
+            </h2>
+            <p className="mt-1 text-xs text-slate-500">Tải logo mới lên để thay biểu tượng trên thanh đầu trang. Ảnh PNG, JPG, WebP hoặc AVIF, tối đa 4 MB.</p>
+          </div>
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+            <div className="flex h-20 min-w-48 items-center justify-center rounded-xl border border-slate-700 bg-white px-4 py-2">
+              {logoUrl && logoPreviewAvailable ? (
+                <Image
+                  src={logoUrl}
+                  alt="Logo website THUECAM"
+                  width={240}
+                  height={80}
+                  unoptimized
+                  className="max-h-16 w-auto max-w-56 object-contain"
+                  onError={() => setLogoPreviewAvailable(false)}
+                />
+              ) : (
+                <div className="flex items-center gap-2 text-slate-700">
+                  <Camera className="size-7 text-sky-600" aria-hidden="true" />
+                  <span className="font-black">THUECAM.VN</span>
+                </div>
+              )}
+            </div>
+            <div className="flex flex-1 flex-col items-start gap-3">
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-700 bg-slate-950 px-4 py-2.5 text-xs font-bold text-slate-200 transition hover:border-sky-500 hover:text-white focus-within:ring-2 focus-within:ring-sky-500">
+                <Upload className="size-4" aria-hidden="true" />
+                {logoFile ? 'Chọn ảnh khác' : 'Chọn file logo'}
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/avif"
+                  className="sr-only"
+                  onChange={(event) => setLogoFile(event.currentTarget.files?.[0] ?? null)}
+                />
+              </label>
+              <p className="text-xs text-slate-400" aria-live="polite">
+                {logoFile ? `${logoFile.name} · ${(logoFile.size / (1024 * 1024)).toFixed(2)} MB` : 'Logo sẽ hiển thị thay biểu tượng máy ảnh mặc định.'}
+              </p>
+              <button
+                type="button"
+                onClick={() => void handleLogoUpload()}
+                disabled={!logoFile || isUploadingLogo}
+                aria-busy={isUploadingLogo}
+                className="inline-flex items-center gap-2 rounded-xl bg-sky-500 px-4 py-2.5 text-xs font-black text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isUploadingLogo ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <Upload className="size-4" aria-hidden="true" />}
+                {isUploadingLogo ? 'Đang tải logo…' : 'Tải logo lên'}
+              </button>
+            </div>
+          </div>
+        </section>
+
         {/* Physical Showroom & Pickup Address */}
         <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 space-y-4">
           <h2 className="text-sm font-black text-black flex items-center gap-2">

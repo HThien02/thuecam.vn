@@ -1,11 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Camera, Search, Phone, Menu, X, Sparkles, Gift, Home, Tag, Clock3, Wrench } from 'lucide-react';
 
+const siteLogoUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? `${process.env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/$/, '')}/storage/v1/object/public/product-images/branding/site-logo`
+  : null;
+
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [customLogoAvailable, setCustomLogoAvailable] = useState(Boolean(siteLogoUrl));
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-sky-100 shadow-sm transition-colors">
@@ -38,16 +44,27 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex min-h-16 items-center justify-between gap-5 py-2">
           {/* Brand Logo */}
-          <Link href="/" className="flex shrink-0 items-center gap-2.5 group">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-candy flex items-center justify-center shadow-cute group-hover:scale-105 transition-transform">
-              <Camera className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <span className="text-lg font-black tracking-tight text-slate-900 block leading-none sm:text-xl">
-                THUECAM<span className="text-[#0284c7]">.VN</span>
-              </span>
-
-            </div>
+          <Link href="/" className="group flex shrink-0 items-center gap-2.5">
+            {siteLogoUrl && customLogoAvailable ? (
+              <Image
+                src={siteLogoUrl}
+                alt="THUECAM.VN"
+                width={240}
+                height={80}
+                unoptimized
+                className="h-11 w-auto max-w-40 object-contain transition-transform group-hover:scale-[1.03]"
+                onError={() => setCustomLogoAvailable(false)}
+              />
+            ) : (
+              <>
+                <div className="flex size-11 items-center justify-center rounded-2xl bg-gradient-candy shadow-cute transition-transform group-hover:scale-105">
+                  <Camera className="size-6 text-white" aria-hidden="true" />
+                </div>
+                <span className="text-lg font-black leading-none tracking-tight text-slate-900 sm:text-xl">
+                  THUECAM<span className="text-[#0284c7]">.VN</span>
+                </span>
+              </>
+            )}
           </Link>
 
           {/* Desktop Nav */}
@@ -143,7 +160,7 @@ export default function Header() {
               onClick={() => setMobileMenuOpen(false)}
               className="w-full py-3 rounded-2xl bg-gradient-candy text-white text-center font-extrabold shadow-cute"
             >
-              Đặt Thuê Online Nhận Máy Ngay
+              Đ���t Thuê Online Nhận Máy Ngay
             </Link>
             <a
               href="tel:0932501411"

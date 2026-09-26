@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { getAdminRow } from '@/lib/data/admin-server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import SettingsManagerClient from './SettingsManagerClient';
 
 export const metadata: Metadata = {
@@ -23,6 +24,17 @@ export default async function AdminSettingsPage() {
     instagram_url: string;
     whatsapp_url: string;
   }>('site_settings', 'global');
+  const supabase = createAdminClient();
+  const { data: logoFiles } = await supabase.storage.from('product-images').list('branding', {
+    limit: 20,
+    search: 'site-logo',
+  });
+  const logoFile = logoFiles?.find((file) => file.name === 'site-logo');
+  const logoPath = 'branding/site-logo';
+  const initialLogoUrl = logoFile
+    ? `${supabase.storage.from('product-images').getPublicUrl(logoPath).data.publicUrl}?v=${encodeURIComponent(logoFile.updated_at ?? logoFile.created_at ?? '')}`
+    : null;
+
   const initialSettings = {
     siteName: row?.site_name ?? 'THUECAM.VN',
     pickupAddress: row?.pickup_address ?? '',
@@ -52,7 +64,7 @@ export default async function AdminSettingsPage() {
         </p>
       </div>
 
-      <SettingsManagerClient initialSettings={initialSettings} />
+      <SettingsManagerClient initialSettings={initialSettings} initialLogoUrl={initialLogoUrl} />
     </div>
   );
 }
