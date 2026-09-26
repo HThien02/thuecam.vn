@@ -49,77 +49,9 @@ export default async function PricingPage() {
         </div>
       </section>
 
-<<<<<<< HEAD
-      <section className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[220px_1fr] lg:px-8">
-        <aside className="h-fit rounded-3xl border border-[#e5defc] bg-white p-4 shadow-[0_12px_35px_-24px_rgba(23,53,46,0.35)] lg:sticky lg:top-28">
-          <p className="px-2 pb-3 text-[11px] font-black uppercase tracking-[0.16em] text-[#718981]">Danh mục</p>
-          <nav className="flex flex-wrap gap-2 lg:flex-col">
-            {categories.map((category) => (
-              <a key={category.id} href={`#${category.slug}`} className="rounded-2xl bg-[#fbfaf4] px-3 py-2 text-sm font-bold text-[#527268] transition-colors hover:bg-[#f2edff] hover:text-[#6d55c7]">
-                {category.name}
-              </a>
-            ))}
-          </nav>
-          <div className="mt-5 rounded-2xl bg-[#dff3eb] p-3 text-xs leading-5 text-[#438e72]">
-            <CircleHelp className="mb-1 size-4" />
-            Chưa biết chọn máy nào? Nhắn để được gợi ý theo nhu cầu.
-          </div>
-        </aside>
-
-        <div className="space-y-8">
-          {categories.map((category) => {
-            const categoryProducts = activeProducts.filter((product) => product.category_id === category.id);
-            if (categoryProducts.length === 0) return null;
-
-            return (
-              <section key={category.id} id={category.slug} className="scroll-mt-28">
-                <div className="mb-3 flex items-end justify-between gap-4">
-                  <div>
-                    <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#f09b45]">Giá thuê theo danh mục</p>
-                    <h2 className="mt-1 text-2xl font-black text-[#17352e]">{category.name}</h2>
-                  </div>
-                  <Link href={`/danh-muc/${category.slug}`} className="hidden items-center gap-1 text-xs font-bold text-[#6d55c7] hover:underline sm:flex">
-                    Xem danh mục <ArrowRight className="size-3.5" />
-                  </Link>
-                </div>
-                <div className="overflow-hidden rounded-3xl border border-[#e5defc] bg-white shadow-[0_14px_35px_-28px_rgba(23,53,46,0.5)]">
-                  <div className="hidden grid-cols-[minmax(220px,1.5fr)_110px_repeat(3,90px)_90px] gap-3 bg-[#f2edff] px-5 py-3 text-[10px] font-black uppercase tracking-wide text-[#718981] md:grid">
-                    <span>Thiết bị</span><span>Giá từ</span><span>1 ngày</span><span>3 ngày</span><span>7+ ngày</span><span>Chi tiết</span>
-                  </div>
-                  <div className="divide-y divide-[#eeeafa]">
-                    {categoryProducts.map((product) => (
-                      <div key={product.id} className="grid gap-3 px-4 py-4 transition-colors hover:bg-[#fffdf5] md:grid-cols-[minmax(220px,1.5fr)_110px_repeat(3,90px)_90px] md:items-center md:px-5">
-                        <div className="flex min-w-0 items-center gap-3">
-                          <img src={product.primary_image} alt="" className="size-12 shrink-0 rounded-2xl border border-[#e5defc] bg-[#fbfaf4] object-cover" />
-                          <div className="min-w-0">
-                            <Link href={`/thiet-bi/${product.slug}`} className="block truncate text-sm font-black text-[#17352e] hover:text-[#6d55c7]">{product.name}</Link>
-                            <span className="text-xs text-[#718981]">Đã gồm phụ kiện cơ bản</span>
-                          </div>
-                        </div>
-                        <div className="text-sm font-black text-[#6d55c7]">{formatPrice(product.rental_price_per_day)}<span className="text-[10px]">/ngày</span></div>
-                        <div className="hidden text-sm font-bold text-[#527268] md:block">{product.rental_price_per_day.toLocaleString('vi-VN')}đ</div>
-                        <div className="hidden text-sm font-bold text-[#527268] md:block">{Math.round(product.rental_price_per_day * 0.9).toLocaleString('vi-VN')}đ</div>
-                        <div className="hidden text-sm font-bold text-[#527268] md:block">{Math.round(product.rental_price_per_day * 0.8).toLocaleString('vi-VN')}đ</div>
-                        <Link href={`/dat-thue?product=${product.slug}`} className="inline-flex items-center gap-1 rounded-full bg-[#1976b9] px-3 py-2 text-xs font-black text-white shadow-sm transition hover:bg-[#125e95]">Đặt thuê ngay <ArrowRight className="size-3" /></Link>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </section>
-            );
-          })}
-
-          <div className="grid gap-4 rounded-3xl border border-[#f0c47b] bg-[#fff8e8] p-5 sm:grid-cols-3">
-            {['Giá hiển thị đã gồm VAT', 'Có phụ kiện cơ bản đi kèm', 'Hỗ trợ chọn máy miễn phí'].map((item) => (
-              <div key={item} className="flex items-center gap-2 text-sm font-bold text-[#527268]"><Check className="size-4 rounded-full bg-[#dff3eb] p-0.5 text-[#438e72]" />{item}</div>
-            ))}
-          </div>
-        </div>
-=======
       {/* Main Interactive Pricing Section with Left Category Nav */}
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <PricingTableClient categories={categories} products={products} />
->>>>>>> origin/main
       </section>
     </main>
   );

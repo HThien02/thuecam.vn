@@ -23,20 +23,6 @@ export default function RentalRequestForm({
   initialProduct?: Product;
 }) {
   const [submitted, setSubmitted] = useState(false);
-<<<<<<< HEAD
-  const [selectedProduct, setSelectedProduct] = useState(initialProduct?.slug ?? products[0]?.slug ?? '');
-  const [duration, setDuration] = useState<'hourly' | 'daily'>('hourly');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const product = products.find((item) => item.slug === selectedProduct) ?? initialProduct ?? products[0];
-  const today = toDateKey(new Date());
-  const availableDates = useMemo(() => Array.from({ length: 21 }, (_, index) => { const date = new Date(); date.setDate(date.getDate() + index); return toDateKey(date); }), []);
-  const reservedDates = useMemo(() => availableDates.filter((_, index) => index === 4 || index === 11 || (index > 14 && index % 3 === 0)), [availableDates]);
-  const isAvailable = (date: string) => !reservedDates.includes(date);
-  const selectedRange = startDate && endDate ? availableDates.filter((date) => date >= startDate && date <= endDate) : [];
-  const rangeAvailable = startDate && endDate ? selectedRange.length > 0 && selectedRange.every(isAvailable) : true;
-  const estimatedDays = startDate && endDate ? Math.max(1, Math.ceil((new Date(`${endDate}T12:00:00`).getTime() - new Date(`${startDate}T12:00:00`).getTime()) / 86400000) + 1) : 1;
-=======
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingCode, setBookingCode] = useState('');
   const [confirmationEmailSent, setConfirmationEmailSent] = useState(false);
@@ -49,7 +35,6 @@ export default function RentalRequestForm({
   const [rangeAvailability, setRangeAvailability] = useState<boolean | null>(null);
   const updateRangeAvailability = useCallback((isAvailable: boolean | null) => setRangeAvailability(isAvailable), []);
   const pickupMethod: 'STORE' | 'DELIVERY' = pickupTime >= '08:00' && pickupTime <= '18:00' ? 'STORE' : 'DELIVERY';
->>>>>>> origin/main
 
   const todayStr = new Date().toISOString().split('T')[0];
   const tomorrow = new Date();
