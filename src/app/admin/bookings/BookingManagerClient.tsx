@@ -43,6 +43,7 @@ export default function BookingManagerClient({
   const [totalPrice, setTotalPrice] = useState<number>(450000);
   const [depositAmount, setDepositAmount] = useState<number>(3000000);
   const [pickupMethod, setPickupMethod] = useState('ETown Tân Bình');
+  const [pickupTime, setPickupTime] = useState('09:00');
   const [status, setStatus] = useState<BookingRecord['status']>('CONFIRMED');
   const [notes, setNotes] = useState('');
   const [toastMsg, setToastMsg] = useState('');
@@ -71,6 +72,7 @@ export default function BookingManagerClient({
     setTotalPrice(450000);
     setDepositAmount(3000000);
     setPickupMethod('ETown Tân Bình');
+    setPickupTime('09:00');
     setStatus('CONFIRMED');
     setNotes('');
     setIsModalOpen(true);
@@ -88,6 +90,7 @@ export default function BookingManagerClient({
     setTotalPrice(b.total_price);
     setDepositAmount(b.deposit_amount || 2000000);
     setPickupMethod(b.pickup_method);
+    setPickupTime(b.pickup_time?.slice(0, 5) ?? '09:00');
     setStatus(b.status);
     setNotes(b.notes || '');
     setIsModalOpen(true);
@@ -136,7 +139,9 @@ export default function BookingManagerClient({
       ) + 1
     );
     const bookingCode = editingBooking?.id ?? `TC${Math.floor(100000 + Math.random() * 900000)}`;
-    const delivery = pickupMethod.toLocaleLowerCase('vi').startsWith('giao');
+    const delivery = editingBooking
+      ? editingBooking.pickup_method !== 'ETown Tân Bình'
+      : pickupMethod.toLocaleLowerCase('vi').startsWith('giao');
 
     try {
       const saved = await saveAdminRecord<Record<string, unknown>>(
@@ -152,6 +157,7 @@ export default function BookingManagerClient({
           product_name: productName.trim(),
           start_date: startDate,
           end_date: endDate,
+          pickup_time: pickupTime,
           total_days: daysCount,
           daily_price: editingBooking?.daily_price ?? Math.round(Number(totalPrice) / daysCount),
           total_price: Number(totalPrice),
@@ -174,6 +180,7 @@ export default function BookingManagerClient({
         product_name: String(saved.product_name),
         start_date: String(saved.start_date),
         end_date: String(saved.end_date),
+        pickup_time: typeof saved.pickup_time === 'string' ? saved.pickup_time : pickupTime,
         total_days: Number(saved.total_days),
         daily_price: Number(saved.daily_price),
         total_price: Number(saved.total_price),
@@ -341,6 +348,7 @@ export default function BookingManagerClient({
                     <td className="px-4 py-3">
                       <p className="font-bold text-white">{b.customer_name}</p>
                       <p className="text-[11px] text-sky-400">{b.customer_phone}</p>
+                      {b.customer_email && <p className="text-[11px] text-slate-400">{b.customer_email}</p>}
                     </td>
                     <td className="px-4 py-3 font-medium text-slate-200">
                       <p>{b.product_name}</p>
@@ -360,7 +368,7 @@ export default function BookingManagerClient({
                       <span className="text-slate-500 mx-1">→</span>
                       <span className="font-bold text-white">{b.end_date}</span>
                       <span className="block text-[10px] text-slate-400 font-bold">
-                        ({b.total_days} ngày)
+                        ({b.total_days} ngày) · nhận lúc {b.pickup_time?.slice(0, 5) ?? '—'}
                       </span>
                     </td>
                     <td className="px-4 py-3 font-black text-sky-400">
@@ -575,6 +583,17 @@ export default function BookingManagerClient({
               </div>
 
               <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="booking-pickup-time" className="block font-bold text-slate-300 mb-1">Giờ nhận máy:</label>
+                  <input
+                    id="booking-pickup-time"
+                    type="time"
+                    required
+                    value={pickupTime}
+                    onChange={(event) => setPickupTime(event.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white outline-none focus:border-emerald-500"
+                  />
+                </div>
                 <div>
                   <label className="block font-bold text-slate-300 mb-1">Tổng tiền thuê (VNĐ): *</label>
                   <input

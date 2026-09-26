@@ -3,12 +3,9 @@ import React, { useCallback, useRef, useState } from 'react';
 import { Product, RentalAddon } from '@/types';
 import { formatVND } from '../product/ProductCard';
 import { trackEvent } from '@/lib/analytics/gtag';
-import confetti from 'canvas-confetti';
 import {
   Calendar,
   CheckCircle2,
-  Copy,
-  CreditCard,
   X,
   ShieldCheck,
   MapPin,
@@ -34,8 +31,7 @@ interface BookingModalProps {
 }
 
 export default function BookingModal({ product, isOpen, onClose }: BookingModalProps) {
-  // Step: 'CALENDAR' | 'CUSTOMER_INFO' | 'PAYMENT_SEPAY' | 'SUCCESS'
-  const [step, setStep] = useState<'CALENDAR' | 'CUSTOMER_INFO' | 'PAYMENT_SEPAY' | 'SUCCESS'>('CALENDAR');
+  const [step, setStep] = useState<'CALENDAR' | 'CUSTOMER_INFO' | 'SUCCESS'>('CALENDAR');
 
   // Dates
   const todayStr = new Date().toISOString().split('T')[0];
@@ -65,7 +61,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
 
   // Booking result
   const [bookingCode, setBookingCode] = useState('');
-  const [copied, setCopied] = useState(false);
+  const [customerEmailSent, setCustomerEmailSent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmedTotalPrice, setConfirmedTotalPrice] = useState<number | null>(null);
   const [submissionError, setSubmissionError] = useState('');
@@ -215,48 +211,14 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
           total_price: serverTotalPrice,
         },
       });
-      trackEvent({
-        action: 'payment_started',
-        params: { booking_code: generatedCode, amount: serverTotalPrice, method: 'SePay_VietQR' },
-      });
-      setStep('PAYMENT_SEPAY');
+      setCustomerEmailSent(booking.email_notifications?.customerEmailSent === true);
+      setStep('SUCCESS');
     } catch (error) {
       setSubmissionError(error instanceof Error ? error.message : 'Không thể tạo đơn thuê.');
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  const handleCopyContent = () => {
-    navigator.clipboard.writeText(bookingCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
-  };
-
-  const handleSimulateSuccessfulPayment = () => {
-    confetti({
-      particleCount: 120,
-      spread: 70,
-      origin: { y: 0.6 },
-    });
-
-    trackEvent({
-      action: 'payment_success',
-      params: {
-        booking_code: bookingCode,
-        amount: totalDueNow,
-      },
-    });
-
-    setTimeout(() => {
-      setStep('SUCCESS');
-    }, 1200);
-  };
-
-  // SePay VietQR URL standard:
-  const bankAccount = '9999888877';
-  const bankCode = 'MBBank';
-  const vietQrUrl = `https://qr.sepay.vn/img?acc=${bankAccount}&bank=${bankCode}&amount=${totalDueNow}&des=${bookingCode}`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
@@ -273,7 +235,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
         {step === 'CALENDAR' && (
           <div className="space-y-5">
             <div>
-              <span className="badge-rental mb-2">Bước 1/3: Chọn Ngày Đi Chơi</span>
+              <span className="badge-rental mb-2">Bước 1/2: Chọn Ngày Đi Chơi</span>
               <h3 className="text-xl font-black text-slate-900">Kiểm Tra Lịch & Đặt Thuê 📸</h3>
               <p className="text-xs text-slate-500 font-medium mt-1">
                 Thiết bị: <strong className="text-slate-800">{product.name}</strong>
@@ -387,7 +349,7 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
         {step === 'CUSTOMER_INFO' && (
           <form onSubmit={handleCreateBooking} className="space-y-4">
             <div>
-              <span className="badge-rental mb-2">Bước 2/3: Người Nhận Máy</span>
+              <span className="badge-rental mb-2">Bước 2/2: Người Nhận Máy</span>
               <h3 className="text-xl font-black text-slate-900">Thông Tin Liên Hệ</h3>
               <p className="text-xs text-slate-500 mt-1">
                 Lịch thuê {totalDays} ngày: từ <strong className="text-slate-800">{startDate}</strong> đến <strong className="text-slate-800">{endDate}</strong>
@@ -556,111 +518,11 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
                 loadingText="Đang tạo đơn..."
                 className="w-2/3 py-3 rounded-full bg-gradient-candy hover:opacity-95 text-white font-black text-xs shadow-cute flex items-center justify-center gap-1.5"
               >
-                <CreditCard className="w-4 h-4" />
-                <span>Tiếp Tục Thanh Toán VietQR ({formatVND(totalDueNow)})</span>
+                <Calendar className="w-4 h-4" />
+                <span>Gửi yêu cầu thuê ({formatVND(totalDueNow)})</span>
               </SafeButton>
             </div>
           </form>
-        )}
-
-        {/* STEP 3: SEPAY VIETQR PAYMENT */}
-        {step === 'PAYMENT_SEPAY' && (
-          <div className="space-y-4 text-center">
-            <div>
-              <span className="badge-rental mb-2">Bước 3/3: Thanh Toán Tự Động</span>
-              <h3 className="text-xl font-black text-slate-900">Quét Mã VietQR SePay ✨</h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Mở app ngân hàng bất kỳ quét mã là thanh toán xong ngay
-              </p>
-            </div>
-
-            {/* QR display box */}
-            <div className="p-4 bg-gradient-to-br from-sky-50 to-white rounded-3xl inline-block mx-auto shadow-cute border-2 border-sky-100">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={vietQrUrl}
-                alt="SePay VietQR Code"
-                className="w-56 h-56 mx-auto rounded-2xl border border-sky-100 bg-white"
-              />
-              <p className="text-[11px] text-slate-500 font-bold mt-2">
-                Hệ thống xác nhận tự động sau 3 - 5 giây
-              </p>
-            </div>
-
-            <section aria-label="Chi tiết hóa đơn thuê" className="mx-auto max-w-sm space-y-2 rounded-2xl border border-sky-100 bg-white p-3.5 text-left text-xs">
-              <h4 className="font-black text-slate-900">Chi tiết hóa đơn thuê</h4>
-              <div className="flex justify-between gap-3">
-                <span className="text-slate-600">Thuê thiết bị · {totalDays} ngày</span>
-                <span className="font-bold text-slate-800">{formatVND(baseRentalPrice)}</span>
-              </div>
-              {selectedAddons.map((addon) => (
-                <div key={addon.id} className="flex justify-between gap-3">
-                  <span className="text-slate-600">{addon.name} · một lần thuê</span>
-                  <span className="font-bold text-slate-800">{formatVND(Number(addon.price_per_rental ?? addon.price_per_day ?? 0))}</span>
-                </div>
-              ))}
-              {discountAmount > 0 && (
-                <div className="flex justify-between gap-3 text-emerald-700">
-                  <span>Ưu đãi thuê dài ngày</span>
-                  <span className="font-bold">−{formatVND(discountAmount)}</span>
-                </div>
-              )}
-              {appliedVoucher && (
-                <div className="flex justify-between gap-3 text-emerald-700">
-                  <span>Voucher {appliedVoucher.code}</span>
-                  <span className="font-bold">−{formatVND(voucherDiscount)}</span>
-                </div>
-              )}
-              <div className="flex justify-between gap-3 border-t border-slate-100 pt-2 font-black text-slate-900">
-                <span>Tổng tiền thuê</span>
-                <span className="text-[#0284c7]">{formatVND(totalDueNow)}</span>
-              </div>
-            </section>
-
-            {/* Transfer details */}
-            <div className="p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200 max-w-sm mx-auto space-y-1.5 text-xs text-left">
-              <div className="flex justify-between items-center">
-                <span className="text-slate-500">Số tiền:</span>
-                <span className="font-black text-[#0284c7] text-sm">{formatVND(totalDueNow)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-500">Mã đơn / Nội dung:</span>
-                <div className="flex items-center gap-1">
-                  <span className="font-mono font-black text-slate-900 bg-white px-2 py-0.5 rounded border border-sky-200">
-                    {bookingCode}
-                  </span>
-                  <button
-                    onClick={handleCopyContent}
-                    className="p-1 text-slate-500 hover:text-[#0284c7]"
-                    title="Sao chép mã"
-                  >
-                    <Copy className="w-3.5 h-3.5" />
-                  </button>
-                  {copied && <span className="text-[10px] text-emerald-600 font-bold">Đã chép!</span>}
-                </div>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-500">Ngân hàng:</span>
-                <span className="font-bold text-slate-700">MBBank (Ngân Hàng Quân Đội)</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-500">Số tài khoản:</span>
-                <span className="font-bold text-slate-700">{bankAccount}</span>
-              </div>
-            </div>
-
-            {/* Simulating webhook receiver */}
-            <div className="pt-2 flex flex-col items-center gap-2">
-              <button
-                type="button"
-                onClick={handleSimulateSuccessfulPayment}
-                className="text-xs text-sky-600 font-bold hover:underline flex items-center gap-1"
-              >
-                <RotateCw className="w-3 h-3 animate-spin" />
-                <span>Mô phỏng SePay đã nhận tiền (Demo)</span>
-              </button>
-            </div>
-          </div>
         )}
 
         {/* STEP 4: SUCCESS CONFIRMATION */}
@@ -671,18 +533,26 @@ export default function BookingModal({ product, isOpen, onClose }: BookingModalP
             </div>
 
             <div>
-              <span className="badge-verified mb-2">Đã Xác Nhận Đơn Hàng</span>
-              <h3 className="text-2xl font-black text-slate-900">Đặt Thuê Thành Công! 🎉</h3>
+              <span className="badge-rental mb-2">Đơn thuê đang chờ shop xác nhận</span>
+              <h3 className="text-2xl font-black text-slate-900">Đã gửi yêu cầu thuê</h3>
               <p className="text-xs text-slate-600 mt-1 max-w-sm mx-auto">
-                Mã đơn thuê của bạn là <strong className="text-[#0284c7] font-mono text-sm">{bookingCode}</strong>.
-                THUECAM sẽ liên hệ qua SĐT/Zalo <strong>{customerPhone}</strong> để chuẩn bị bàn giao máy tại ETown Tân Bình.
+                Mã yêu cầu <strong className="text-[#0284c7] font-mono text-sm">{bookingCode}</strong>. THUECAM sẽ liên hệ qua SĐT/Zalo <strong>{customerPhone}</strong> để xác nhận lịch, giá thuê và tiền cọc trước khi bàn giao máy.
               </p>
+              {customerEmailSent ? (
+                <p role="status" className="mt-2 text-xs font-semibold text-emerald-700">Phiếu xác nhận đã được gửi đến {customerEmail}.</p>
+              ) : (
+                <p role="status" className="mt-2 text-xs font-semibold text-amber-700">Yêu cầu đã lưu; email xác nhận chưa gửi được. Shop sẽ liên hệ qua số điện thoại của bạn.</p>
+              )}
             </div>
 
             <div className="p-4 rounded-2xl bg-sky-50 border border-sky-200 max-w-sm mx-auto text-left text-xs space-y-2">
               <div className="flex items-center gap-2 text-slate-700">
                 <MapPin className="size-4 text-[#0284c7]" />
-                <span>Điểm nhận máy: <strong>ETown, Tân Bình, TP HCM</strong></span>
+                <span>Điểm nhận máy: <strong>{pickupMethod === 'STORE' ? 'ETown, Tân Bình, TP HCM' : address}</strong> lúc {pickupTime}</span>
+              </div>
+              <div className="flex items-center gap-2 text-slate-700">
+                <Calendar className="size-4 text-[#0284c7]" />
+                <span>Thời gian thuê: <strong>{startDate} – {endDate}</strong> · {formatVND(totalDueNow)} (dự kiến)</span>
               </div>
               <div className="flex items-center gap-2 text-slate-700">
                 <ShieldCheck className="size-4 text-emerald-600" />

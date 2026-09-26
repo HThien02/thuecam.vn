@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { isValidEmail, isValidName, isValidVietnamPhone, sanitizeInput } from '@/lib/security/validation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { enforceApiRateLimit } from '@/lib/security/rate-limit';
+import { sendBookingNotifications } from '@/lib/booking-email';
 import type { RentalAddon } from '@/types';
 
 const activeBookingStatuses = ['PENDING', 'CONFIRMED', 'RENTING', 'PAID', 'ACTIVE'];
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
   if (!productId || !isDateKey(startDate) || !isDateKey(endDate) || endDate < startDate) {
     return errorResponse('Vui lòng chọn thiết bị và khoảng ngày thuê hợp lệ.', 400);
   }
-  if (!isValidName(customerName) || !isValidVietnamPhone(customerPhone) || (customerEmail && !isValidEmail(customerEmail))) {
+  if (!isValidName(customerName) || !isValidVietnamPhone(customerPhone) || !isValidEmail(customerEmail) || customerEmail.length > 254) {
     return errorResponse('Vui lòng kiểm tra lại họ tên, số điện thoại và email.', 400);
   }
   if (!isValidPickupTime) return errorResponse('Vui lòng chọn giờ nhận máy hợp lệ.', 400);
@@ -113,6 +114,9 @@ export async function POST(request: NextRequest) {
   const discountRate = days.length >= 7 ? 0.2 : days.length >= 3 ? 0.1 : 0;
   const subtotal = Math.max(0, basePrice - Math.round(basePrice * discountRate));
   const bookingCode = `TC${randomInt(10_000_000, 100_000_000)}`;
+  const sanitizedName = sanitizeInput(customerName);
+  const sanitizedAddress = pickupMethod === 'DELIVERY' ? sanitizeInput(deliveryAddress) : null;
+  const sanitizedNote = typeof body.note === 'string' ? sanitizeInput(body.note).slice(0, 2000) : null;
   const { data: booking, error: insertError } = await supabase.rpc('create_booking_with_voucher', {
     p_booking_code: bookingCode,
     p_product_id: product.id,
@@ -123,12 +127,12 @@ export async function POST(request: NextRequest) {
     p_daily_price: dailyPrice,
     p_deposit_amount: depositAmount,
     p_subtotal: subtotal,
-    p_customer_name: sanitizeInput(customerName),
+    p_customer_name: sanitizedName,
     p_customer_phone: customerPhone,
-    p_customer_email: customerEmail || null,
+    p_customer_email: customerEmail,
     p_pickup_method: pickupMethod,
-    p_delivery_address: pickupMethod === 'DELIVERY' ? sanitizeInput(deliveryAddress) : null,
-    p_note: typeof body.note === 'string' ? sanitizeInput(body.note).slice(0, 2000) : null,
+    p_delivery_address: sanitizedAddress,
+    p_note: sanitizedNote,
     p_selected_addons: selectedAddons.map((addon, index) => ({
       id: addon!.id,
       name: addon!.name,
@@ -145,7 +149,31 @@ export async function POST(request: NextRequest) {
   }
 
   const createdBooking = typeof booking === 'object' && booking !== null ? booking as Record<string, unknown> : {};
-  return NextResponse.json(createdBooking, { status: 201, headers: { 'Cache-Control': 'no-store' } });
+  const totalPrice = Number(createdBooking.total_price ?? subtotal);
+  const emailResults = await sendBookingNotifications({
+    bookingCode: String(createdBooking.booking_code ?? bookingCode),
+    customerName: sanitizedName,
+    customerEmail,
+    customerPhone,
+    productName: String(createdBooking.product_name ?? product.name),
+    startDate: String(createdBooking.start_date ?? startDate),
+    endDate: String(createdBooking.end_date ?? endDate),
+    pickupTime,
+    pickupMethod,
+    deliveryAddress: sanitizedAddress,
+    totalDays: Number(createdBooking.total_days ?? days.length),
+    totalPrice,
+    depositAmount: Number(createdBooking.deposit_amount ?? depositAmount),
+    note: sanitizedNote,
+    selectedAddons: selectedAddons.map((addon, index) => ({ name: addon!.name, price: addonPrices[index] })),
+    voucherCode: voucherCode || null,
+    voucherDiscount: Number(createdBooking.voucher_discount ?? 0),
+  });
+
+  return NextResponse.json({
+    ...createdBooking,
+    email_notifications: emailResults,
+  }, { status: 201, headers: { 'Cache-Control': 'no-store' } });
 }
 
 export const runtime = 'nodejs';

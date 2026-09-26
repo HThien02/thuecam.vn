@@ -33,6 +33,7 @@ export default async function AdminBookingsPage() {
       product_name: String(row.product_name),
       start_date: String(row.start_date),
       end_date: String(row.end_date),
+      pickup_time: typeof row.pickup_time === 'string' ? row.pickup_time : null,
       total_days: Number(row.total_days),
       daily_price: Number(row.daily_price),
       deposit_amount: Number(row.deposit_amount),

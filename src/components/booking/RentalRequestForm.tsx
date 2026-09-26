@@ -25,6 +25,7 @@ export default function RentalRequestForm({
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingCode, setBookingCode] = useState('');
+  const [confirmationEmailSent, setConfirmationEmailSent] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(
     initialProduct?.slug ?? products[0]?.slug ?? ''
   );
@@ -171,6 +172,7 @@ export default function RentalRequestForm({
       const result = await response.json();
       if (!response.ok) throw new Error(result.error ?? 'Không thể gửi yêu cầu thuê.');
       setBookingCode(result.booking_code);
+      setConfirmationEmailSent(result.email_notifications?.customerEmailSent === true);
       setSubmitted(true);
     } catch (error) {
       setErrors({ submit: error instanceof Error ? error.message : 'Không thể gửi yêu cầu thuê.' });
@@ -191,7 +193,12 @@ export default function RentalRequestForm({
           <p className="mx-auto mt-2 max-w-lg text-slate-600 text-sm">
             THUECAM sẽ liên hệ qua SĐT/Zalo <strong>{phone}</strong> trong vòng 10 phút để xác nhận lịch máy. Giờ nhận {pickupTime} — {pickupMethod === 'STORE' ? 'nhận tại ETown Tân Bình' : 'giao hỏa tốc đến địa chỉ đã chọn'}.
           </p>
-        <p className="mt-4 text-sm font-bold text-sky-800">Mã yêu cầu: {bookingCode}</p>
+        <p className="mt-4 text-sm font-bold text-sky-800">Mã yêu cầu: {bookingCode} · Trạng thái: Chờ shop xác nhận</p>
+        {confirmationEmailSent ? (
+          <p role="status" className="mt-2 text-sm font-semibold text-emerald-700">Phiếu xác nhận đã được gửi đến {email}.</p>
+        ) : (
+          <p role="status" className="mt-2 text-sm font-semibold text-amber-700">Yêu cầu đã lưu. Email xác nhận chưa gửi được; shop sẽ liên hệ qua điện thoại.</p>
+        )}
         <div className="mt-6 flex justify-center">
           <button
             type="button"
@@ -506,7 +513,7 @@ export default function RentalRequestForm({
 
       <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-sky-100">
         <p className="text-xs text-slate-500">
-          Sau khi gửi, THUECAM sẽ liên hệ xác nhận lịch và giữ máy cho bạn ngay.
+          Sau khi gửi, THUECAM sẽ liên h��� xác nhận lịch và giữ máy cho bạn ngay.
         </p>
 
       {rangeAvailability === false && <p role="alert" className="text-sm font-semibold text-rose-600 sm:text-right">Khoảng ngày đang chọn đã kín lịch. Hãy chọn ngày khác.</p>}

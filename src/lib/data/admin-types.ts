@@ -23,6 +23,7 @@ export interface BookingRecord {
   daily_price?: number;
   deposit_amount?: number;
   pickup_method: string;
+  pickup_time?: string | null;
   status: 'PENDING' | 'CONFIRMED' | 'RENTING' | 'COMPLETED' | 'CANCELLED';
   notes?: string;
   created_at: string;
