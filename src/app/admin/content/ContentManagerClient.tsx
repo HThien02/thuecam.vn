@@ -179,51 +179,46 @@ export default function ContentManagerClient({ initialArticles }: Props) {
           <span className="text-slate-400 font-semibold">Bộ lọc theo loại:</span>
           <button
             onClick={() => setFilterType('ALL')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
-              filterType === 'ALL'
+            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${filterType === 'ALL'
                 ? 'bg-cyan-500 text-slate-950 font-bold'
                 : 'bg-slate-800 text-slate-600 hover:text-white'
-            }`}
+              }`}
           >
             Tất cả ({articles.length})
           </button>
           <button
             onClick={() => setFilterType('blog')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
-              filterType === 'blog'
+            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${filterType === 'blog'
                 ? 'bg-cyan-500 text-slate-950 font-bold'
                 : 'bg-slate-800 text-slate-600 hover:text-white'
-            }`}
+              }`}
           >
             Blog Guides
           </button>
           <button
             onClick={() => setFilterType('comparison')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
-              filterType === 'comparison'
+            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${filterType === 'comparison'
                 ? 'bg-cyan-500 text-slate-950 font-bold'
                 : 'bg-slate-800 text-slate-600 hover:text-white'
-            }`}
+              }`}
           >
             So Sánh
           </button>
           <button
             onClick={() => setFilterType('guide')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
-              filterType === 'guide'
+            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${filterType === 'guide'
                 ? 'bg-cyan-500 text-slate-950 font-bold'
                 : 'bg-slate-800 text-slate-600 hover:text-white'
-            }`}
+              }`}
           >
             Hướng Dẫn
           </button>
           <button
             onClick={() => setFilterType('formula')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
-              filterType === 'formula'
+            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${filterType === 'formula'
                 ? 'bg-cyan-500 text-slate-950 font-bold'
                 : 'bg-slate-800 text-slate-600 hover:text-white'
-            }`}
+              }`}
           >
             Công thức camera
           </button>
@@ -266,7 +261,7 @@ export default function ContentManagerClient({ initialArticles }: Props) {
             {filteredArticles.map((art) => (
               <tr key={art.id} className="hover:bg-slate-800/30">
                 <td className="py-3.5 px-3">
-                  <span className="font-bold text-white block max-w-sm truncate">{art.title}</span>
+                  <span className="font-bold text-black block max-w-sm truncate">{art.title}</span>
                   <span className="text-[11px] text-slate-500 font-mono">/{art.slug}</span>
                 </td>
                 <td className="py-3.5 px-3">
@@ -284,13 +279,12 @@ export default function ContentManagerClient({ initialArticles }: Props) {
                 <td className="py-3.5 px-3 text-slate-400">{art.author_name}</td>
                 <td className="py-3.5 px-3">
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      art.status === 'PUBLISHED'
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${art.status === 'PUBLISHED'
                         ? 'bg-emerald-500/20 text-emerald-300'
                         : art.status === 'DRAFT'
-                        ? 'bg-amber-500/20 text-amber-300'
-                        : 'bg-slate-800 text-slate-400'
-                    }`}
+                          ? 'bg-amber-500/20 text-amber-300'
+                          : 'bg-slate-800 text-slate-400'
+                      }`}
                   >
                     {art.status}
                   </span>

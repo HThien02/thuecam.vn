@@ -57,7 +57,7 @@ export default function SeoManagerClient({
         setSeoTitle(prod.seo_title || `Thuê ${prod.name} Chính Hãng | Giá từ 200K/ngày | THUECAM`);
         setSeoDescription(
           prod.seo_description ||
-            `Thuê ${prod.name} với giá từ 200.000đ/ngày. Kiểm tra lịch trống, đặt thuê online và thanh toán nhanh tại THUECAM.`
+          `Thuê ${prod.name} với giá từ 200.000đ/ngày. Kiểm tra lịch trống, đặt thuê online và thanh toán nhanh tại THUECAM.`
         );
         setCanonicalUrl(`https://thuecam.vn/thiet-bi/${prod.slug}`);
         setOgImage(prod.og_image || prod.primary_image);
@@ -168,11 +168,10 @@ export default function SeoManagerClient({
       {/* Global Noindex Safeguard Warning Banner */}
       {selectedTarget === 'GLOBAL' && (
         <div
-          className={`p-4 rounded-2xl border flex items-center justify-between gap-4 transition-colors ${
-            globalNoindex
+          className={`p-4 rounded-2xl border flex items-center justify-between gap-4 transition-colors ${globalNoindex
               ? 'bg-rose-950/40 border-rose-500/50 text-rose-300'
               : 'bg-slate-900/40 border-slate-800 text-slate-600'
-          }`}
+            }`}
         >
           <div className="flex items-center gap-3 text-xs">
             <ShieldAlert
@@ -195,11 +194,10 @@ export default function SeoManagerClient({
           <button
             type="button"
             onClick={handleToggleGlobalNoindex}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              globalNoindex
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${globalNoindex
                 ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'
                 : 'bg-rose-600 hover:bg-rose-500 text-white'
-            }`}
+              }`}
           >
             {globalNoindex ? 'Bật Lại Index Toàn Site' : 'Tắt Index Toàn Site (Cần Xác Nhận)'}
           </button>
@@ -218,9 +216,8 @@ export default function SeoManagerClient({
               <div className="flex justify-between text-xs">
                 <label className="font-semibold text-slate-600">SEO Title (Tiêu Đề Trang):</label>
                 <span
-                  className={`font-mono font-bold ${
-                    isTitleOptimal ? 'text-emerald-400' : 'text-amber-400'
-                  }`}
+                  className={`font-mono font-bold ${isTitleOptimal ? 'text-emerald-400' : 'text-amber-400'
+                    }`}
                 >
                   {titleLen} / 60 ký tự ({isTitleOptimal ? 'Chuẩn SEO' : 'Nên trong khoảng 50-60'})
                 </span>
@@ -238,9 +235,8 @@ export default function SeoManagerClient({
               <div className="flex justify-between text-xs">
                 <label className="font-semibold text-slate-600">Meta Description (Mô Tả):</label>
                 <span
-                  className={`font-mono font-bold ${
-                    isDescOptimal ? 'text-emerald-400' : 'text-amber-400'
-                  }`}
+                  className={`font-mono font-bold ${isDescOptimal ? 'text-emerald-400' : 'text-amber-400'
+                    }`}
                 >
                   {descLen} / 160 ký tự ({isDescOptimal ? 'Chuẩn SEO' : 'Nên trong khoảng 150-160'})
                 </span>
@@ -294,11 +290,10 @@ export default function SeoManagerClient({
                 <button
                   type="button"
                   onClick={() => setIndexable(!indexable)}
-                  className={`px-3 py-1.5 rounded-xl font-bold transition-colors ${
-                    indexable
+                  className={`px-3 py-1.5 rounded-xl font-bold transition-colors ${indexable
                       ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
                       : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
-                  }`}
+                    }`}
                 >
                   {indexable ? 'INDEX, FOLLOW' : 'NOINDEX, FOLLOW'}
                 </button>
@@ -323,11 +318,10 @@ export default function SeoManagerClient({
                 <button
                   type="button"
                   onClick={() => setSerpViewMode('DESKTOP')}
-                  className={`p-1.5 rounded-lg text-xs transition-colors flex items-center gap-1 ${
-                    serpViewMode === 'DESKTOP'
+                  className={`p-1.5 rounded-lg text-xs transition-colors flex items-center gap-1 ${serpViewMode === 'DESKTOP'
                       ? 'bg-slate-800 text-cyan-400 font-bold'
                       : 'text-slate-400 hover:text-white'
-                  }`}
+                    }`}
                   title="Xem dạng máy tính Desktop"
                 >
                   <Monitor className="w-3.5 h-3.5" />
@@ -336,11 +330,10 @@ export default function SeoManagerClient({
                 <button
                   type="button"
                   onClick={() => setSerpViewMode('MOBILE')}
-                  className={`p-1.5 rounded-lg text-xs transition-colors flex items-center gap-1 ${
-                    serpViewMode === 'MOBILE'
+                  className={`p-1.5 rounded-lg text-xs transition-colors flex items-center gap-1 ${serpViewMode === 'MOBILE'
                       ? 'bg-slate-800 text-cyan-400 font-bold'
                       : 'text-slate-400 hover:text-white'
-                  }`}
+                    }`}
                   title="Xem dạng điện thoại Mobile"
                 >
                   <Smartphone className="w-3.5 h-3.5" />
@@ -351,9 +344,8 @@ export default function SeoManagerClient({
 
             {/* Google Snippet Simulation Box */}
             <div
-              className={`p-5 rounded-2xl bg-[#202124] text-[#bdc1c6] font-sans transition-all border border-slate-700 shadow-xl ${
-                serpViewMode === 'MOBILE' ? 'max-w-sm mx-auto' : 'w-full'
-              }`}
+              className={`p-5 rounded-2xl bg-[#202124] text-[#bdc1c6] font-sans transition-all border border-slate-700 shadow-xl ${serpViewMode === 'MOBILE' ? 'max-w-sm mx-auto' : 'w-full'
+                }`}
             >
               {/* URL & Breadcrumb snippet */}
               <div className="flex items-center gap-2 mb-1.5 text-xs text-[#dadce0]">
@@ -404,7 +396,7 @@ export default function SeoManagerClient({
                   <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold block">
                     THUECAM.VN
                   </span>
-                  <span className="font-bold text-white block truncate">{seoTitle}</span>
+                  <span className="font-bold text-black block truncate">{seoTitle}</span>
                   <span className="text-slate-400 block line-clamp-2">{seoDescription}</span>
                 </div>
               </div>

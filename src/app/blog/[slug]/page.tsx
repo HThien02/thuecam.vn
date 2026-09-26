@@ -107,7 +107,7 @@ export default async function BlogDetailPage({ params }: Props) {
               </div>
             )}
             <div>
-              <span className="font-bold text-white block">{article.author_name}</span>
+              <span className="font-bold text-black block">{article.author_name}</span>
               <span className="text-[11px] text-slate-400">Kỹ thuật viên kiểm định THUECAM</span>
             </div>
           </div>
