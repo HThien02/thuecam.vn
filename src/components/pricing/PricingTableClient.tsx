@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Category, Product } from '@/types';
 import { ArrowRight, Check, CircleHelp, Sparkles, Calendar, Layers } from 'lucide-react';
 import BookingModal from '../booking/BookingModal';
@@ -12,13 +11,37 @@ interface PricingTableClientProps {
   products: Product[];
 }
 
+type PricingSection = Pick<Category, 'id' | 'slug' | 'name' | 'indexable'> & {
+  products: Product[];
+};
+
 const formatPrice = (price: number) => `${Math.round(price / 1000)}K`;
 
 export default function PricingTableClient({ categories, products }: PricingTableClientProps) {
-  const [activeCategory, setActiveCategory] = useState<string>(categories[0]?.slug || '');
-  const [selectedProductForBooking, setSelectedProductForBooking] = useState<Product | null>(null);
+  const categorySections = useMemo<PricingSection[]>(() => {
+    const sections: PricingSection[] = categories
+      .map((category) => ({
+        ...category,
+        products: products.filter((product) => product.category_id === category.id),
+      }))
+      .filter((section) => section.products.length > 0);
+    const categorizedProductIds = new Set(sections.flatMap((section) => section.products.map((product) => product.id)));
+    const uncategorizedProducts = products.filter((product) => !categorizedProductIds.has(product.id));
 
-  const displayedProducts = products;
+    if (uncategorizedProducts.length > 0) {
+      sections.push({
+        id: 'uncategorized',
+        slug: 'uncategorized',
+        name: 'Sản phẩm khác',
+        indexable: false,
+        products: uncategorizedProducts,
+      });
+    }
+
+    return sections;
+  }, [categories, products]);
+  const [activeCategory, setActiveCategory] = useState<string>(categorySections[0]?.slug || '');
+  const [selectedProductForBooking, setSelectedProductForBooking] = useState<Product | null>(null);
 
   // Smooth scroll handler with offset for fixed header
   const scrollToCategory = (slug: string) => {
@@ -40,7 +63,7 @@ export default function PricingTableClient({ categories, products }: PricingTabl
   useEffect(() => {
     const handleScroll = () => {
       const scrollPos = window.scrollY + 160;
-      for (const cat of categories) {
+      for (const cat of categorySections) {
         const el = document.getElementById(`category-${cat.slug}`);
         if (el) {
           const top = el.offsetTop;
@@ -55,7 +78,7 @@ export default function PricingTableClient({ categories, products }: PricingTabl
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [categories]);
+  }, [categorySections]);
 
   return (
     <>
@@ -64,21 +87,20 @@ export default function PricingTableClient({ categories, products }: PricingTabl
         <span className="text-[11px] font-black uppercase text-sky-800 shrink-0 flex items-center gap-1">
           <Layers className="size-3.5 text-[#0284c7]" /> Danh mục:
         </span>
-        {categories.map((category) => {
-          const count = displayedProducts.filter((p) => p.category_id === category.id).length;
-          if (count === 0) return null;
-          const isActive = activeCategory === category.slug;
+        {categorySections.map((section) => {
+          const count = section.products.length;
+          const isActive = activeCategory === section.slug;
           return (
             <button
-              key={category.id}
-              onClick={() => scrollToCategory(category.slug)}
+              key={section.id}
+              onClick={() => scrollToCategory(section.slug)}
               className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-black transition-all ${
                 isActive
                   ? 'bg-[#0284c7] text-white shadow-sm'
                   : 'bg-sky-50 text-slate-700 hover:bg-sky-100 hover:text-[#0284c7]'
               }`}
             >
-              {category.name} ({count})
+              {section.name} ({count})
             </button>
           );
         })}
@@ -94,22 +116,21 @@ export default function PricingTableClient({ categories, products }: PricingTabl
             </p>
           </div>
           <nav className="mt-3 flex flex-col gap-1.5">
-            {categories.map((category) => {
-              const count = displayedProducts.filter((p) => p.category_id === category.id).length;
-              if (count === 0) return null;
-              const isActive = activeCategory === category.slug;
+            {categorySections.map((section) => {
+              const count = section.products.length;
+              const isActive = activeCategory === section.slug;
               return (
                 <button
-                  key={category.id}
+                  key={section.id}
                   type="button"
-                  onClick={() => scrollToCategory(category.slug)}
+                  onClick={() => scrollToCategory(section.slug)}
                   className={`w-full text-left rounded-2xl px-3.5 py-2.5 text-sm font-black transition-all flex items-center justify-between group ${
                     isActive
                       ? 'bg-[#0284c7] text-white shadow-md translate-x-1'
                       : 'bg-sky-50/60 text-slate-700 hover:bg-sky-100 hover:text-[#0284c7]'
                   }`}
                 >
-                  <span className="truncate">{category.name}</span>
+                  <span className="truncate">{section.name}</span>
                   <span
                     className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
                       isActive ? 'bg-white/20 text-white' : 'bg-white text-slate-500 group-hover:text-[#0284c7]'
@@ -131,14 +152,13 @@ export default function PricingTableClient({ categories, products }: PricingTabl
 
         {/* Right Content Sections */}
         <div className="space-y-10">
-          {categories.map((category) => {
-            const categoryProducts = displayedProducts.filter((product) => product.category_id === category.id);
-            if (categoryProducts.length === 0) return null;
+          {categorySections.map((section) => {
+            const categoryProducts = section.products;
 
             return (
               <section
-                key={category.id}
-                id={`category-${category.slug}`}
+                key={section.id}
+                id={`category-${section.slug}`}
                 className="scroll-mt-28"
               >
                 <div className="mb-3.5 flex items-end justify-between gap-4">
@@ -146,14 +166,16 @@ export default function PricingTableClient({ categories, products }: PricingTabl
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-0.5 text-[11px] font-black uppercase text-[#0284c7]">
                       <Sparkles className="size-3" /> Bảng giá dòng máy
                     </span>
-                    <h2 className="mt-1 text-2xl font-black text-slate-900">{category.name}</h2>
+                    <h2 className="mt-1 text-2xl font-black text-slate-900">{section.name}</h2>
                   </div>
-                  <Link
-                    href={`/danh-muc/${category.slug}`}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-[#0284c7] hover:underline"
-                  >
-                    Xem chi tiết danh mục <ArrowRight className="size-3.5" />
-                  </Link>
+                  {section.indexable && (
+                    <Link
+                      href={`/danh-muc/${section.slug}`}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-[#0284c7] hover:underline"
+                    >
+                      Xem chi tiết danh mục <ArrowRight className="size-3.5" />
+                    </Link>
+                  )}
                 </div>
 
                 <div className="overflow-hidden rounded-[28px] border-2 border-sky-100 bg-white shadow-cute">

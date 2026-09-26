@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, CalendarCheck2, Sparkles } from 'lucide-react';
-import { getCategories, getProducts } from '@/lib/data';
+import { getAllCategories, getProducts } from '@/lib/data';
 import { constructMetadata } from '@/lib/seo/metadata';
 import PricingTableClient from '@/components/pricing/PricingTableClient';
 
@@ -13,7 +13,7 @@ export const metadata: Metadata = constructMetadata({
 });
 
 export default async function PricingPage() {
-  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
+  const [products, categories] = await Promise.all([getProducts(), getAllCategories()]);
 
   return (
     <main className="min-h-screen bg-[#f0f7ff] text-[#0c2340]">
