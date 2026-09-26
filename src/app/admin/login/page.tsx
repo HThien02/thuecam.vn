@@ -69,11 +69,11 @@ function LoginFormContent() {
   }
 
   return (
-    <main className="min-h-screen bg-[#070b14] flex items-center justify-center px-4 py-12 text-white">
+    <main className="admin-shell min-h-screen flex items-center justify-center px-4 py-12 text-slate-900">
       <div className="w-full max-w-md">
         <form
           onSubmit={handleSubmit}
-          className="space-y-6 rounded-3xl border border-slate-800 bg-slate-900/90 p-8 shadow-2xl backdrop-blur-xl"
+          className="space-y-6 rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-900/5"
         >
           <div className="text-center space-y-2">
             <h1 className="text-2xl font-black text-white">Đăng Nhập Quản Trị</h1>
@@ -88,7 +88,7 @@ function LoginFormContent() {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1.5">
+              <label className="mb-2 block text-sm font-semibold text-slate-800">
                 Email quản trị viên:
               </label>
               <div className="relative">
@@ -100,13 +100,13 @@ function LoginFormContent() {
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-xl border border-slate-700 bg-slate-950/80 pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition"
+                  className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-3 text-base text-slate-900 placeholder-slate-500 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-700/20"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1.5">
+              <label className="mb-2 block text-sm font-semibold text-slate-800">
                 Mật khẩu:
               </label>
               <div className="relative">
@@ -118,7 +118,7 @@ function LoginFormContent() {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-xl border border-slate-700 bg-slate-950/80 pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition"
+                  className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-3 text-base text-slate-900 placeholder-slate-500 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-700/20"
                 />
               </div>
             </div>
@@ -127,7 +127,7 @@ function LoginFormContent() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-gradient-to-r from-cyan-400 to-sky-500 hover:from-cyan-300 hover:to-sky-400 py-3.5 font-black text-slate-950 text-sm shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 transition disabled:cursor-not-allowed disabled:opacity-70"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-800 py-3.5 text-base font-semibold text-white shadow-sm transition hover:bg-blue-900 disabled:cursor-not-allowed disabled:opacity-70"
           >
             <span>{loading ? 'Đang xác thực bảo mật...' : 'Đăng Nhập Quản Trị'}</span>
             {!loading && <ArrowRight className="w-4 h-4" />}
@@ -140,7 +140,7 @@ function LoginFormContent() {
 
 export default function AdminLoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#070b14]" />}>
+    <Suspense fallback={<div className="admin-shell min-h-screen" />}>
       <LoginFormContent />
     </Suspense>
   );

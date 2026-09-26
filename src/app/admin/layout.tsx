@@ -42,7 +42,7 @@ export default function AdminLayout({
 
   const navClass = (href: string) => {
     const active = isNavActive(href);
-      return `flex items-center gap-2.5 rounded-xl px-3 py-2.5 transition-colors text-[13px] font-semibold ${
+      return `flex items-center gap-2.5 rounded-xl px-3 py-3 transition-colors text-sm font-semibold ${
       active
         ? 'bg-blue-50 text-blue-900 border-l-[3px] border-blue-700'
         : 'text-slate-600 hover:text-blue-800 hover:bg-slate-100'
