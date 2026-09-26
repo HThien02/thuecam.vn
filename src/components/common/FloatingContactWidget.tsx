@@ -31,6 +31,22 @@ function safeHttpsUrl(value: string | null | undefined) {
   }
 }
 
+function getWhatsappPhoneDigits(value: string | null | undefined) {
+  const trimmed = value?.trim();
+  if (!trimmed) return '';
+
+  try {
+    const url = new URL(trimmed);
+    if (url.hostname === 'wa.me') return url.pathname.replace(/\D/g, '');
+    if (url.hostname.endsWith('whatsapp.com')) {
+      return (url.searchParams.get('phone') ?? '').replace(/\D/g, '');
+    }
+    return '';
+  } catch {
+    return trimmed.replace(/\D/g, '');
+  }
+}
+
 interface ContactChannel {
   name: string;
   label: string;
@@ -51,6 +67,7 @@ export default function FloatingContactWidget() {
   const hotlineHref = hasLoadedSettings
     ? phoneDigits ? `tel:${phoneDigits.startsWith('84') ? `+${phoneDigits}` : phoneDigits}` : ''
     : 'tel:+84932501411';
+  const whatsappPhone = getWhatsappPhoneDigits(settings?.whatsapp_url);
   const zaloHref = !hasLoadedSettings
     ? 'https://zalo.me/0932501411'
     : safeHttpsUrl(settings?.zalo) || (phoneDigits ? `https://zalo.me/${phoneDigits}` : '');
@@ -84,7 +101,7 @@ export default function FloatingContactWidget() {
     {
       name: 'WhatsApp',
       label: `Nhắn WhatsApp ${managerName}`,
-      href: hasLoadedSettings ? safeHttpsUrl(settings?.whatsapp_url) : 'https://wa.me/84932501411',
+      href: hasLoadedSettings ? (whatsappPhone ? `https://wa.me/${whatsappPhone}` : '') : 'https://wa.me/84932501411',
       bgColor: 'bg-[#25D366]',
       hoverGlow: 'hover:shadow-[0_0_18px_rgba(37,211,102,0.6)]',
       icon: (

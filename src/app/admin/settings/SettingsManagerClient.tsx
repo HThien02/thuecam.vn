@@ -5,6 +5,22 @@ import type { SiteSettings } from '@/lib/data/admin-types';
 import { saveAdminRecord } from '@/lib/data/admin-api';
 import { Save, CheckCircle2, MapPin, Phone, Gift, Loader2, Share2 } from 'lucide-react';
 
+function getWhatsappPhone(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+
+  try {
+    const url = new URL(trimmed);
+    if (url.hostname === 'wa.me') return url.pathname.replace(/\D/g, '');
+    if (url.hostname.endsWith('whatsapp.com')) {
+      return (url.searchParams.get('phone') ?? '').replace(/\D/g, '');
+    }
+    return '';
+  } catch {
+    return trimmed.replace(/\D/g, '');
+  }
+}
+
 export default function SettingsManagerClient({ initialSettings }: { initialSettings: SiteSettings }) {
   const [settings, setSettings] = useState<SiteSettings>(initialSettings);
   const [toastMsg, setToastMsg] = useState('');
@@ -32,7 +48,7 @@ export default function SettingsManagerClient({ initialSettings }: { initialSett
         contact_manager_name: settings.contactManagerName,
         facebook_url: settings.facebookUrl,
         instagram_url: settings.instagramUrl,
-        whatsapp_url: settings.whatsappUrl,
+        whatsapp_url: getWhatsappPhone(settings.whatsappUrl),
       }, 'update');
       showToast('Đã lưu cấu hình website thành công!');
     } catch (error) {
@@ -145,11 +161,11 @@ export default function SettingsManagerClient({ initialSettings }: { initialSett
               <input type="url" value={settings.instagramUrl} onChange={(event) => setSettings({ ...settings, instagramUrl: event.target.value })} placeholder="https://instagram.com/..." className="rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-white outline-none focus:border-sky-500" />
             </label>
             <label className="flex flex-col gap-1 font-bold text-slate-300">
-              WhatsApp URL
-              <input type="url" value={settings.whatsappUrl} onChange={(event) => setSettings({ ...settings, whatsappUrl: event.target.value })} placeholder="https://wa.me/..." className="rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-white outline-none focus:border-sky-500" />
+              Số điện thoại WhatsApp
+              <input type="tel" inputMode="tel" autoComplete="tel" value={getWhatsappPhone(settings.whatsappUrl)} onChange={(event) => setSettings({ ...settings, whatsappUrl: event.target.value })} placeholder="+84 932 501 411" className="rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-white outline-none focus:border-sky-500" />
             </label>
           </div>
-          <p className="text-[11px] text-slate-500">Số hotline và Zalo được chỉnh ở mục Hotline & Kênh Liên Hệ phía trên. Các liên kết chỉ chấp nhận HTTPS.</p>
+          <p className="text-[11px] text-slate-500">Nhập số WhatsApp kèm mã quốc gia (ví dụ +84), không cần nhập URL. Hotline và Zalo được chỉnh ở mục Hotline & Kênh Liên Hệ phía trên.</p>
         </section>
 
         {/* Promo Ribbon & Policies */}

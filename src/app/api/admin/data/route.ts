@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
   if (!record || Object.keys(record).length === 0) return responseError('No valid record fields were provided.');
 
   if (table === 'site_settings') {
-    for (const field of ['facebook_url', 'instagram_url', 'whatsapp_url']) {
+    for (const field of ['facebook_url', 'instagram_url']) {
       const link = record[field];
       if (typeof link === 'string' && link.trim()) {
         try {
@@ -82,6 +82,20 @@ export async function POST(request: NextRequest) {
           return responseError('Vui lòng nhập liên kết mạng xã hội hợp lệ.', 400);
         }
       }
+    }
+
+    const whatsappPhone = record.whatsapp_url;
+    if (typeof whatsappPhone === 'string' && whatsappPhone.trim()) {
+      if (!/^[+\d\s().-]+$/.test(whatsappPhone)) {
+        return responseError('Vui lòng nhập số điện thoại WhatsApp, không nhập URL.', 400);
+      }
+      const digits = whatsappPhone.replace(/\D/g, '');
+      if (digits.length < 8 || digits.length > 15) {
+        return responseError('Số WhatsApp cần có từ 8 đến 15 chữ số, bao gồm mã quốc gia.', 400);
+      }
+      record.whatsapp_url = digits;
+    } else if (typeof whatsappPhone === 'string') {
+      record.whatsapp_url = '';
     }
   }
 
