@@ -5,8 +5,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Camera, Search, Phone, Menu, X, Sparkles, Gift, Home, Tag, Clock3, Wrench } from 'lucide-react';
 
-const siteLogoUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  ? `${process.env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/$/, '')}/storage/v1/object/public/product-images/branding/site-logo`
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
+const siteLogoUrl = supabaseUrl
+  ? `${supabaseUrl.replace(/\/$/, '')}/storage/v1/object/public/product-images/branding/site-logo`
   : null;
 
 export default function Header() {
