@@ -19,12 +19,6 @@ export default function ProductCard({ product }: ProductCardProps) {
   const availabilityLabel = product.status === 'ACTIVE'
     ? product.inventory_count > 0 ? 'Sẵn sàng cho thuê' : 'Full lịch thuê'
     : 'Đang bảo trì';
-  const availabilityClass = product.status === 'ACTIVE'
-    ? product.inventory_count > 0
-      ? 'bg-emerald-100/95 text-emerald-900 border-emerald-200'
-      : 'bg-amber-100/95 text-amber-900 border-amber-200'
-    : 'bg-slate-100/95 text-slate-700 border-slate-200';
-  const showAvailabilityBadge = product.status === 'MAINTENANCE' || (product.status === 'ACTIVE' && product.inventory_count <= 0);
   const canBook = product.status === 'ACTIVE' && product.inventory_count > 0;
 
   return (
@@ -42,11 +36,6 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Badges overlay */}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
-          {showAvailabilityBadge && (
-            <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold backdrop-blur-md shadow-sm border ${availabilityClass}`}>
-              {availabilityLabel}
-            </span>
-          )}
           {product.brand && (
             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/95 text-slate-700 backdrop-blur-md shadow-sm border border-sky-100">
               {product.brand.name}
