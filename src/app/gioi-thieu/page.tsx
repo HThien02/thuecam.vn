@@ -55,7 +55,7 @@ export default function GioiThieuPage() {
           Chúng tôi có văn phòng và showroom hoạt động thực tế tại trung tâm 2 thành phố lớn:
         </p>
         <ul>
-          <li><strong>TP. Hồ Chí Minh:</strong> 123 Nguyễn Thị Minh Khai, P. Bến Thành, Quận 1 (Hotline: 0901.234.567)</li>
+          <li><strong>TP. Hồ Chí Minh:</strong> 123 Nguyễn Thị Minh Khai, P. Bến Thành, Quận 1 (Hotline: 0932.501.411)</li>
           <li><strong>Hà Nội:</strong> 45 Phố Giảng Võ, P. Cát Linh, Quận Đống Đa (Hotline: 0902.345.678)</li>
         </ul>
       </div>

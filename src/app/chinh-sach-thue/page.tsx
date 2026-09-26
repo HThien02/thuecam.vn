@@ -42,7 +42,7 @@ export default function ChinhSachThuePage() {
         <p>
           - Khách hàng có trách nhiệm bảo quản thiết bị đúng hướng dẫn an toàn kỹ thuật.<br />
           - Tuyệt đối không tự ý tháo mở, sửa chữa hoặc can thiệp phần cứng thiết bị.<br />
-          - Trong trường hợp xảy ra sự cố bất khả kháng (rơi vỡ, vô nước), khách hàng cần thông báo ngay cho hotline hỗ trợ 0901.234.567 để được hướng dẫn xử lý hạn chế tối đa rủi ro thiệt hại.
+          - Trong trường hợp xảy ra sự cố bất khả kháng (rơi vỡ, vô nước), khách hàng cần thông báo ngay cho hotline hỗ trợ 0932.501.411 để được hướng dẫn xử lý hạn chế tối đa rủi ro thiệt hại.
         </p>
       </div>
     </div>

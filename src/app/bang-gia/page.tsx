@@ -20,15 +20,15 @@ export default async function PricingPage() {
       {/* Hero Header Section */}
       <section className="border-b border-sky-100 bg-gradient-to-b from-white to-[#e0f2fe]/40">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-          <div className="max-w-3xl">
+          <div className="max-w-4xl">
             <span className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3.5 py-1 text-xs font-black text-[#0284c7]">
               <Sparkles className="size-3.5" />
               BẢNG GIÁ THUECAM 📸
             </span>
-            <h1 className="mt-4 max-w-4xl text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">
+            <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">
               Giá thuê rõ ràng, chọn máy thật dễ
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-8 text-[#334e68] font-medium">
+            <p className="mt-4 text-base leading-8 text-[#334e68] font-medium">
               Xem giá theo ngày của từng thiết bị. Thuê càng lâu càng tiết kiệm, phụ kiện cơ bản (thẻ nhớ, pin sạc, túi đựng) đã được chuẩn bị sẵn để bạn nhận máy tại <strong>ETown Tân Bình</strong> và bắt đầu quay ngay!
             </p>
             <div className="mt-7 flex flex-wrap gap-3">

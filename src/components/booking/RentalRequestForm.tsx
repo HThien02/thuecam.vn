@@ -190,9 +190,9 @@ export default function RentalRequestForm({
         <h2 className="text-2xl font-black text-slate-900">
           Đã nhận yêu cầu thuê thiết bị! 🎉
         </h2>
-          <p className="mx-auto mt-2 max-w-lg text-slate-600 text-sm">
-            THUECAM sẽ liên hệ qua SĐT/Zalo <strong>{phone}</strong> trong vòng 10 phút để xác nhận lịch máy. Giờ nhận {pickupTime} — {pickupMethod === 'STORE' ? 'nhận tại ETown Tân Bình' : 'giao hỏa tốc đến địa chỉ đã chọn'}.
-          </p>
+        <p className="mx-auto mt-2 max-w-lg text-slate-600 text-sm">
+          THUECAM sẽ liên hệ qua SĐT/Zalo <strong>{phone}</strong> trong vòng 10 phút để xác nhận lịch máy. Giờ nhận {pickupTime} — {pickupMethod === 'STORE' ? 'nhận tại ETown Tân Bình' : 'giao hỏa tốc đến địa chỉ đã chọn'}.
+        </p>
         <p className="mt-4 text-sm font-bold text-sky-800">Mã yêu cầu: {bookingCode} · Trạng thái: Chờ shop xác nhận</p>
         {confirmationEmailSent ? (
           <p role="status" className="mt-2 text-sm font-semibold text-emerald-700">Phiếu xác nhận đã được gửi đến {email}.</p>
@@ -354,7 +354,7 @@ export default function RentalRequestForm({
             className="mt-1.5 w-full rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-sm font-bold text-slate-900 outline-none focus:border-[#0284c7]"
           />
           <span id="pickup-time-guidance" className="mt-1 block text-[11px] font-medium text-slate-500">
-            08:00���18:00 nhận tại ETown; ngoài khung giờ sẽ tự chuyển sang giao hỏa tốc.
+            08:00-18:00 nhận tại ETown; ngoài khung giờ sẽ tự chuyển sang giao hỏa tốc.
           </span>
         </label>
 
@@ -368,11 +368,10 @@ export default function RentalRequestForm({
               setFullName(e.target.value);
               if (errors.fullName) setErrors((prev) => ({ ...prev, fullName: '' }));
             }}
-            className={`mt-1.5 w-full rounded-2xl border px-4 py-2.5 text-sm font-medium outline-none transition ${
-              errors.fullName
-                ? 'border-rose-400 bg-rose-50/40 text-rose-900 focus:border-rose-500'
-                : 'border-sky-200 bg-sky-50/50 focus:border-[#0284c7]'
-            }`}
+            className={`mt-1.5 w-full rounded-2xl border px-4 py-2.5 text-sm font-medium outline-none transition ${errors.fullName
+              ? 'border-rose-400 bg-rose-50/40 text-rose-900 focus:border-rose-500'
+              : 'border-sky-200 bg-sky-50/50 focus:border-[#0284c7]'
+              }`}
             placeholder="Ví dụ: Nguyễn Văn A"
           />
           {errors.fullName && (
@@ -392,11 +391,10 @@ export default function RentalRequestForm({
               setPhone(e.target.value);
               if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
             }}
-            className={`mt-1.5 w-full rounded-2xl border px-4 py-2.5 text-sm font-medium outline-none transition ${
-              errors.phone
-                ? 'border-rose-400 bg-rose-50/40 text-rose-900 focus:border-rose-500'
-                : 'border-sky-200 bg-sky-50/50 focus:border-[#0284c7]'
-            }`}
+            className={`mt-1.5 w-full rounded-2xl border px-4 py-2.5 text-sm font-medium outline-none transition ${errors.phone
+              ? 'border-rose-400 bg-rose-50/40 text-rose-900 focus:border-rose-500'
+              : 'border-sky-200 bg-sky-50/50 focus:border-[#0284c7]'
+              }`}
             placeholder="09xx xxx xxx"
           />
           {errors.phone && (
@@ -416,11 +414,10 @@ export default function RentalRequestForm({
               setEmail(e.target.value);
               if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
             }}
-            className={`mt-1.5 w-full rounded-2xl border px-4 py-2.5 text-sm font-medium outline-none transition ${
-              errors.email
-                ? 'border-rose-400 bg-rose-50/40 text-rose-900 focus:border-rose-500'
-                : 'border-sky-200 bg-sky-50/50 focus:border-[#0284c7]'
-            }`}
+            className={`mt-1.5 w-full rounded-2xl border px-4 py-2.5 text-sm font-medium outline-none transition ${errors.email
+              ? 'border-rose-400 bg-rose-50/40 text-rose-900 focus:border-rose-500'
+              : 'border-sky-200 bg-sky-50/50 focus:border-[#0284c7]'
+              }`}
             placeholder="ban@example.com"
           />
           {errors.email && (
@@ -437,22 +434,20 @@ export default function RentalRequestForm({
             <button
               type="button"
               onClick={() => setDuration('daily')}
-              className={`flex-1 rounded-2xl py-2.5 text-xs font-black transition-all ${
-                duration === 'daily'
-                  ? 'bg-[#0284c7] text-white shadow-sm'
-                  : 'bg-sky-50 text-slate-700 hover:bg-sky-100'
-              }`}
+              className={`flex-1 rounded-2xl py-2.5 text-xs font-black transition-all ${duration === 'daily'
+                ? 'bg-[#0284c7] text-white shadow-sm'
+                : 'bg-sky-50 text-slate-700 hover:bg-sky-100'
+                }`}
             >
               <CalendarDays className="mr-1 inline size-3.5" /> Theo ngày (24h)
             </button>
             <button
               type="button"
               onClick={() => setDuration('hourly')}
-              className={`flex-1 rounded-2xl py-2.5 text-xs font-black transition-all ${
-                duration === 'hourly'
-                  ? 'bg-[#0284c7] text-white shadow-sm'
-                  : 'bg-sky-50 text-slate-700 hover:bg-sky-100'
-              }`}
+              className={`flex-1 rounded-2xl py-2.5 text-xs font-black transition-all ${duration === 'hourly'
+                ? 'bg-[#0284c7] text-white shadow-sm'
+                : 'bg-sky-50 text-slate-700 hover:bg-sky-100'
+                }`}
             >
               <Clock3 className="mr-1 inline size-3.5" /> Theo giờ (Trong ngày)
             </button>
@@ -520,16 +515,16 @@ export default function RentalRequestForm({
 
       <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-sky-100">
         <p className="text-xs text-slate-500">
-          Sau khi gửi, THUECAM sẽ liên h��� xác nhận lịch và giữ máy cho bạn ngay.
+          Sau khi gửi, THUECAM sẽ liên hệ xác nhận lịch và giữ máy cho bạn ngay.
         </p>
 
-      {rangeAvailability === false && <p role="alert" className="text-sm font-semibold text-rose-600 sm:text-right">Khoảng ngày đang chọn đã kín lịch. Hãy chọn ngày khác.</p>}
-      {errors.submit && <p role="alert" className="text-sm font-semibold text-rose-600">{errors.submit}</p>}
-      <SafeButton
-        type="submit"
-        disabled={isSubmitting || isCheckingVoucher || !product || rangeAvailability !== true}
-        isLoading={isSubmitting || isCheckingVoucher}
-        loadingText={isCheckingVoucher ? 'Đang kiểm tra voucher...' : 'Đang gửi yêu cầu...'}
+        {rangeAvailability === false && <p role="alert" className="text-sm font-semibold text-rose-600 sm:text-right">Khoảng ngày đang chọn đã kín lịch. Hãy chọn ngày khác.</p>}
+        {errors.submit && <p role="alert" className="text-sm font-semibold text-rose-600">{errors.submit}</p>}
+        <SafeButton
+          type="submit"
+          disabled={isSubmitting || isCheckingVoucher || !product || rangeAvailability !== true}
+          isLoading={isSubmitting || isCheckingVoucher}
+          loadingText={isCheckingVoucher ? 'Đang kiểm tra voucher...' : 'Đang gửi yêu cầu...'}
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#0284c7] hover:bg-[#0369a1] px-8 py-3.5 text-sm font-black text-white shadow-cute transition-all hover:scale-105"
         >
           <span>Gửi Yêu Cầu Thuê Ngay</span>

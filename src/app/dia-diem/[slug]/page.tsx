@@ -100,7 +100,7 @@ export default async function LocationDetailPage({ params }: Props) {
               <Clock className="w-3.5 h-3.5 text-cyan-400" />
               Giờ phục vụ:
             </span>
-            <p className="font-semibold text-white">08:00 - 21:30 hàng ngày</p>
+            <p className="font-semibold text-white">08:00 - 22:00 hàng ngày</p>
           </div>
         </div>
 
@@ -111,11 +111,10 @@ export default async function LocationDetailPage({ params }: Props) {
             <Link
               key={loc.id}
               href={`/dia-diem/${loc.slug}`}
-              className={`px-3 py-1 rounded-lg transition-colors ${
-                loc.slug === location.slug
+              className={`px-3 py-1 rounded-lg transition-colors ${loc.slug === location.slug
                   ? 'bg-cyan-500 text-slate-950 font-bold'
                   : 'bg-slate-800 text-slate-600 hover:text-white'
-              }`}
+                }`}
             >
               {loc.name}
             </Link>

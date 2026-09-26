@@ -73,11 +73,10 @@ export default async function BrandDetailPage({ params }: Props) {
             <Link
               key={b.id}
               href={`/thuong-hieu/${b.slug}`}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${
-                b.slug === brand.slug
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${b.slug === brand.slug
                   ? 'bg-cyan-500 text-slate-950 font-bold'
                   : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
-              }`}
+                }`}
             >
               {b.name}
             </Link>
@@ -99,7 +98,7 @@ export default async function BrandDetailPage({ params }: Props) {
           </div>
         ) : (
           <div className="p-8 text-center rounded-2xl bg-slate-900/40 border border-slate-800 text-slate-400 text-sm">
-            Hiện tại các model thuộc thương hiệu {brand.name} đang được bổ sung vào kho. Vui lòng liên hệ hotline 0901.234.567 để đặt trước.
+            Hiện tại các model thuộc thương hiệu {brand.name} đang được bổ sung vào kho. Vui lòng liên hệ hotline 0932.501.411 để đặt trước.
           </div>
         )}
       </div>

@@ -19,7 +19,7 @@ export default async function CameraFormulaIndexPage() {
       <div className="mx-auto max-w-7xl">
         <header className="max-w-3xl">
           <span className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700">
-            <Aperture className="size-4" aria-hidden="true" /> THUECAM FIELD NOTES
+            <Aperture className="size-4" aria-hidden="true" /> Công thức setup camera
           </span>
           <h1 className="mt-5 text-3xl font-black tracking-tight sm:text-5xl">Công thức setup camera</h1>
           <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base">Công thức thực chiến do đội ngũ chia sẻ: xem ảnh mẫu, thông số máy và hướng dẫn để tái tạo màu sắc, ánh sáng cho từng bối cảnh.</p>

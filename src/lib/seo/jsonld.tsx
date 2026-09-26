@@ -138,7 +138,7 @@ export function generateLocalBusinessJsonLd(loc?: Location) {
     image: `${SITE_URL}/images/og-default.jpg`,
     '@id': `${SITE_URL}/#organization`,
     url: SITE_URL,
-    telephone: loc ? loc.phone : '0901.234.567',
+    telephone: loc ? loc.phone : '0932.501.411',
     priceRange: '100.000đ - 500.000đ/ngày',
     address: {
       '@type': 'PostalAddress',
@@ -159,7 +159,7 @@ export function generateLocalBusinessJsonLd(loc?: Location) {
           'Sunday',
         ],
         opens: '08:00',
-        closes: '21:30',
+        closes: '22:00',
       },
     ],
   };

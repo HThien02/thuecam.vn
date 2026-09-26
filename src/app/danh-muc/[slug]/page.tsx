@@ -75,11 +75,10 @@ export default async function CategoryDetailPage({ params }: Props) {
             <Link
               key={cat.id}
               href={`/danh-muc/${cat.slug}`}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${
-                cat.slug === category.slug
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${cat.slug === category.slug
                   ? 'bg-cyan-500 text-slate-950 font-bold'
                   : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
-              }`}
+                }`}
             >
               {cat.name}
             </Link>
@@ -103,7 +102,7 @@ export default async function CategoryDetailPage({ params }: Props) {
           </div>
         ) : (
           <div className="p-8 text-center rounded-2xl bg-slate-900/40 border border-slate-800 text-slate-400 text-sm">
-            Hiện tại các máy thuộc nhóm này đang được bảo dưỡng định kỳ. Vui lòng liên hệ hotline 0901.234.567 để nhận tư vấn máy tương đương.
+            Hiện tại các máy thuộc nhóm này đang được bảo dưỡng định kỳ. Vui lòng liên hệ hotline 0932.501.411 để nhận tư vấn máy tương đương.
           </div>
         )}
       </div>

@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS seo_settings (
   default_og_image TEXT DEFAULT 'https://thuecam.vn/images/og-default.jpg',
   twitter_handle VARCHAR(50) DEFAULT '@thuecamvn',
   business_name VARCHAR(255) DEFAULT 'THUECAM VIỆT NAM',
-  hotline VARCHAR(50) DEFAULT '0901.234.567',
+  hotline VARCHAR(50) DEFAULT '0932.501.411',
   email VARCHAR(100) DEFAULT 'contact@thuecam.vn',
   address TEXT DEFAULT '123 Nguyễn Thị Minh Khai, Phường Bến Thành, Quận 1, TP. Hồ Chí Minh',
   opening_hours VARCHAR(100) DEFAULT '08:00 - 21:00 hàng ngày',
