@@ -9,8 +9,8 @@ export async function POST(request: NextRequest) {
   const rateLimitResponse = enforceApiRateLimit(request, { limit: 5, windowMs: 60_000 });
   if (rateLimitResponse) return rateLimitResponse;
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL_2 ?? process.env.SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.SUPABASE_ANON_KEY_2 ?? process.env.SUPABASE_PUBLISHABLE_KEY_2 ?? process.env.SUPABASE_ANON_KEY ?? process.env.SUPABASE_PUBLISHABLE_KEY;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (!supabaseUrl || !supabaseKey || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return NextResponse.json(
       { error: 'Dịch vụ đăng nhập chưa được cấu hình. Vui lòng thử lại sau.' },

@@ -1,49 +1,55 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, CalendarCheck2, Check, CircleHelp, Sparkles } from 'lucide-react';
-import { getCategories, getProducts } from '@/lib/data';
+import { ArrowRight, CalendarCheck2, Sparkles } from 'lucide-react';
+import { getAllCategories, getProducts } from '@/lib/data';
 import { constructMetadata } from '@/lib/seo/metadata';
+import PricingTableClient from '@/components/pricing/PricingTableClient';
 
 export const metadata: Metadata = constructMetadata({
   title: 'Bảng giá thuê camera, máy ảnh & flycam | THUECAM',
   description:
-    'Xem nhanh bảng giá thuê camera, máy ảnh, flycam, gimbal và micro theo ngày tại THUECAM.',
+    'Xem nhanh bảng giá thuê camera, máy ảnh, flycam, gimbal và micro theo ngày tại THUECAM. Nhận máy tại ETown Tân Bình hoặc ship 30p.',
   canonicalPath: '/bang-gia',
 });
 
-const formatPrice = (price: number) => `${Math.round(price / 1000)}K`;
-
 export default async function PricingPage() {
-  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
-  const activeProducts = products.filter((product) => product.status === 'ACTIVE');
+  const [products, categories] = await Promise.all([getProducts(), getAllCategories()]);
 
   return (
-    <main className="min-h-screen bg-[#fbfaf4] text-[#17352e]">
-      <section className="border-b border-[#e5defc] bg-[#fffdf5]">
+    <main className="min-h-screen bg-[#f0f7ff] text-[#0c2340]">
+      {/* Hero Header Section */}
+      <section className="border-b border-sky-100 bg-gradient-to-b from-white to-[#e0f2fe]/40">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-          <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#d6caff] bg-[#f2edff] px-3 py-1 text-xs font-bold text-[#6d55c7]">
+          <div className="max-w-4xl">
+            <span className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3.5 py-1 text-xs font-black text-[#0284c7]">
               <Sparkles className="size-3.5" />
-              BẢNG GIÁ THUECAM
+              BẢNG GIÁ THUECAM 📸
             </span>
-            <h1 className="mt-5 max-w-4xl text-4xl font-black tracking-tight text-[#17352e] sm:text-5xl">
+            <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">
               Giá thuê rõ ràng, chọn máy thật dễ
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-8 text-[#527268]">
-              Xem giá theo ngày của từng thiết bị. Thuê càng lâu càng tiết kiệm, phụ kiện cơ bản đã được chuẩn bị sẵn để bạn nhận máy và bắt đầu quay ngay.
+            <p className="mt-4 text-base leading-8 text-[#334e68] font-medium">
+              Xem giá theo ngày của từng thiết bị. Thuê càng lâu càng tiết kiệm, phụ kiện cơ bản (thẻ nhớ, pin sạc, túi đựng) đã được chuẩn bị sẵn để bạn nhận máy tại <strong>ETown Tân Bình</strong> và bắt đầu quay ngay!
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <Link href="/thiet-bi" className="inline-flex items-center gap-2 rounded-full bg-[#6d55c7] px-5 py-3 text-sm font-bold text-white shadow-[0_10px_24px_-10px_rgba(109,85,199,0.7)] transition-transform hover:-translate-y-0.5">
-                Xem toàn bộ thiết bị <ArrowRight className="size-4" />
+              <Link
+                href="/dat-thue"
+                className="inline-flex items-center gap-2 rounded-full bg-[#0284c7] px-6 py-3.5 text-sm font-black text-white shadow-cute hover:bg-[#0369a1] transition-transform hover:-translate-y-0.5"
+              >
+                <CalendarCheck2 className="size-4" /> Kiểm tra lịch máy trống
               </Link>
-              <Link href="/search" className="inline-flex items-center gap-2 rounded-full border border-[#f0c47b] bg-white px-5 py-3 text-sm font-bold text-[#17352e] hover:bg-[#fff8e8]">
-                <CalendarCheck2 className="size-4 text-[#f09b45]" /> Kiểm tra lịch trống
+              <Link
+                href="/thiet-bi"
+                className="inline-flex items-center gap-2 rounded-full border-2 border-sky-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-700 hover:bg-sky-50 transition-colors"
+              >
+                Xem toàn bộ catalog <ArrowRight className="size-4 text-[#0284c7]" />
               </Link>
             </div>
           </div>
         </div>
       </section>
 
+<<<<<<< HEAD
       <section className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[220px_1fr] lg:px-8">
         <aside className="h-fit rounded-3xl border border-[#e5defc] bg-white p-4 shadow-[0_12px_35px_-24px_rgba(23,53,46,0.35)] lg:sticky lg:top-28">
           <p className="px-2 pb-3 text-[11px] font-black uppercase tracking-[0.16em] text-[#718981]">Danh mục</p>
@@ -109,6 +115,11 @@ export default async function PricingPage() {
             ))}
           </div>
         </div>
+=======
+      {/* Main Interactive Pricing Section with Left Category Nav */}
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <PricingTableClient categories={categories} products={products} />
+>>>>>>> origin/main
       </section>
     </main>
   );
