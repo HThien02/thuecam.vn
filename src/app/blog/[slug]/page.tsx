@@ -81,11 +81,11 @@ export default async function BlogDetailPage({ params }: Props) {
           )}
         </div>
 
-        <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+        <h1 className="text-2xl sm:text-4xl font-extrabold text-black tracking-tight leading-tight">
           {article.title}
         </h1>
 
-        <p className="text-sm sm:text-base text-slate-300 leading-relaxed italic border-l-2 border-cyan-400 pl-4">
+        <p className="text-sm sm:text-base text-slate-600 leading-relaxed italic border-l-2 border-cyan-400 pl-4">
           {article.excerpt}
         </p>
 
@@ -140,7 +140,7 @@ export default async function BlogDetailPage({ params }: Props) {
       </div>
 
       {/* Article Body Content */}
-      <div className="prose prose-invert max-w-none text-slate-300 text-sm sm:text-base leading-relaxed space-y-6 whitespace-pre-line">
+      <div className="prose prose-invert max-w-none text-slate-600 text-sm sm:text-base leading-relaxed space-y-6 whitespace-pre-line">
         {article.content}
       </div>
 

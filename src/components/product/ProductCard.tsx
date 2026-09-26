@@ -93,7 +93,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           <Link
             href={`/thiet-bi/${product.slug}`}
-            className="px-4 py-2 rounded-full bg-sky-50 text-[#0284c7] group-hover:bg-gradient-candy group-hover:text-white text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-sm group-hover:shadow-cute"
+            className="px-4 py-2 rounded-full bg-sky-50 text-[#0284c7] group-hover:bg-gradient-candy group-hover:text-[#1e3a8a] text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-sm group-hover:shadow-cute"
             aria-label={canBook ? `Xem chi tiết và thuê ${product.name}` : `Xem chi tiết ${product.name}; ${availabilityLabel.toLocaleLowerCase('vi')}`}
           >
             <span>{canBook ? 'Thuê Ngay' : 'Xem Chi Tiết'}</span>

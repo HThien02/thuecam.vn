@@ -25,7 +25,7 @@ export default async function AdminVouchersPage() {
     <div className="space-y-6">
       <div>
         <p className="text-xs font-black uppercase tracking-wider text-amber-400">PROMOTIONS & CUSTOMER OFFERS</p>
-        <h1 className="mt-1 text-2xl font-black text-white sm:text-3xl">Voucher & Khuyến Mãi</h1>
+        <h1 className="mt-1 text-2xl font-black text-black sm:text-3xl">Voucher & Khuyến Mãi</h1>
         <p className="mt-1 max-w-2xl text-xs text-slate-400 sm:text-sm">
           Tạo mã giảm giá theo phần trăm hoặc số tiền, giới hạn lượt dùng và lịch hiệu lực. Mỗi đơn chỉ áp dụng một voucher.
         </p>

@@ -44,7 +44,7 @@ export default async function AdminSettingsPage() {
         <p className="text-xs font-black uppercase tracking-wider text-cyan-400">
           THUECAM CONFIGURATION CONTROL
         </p>
-        <h1 className="mt-1 text-2xl sm:text-3xl font-black text-white">
+        <h1 className="mt-1 text-2xl sm:text-3xl font-black text-black">
           Cài Đặt Website & Địa Điểm Nhận Máy
         </h1>
         <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">

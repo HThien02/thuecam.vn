@@ -152,7 +152,7 @@ export default async function AdminDashboardPage() {
           <div className="inline-flex items-center gap-2 rounded-full bg-sky-500/10 px-3 py-1 text-xs font-black uppercase text-sky-400 border border-sky-500/20">
             <Sparkles className="size-3.5" /> THUECAM Executive Control Center
           </div>
-          <h1 className="mt-2 text-2xl sm:text-3xl font-black text-white">
+          <h1 className="mt-2 text-2xl sm:text-3xl font-black text-black">
             Dashboard Quản Lý & Vận Hành
           </h1>
           <p className="mt-1 text-xs sm:text-sm text-slate-400">

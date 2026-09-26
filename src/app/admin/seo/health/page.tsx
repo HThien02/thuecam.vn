@@ -154,7 +154,7 @@ export default async function AdminSeoHealthPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-black">
           Báo Cáo Sức Khỏe SEO & Kiểm Định Chỉ Mục (SEO Health Audit)
         </h1>
         <p className="text-xs sm:text-sm text-slate-400 mt-1">
@@ -227,7 +227,7 @@ export default async function AdminSeoHealthPage() {
       {/* Detailed Routes Audit Table */}
       <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
+          <h2 className="text-base font-bold text-black flex items-center gap-2">
             <FileCheck className="w-5 h-5 text-cyan-400" />
             Chi Tiết Danh Sách URL Được Kiểm Tra ({totalPages} URLs)
           </h2>

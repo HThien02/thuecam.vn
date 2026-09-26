@@ -31,10 +31,10 @@ export default async function EquipmentCatalogPage() {
           <Sparkles className="w-3.5 h-3.5" />
           <span>Toàn bộ thiết bị · {rentableCount} đang sẵn sàng cho thuê</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-black tracking-tight">
           Danh Sách Thiết Bị Cho Thuê Chính Hãng
         </h1>
-        <p className="text-sm text-slate-400 max-w-3xl leading-relaxed">
+        <p className="text-sm text-slate-600 max-w-3xl leading-relaxed">
           Danh mục hiển thị đầy đủ thiết bị của shop, kể cả máy đang tạm ngưng hoặc bảo trì. Tình trạng thuê được ghi rõ trên từng sản phẩm; chỉ máy sẵn sàng mới nhận đặt thuê.
         </p>
       </div>

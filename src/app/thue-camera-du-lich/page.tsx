@@ -69,12 +69,6 @@ export default async function PillarThueCameraDuLichPage() {
       badge="Pillar SEO Topic Hub"
       h1="Thuê Camera Du Lịch Gọn Nhẹ & Chống Rung Cực Tốt"
       intro="Tổng hợp các dòng camera bỏ túi, action cam đi biển, flycam du lịch từ DJI, GoPro, Insta360. Giải pháp tiết kiệm tới 90% chi phí so với mua mới, đầy đủ phụ kiện cho chuyến vi vu trọn vẹn."
-      detailedContent={`## Kinh Nghiệm Thuê Camera Du Lịch Không Thể Bỏ Qua
-
-### 1. Xác định địa hình chuyến đi
-- **Khám phá thành phố, ẩm thực, check-in quán cafe:** Ưu tiên dòng [DJI Pocket 4 Creator](/thiet-bi/dji-pocket-4-creator) hoặc [DJI Pocket 3](/thiet-bi/dji-pocket-3-creator) vì góc quay vừa phải, tôn màu da tự nhiên và mic bắt giọng nói rất trong.
-- **Leo núi, trekking, chèo SUP, tắm biển:** Chắc chắn là [GoPro Hero 13](/thiet-bi/gopro-hero-13-black) nhờ khả năng chống va đập và chống nước tuyệt đối.
-- **Cung đường đèo, phượt xe máy:** [Insta360 X4](/thiet-bi/insta360-x4) gắn gậy tàng hình sẽ cho ra các góc quay như có flycam bay theo xe của bạn.`}
       products={travelProducts}
       faq={faq}
       relatedLinks={relatedLinks}

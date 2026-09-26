@@ -211,7 +211,7 @@ export default function SeoManagerClient({
         {/* Left Column: Form Fields with Character Counters */}
         <div className="lg:col-span-6 space-y-6">
           <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 space-y-5">
-            <h2 className="text-base font-bold text-white">Thẻ Thẩm Quyền Tìm Kiếm</h2>
+            <h2 className="text-base font-bold text-black">Thẻ Thẩm Quyền Tìm Kiếm</h2>
 
             {/* SEO Title Input */}
             <div className="space-y-1.5">

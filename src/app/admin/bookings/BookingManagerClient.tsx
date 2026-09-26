@@ -135,7 +135,7 @@ export default function BookingManagerClient({
       1,
       Math.round(
         (new Date(endDate).getTime() - new Date(startDate).getTime()) /
-          (1000 * 60 * 60 * 24)
+        (1000 * 60 * 60 * 24)
       ) + 1
     );
     const bookingCode = editingBooking?.id ?? `TC${Math.floor(100000 + Math.random() * 900000)}`;
@@ -293,7 +293,7 @@ export default function BookingManagerClient({
             />
           </div>
 
-          <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300">
+          <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-600">
             <Filter className="size-3.5 text-sky-400" />
             <select
               value={filterStatus}
@@ -334,7 +334,7 @@ export default function BookingManagerClient({
                 <th className="px-4 py-3.5 text-right">Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-slate-300">
+            <tbody className="divide-y divide-slate-800/60 text-slate-600">
               {filteredBookings.map((b) => {
                 let badgeClass = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
                 if (b.status === 'CONFIRMED') badgeClass = 'bg-sky-500/10 text-sky-400 border-sky-500/30';
@@ -374,7 +374,7 @@ export default function BookingManagerClient({
                     <td className="px-4 py-3 font-black text-sky-400">
                       {b.total_price.toLocaleString('vi-VN')}đ
                     </td>
-                    <td className="px-4 py-3 text-slate-300 max-w-xs truncate">
+                    <td className="px-4 py-3 text-slate-600 max-w-xs truncate">
                       {b.pickup_method}
                     </td>
                     <td className="px-4 py-3">
@@ -495,7 +495,7 @@ export default function BookingManagerClient({
             <form onSubmit={handleSave} className="mt-4 space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-300 mb-1">Tên khách hàng: *</label>
+                  <label className="block font-bold text-slate-600 mb-1">Tên khách hàng: *</label>
                   <input
                     required
                     value={customerName}
@@ -505,7 +505,7 @@ export default function BookingManagerClient({
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-300 mb-1">Số điện thoại / Zalo: *</label>
+                  <label className="block font-bold text-slate-600 mb-1">Số điện thoại / Zalo: *</label>
                   <input
                     required
                     value={customerPhone}
@@ -517,7 +517,7 @@ export default function BookingManagerClient({
               </div>
 
               <div>
-                <label htmlFor="booking-customer-cccd" className="block font-bold text-slate-300 mb-1">CCCD/CMND khách hàng: *</label>
+                <label htmlFor="booking-customer-cccd" className="block font-bold text-slate-600 mb-1">CCCD/CMND khách hàng: *</label>
                 <input
                   id="booking-customer-cccd"
                   required
@@ -538,7 +538,7 @@ export default function BookingManagerClient({
                   {customerLookup.state === 'checking' ? 'Đang tra cứu lịch sử khách hàng…' : customerLookup.message ?? (customerCccd ? 'Rời ô để kiểm tra khách hàng và lịch thuê cũ.' : 'Nhập CCCD để tra cứu và lưu lịch sử thuê theo khách hàng.')}
                 </p>
                 {customerLookup.state === 'existing' && customerLookup.history?.length ? (
-                  <ul className="mt-2 flex flex-col gap-1 rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-[11px] text-slate-300" aria-label="Lịch sử thuê gần đây">
+                  <ul className="mt-2 flex flex-col gap-1 rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-[11px] text-slate-600" aria-label="Lịch sử thuê gần đây">
                     {customerLookup.history.map((item) => (
                       <li key={item.booking_code} className="flex flex-wrap items-center justify-between gap-2">
                         <span><strong className="text-white">{item.product_name}</strong> · {item.start_date}–{item.end_date}</span>
@@ -550,7 +550,7 @@ export default function BookingManagerClient({
               </div>
 
               <div>
-                <label className="block font-bold text-slate-300 mb-1">Thiết bị thuê: *</label>
+                <label className="block font-bold text-slate-600 mb-1">Thiết bị thuê: *</label>
                 <input
                   required
                   value={productName}
@@ -561,7 +561,7 @@ export default function BookingManagerClient({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-300 mb-1">Ngày nhận máy: *</label>
+                  <label className="block font-bold text-slate-600 mb-1">Ngày nhận máy: *</label>
                   <input
                     required
                     type="date"
@@ -571,7 +571,7 @@ export default function BookingManagerClient({
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-300 mb-1">Ngày trả máy: *</label>
+                  <label className="block font-bold text-slate-600 mb-1">Ngày trả máy: *</label>
                   <input
                     required
                     type="date"
@@ -584,7 +584,7 @@ export default function BookingManagerClient({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="booking-pickup-time" className="block font-bold text-slate-300 mb-1">Giờ nhận máy:</label>
+                  <label htmlFor="booking-pickup-time" className="block font-bold text-slate-600 mb-1">Giờ nhận máy:</label>
                   <input
                     id="booking-pickup-time"
                     type="time"
@@ -595,7 +595,7 @@ export default function BookingManagerClient({
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-300 mb-1">Tổng tiền thuê (VNĐ): *</label>
+                  <label className="block font-bold text-slate-600 mb-1">Tổng tiền thuê (VNĐ): *</label>
                   <input
                     type="number"
                     required
@@ -605,7 +605,7 @@ export default function BookingManagerClient({
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-300 mb-1">Tiền cọc (VNĐ):</label>
+                  <label className="block font-bold text-slate-600 mb-1">Tiền cọc (VNĐ):</label>
                   <input
                     type="number"
                     value={depositAmount}
@@ -616,7 +616,7 @@ export default function BookingManagerClient({
               </div>
 
               <div>
-                <label className="block font-bold text-slate-300 mb-1">Điểm nhận máy / Địa chỉ:</label>
+                <label className="block font-bold text-slate-600 mb-1">Điểm nhận máy / Địa chỉ:</label>
                 <input
                   value={pickupMethod}
                   onChange={(e) => setPickupMethod(e.target.value)}
@@ -627,7 +627,7 @@ export default function BookingManagerClient({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-300 mb-1">Trạng thái đơn:</label>
+                  <label className="block font-bold text-slate-600 mb-1">Trạng thái đơn:</label>
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value as BookingRecord['status'])}
@@ -641,7 +641,7 @@ export default function BookingManagerClient({
                   </select>
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-300 mb-1">Ghi chú:</label>
+                  <label className="block font-bold text-slate-600 mb-1">Ghi chú:</label>
                   <input
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
@@ -655,7 +655,7 @@ export default function BookingManagerClient({
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold"
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-600 font-bold"
                 >
                   Hủy
                 </button>

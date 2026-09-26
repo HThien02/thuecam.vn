@@ -42,11 +42,11 @@ export default function CuratedLandingTemplate({
           <span>{badge}</span>
         </div>
 
-        <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
+        <h1 className="text-3xl sm:text-5xl font-extrabold text-black tracking-tight leading-tight">
           {h1}
         </h1>
 
-        <p className="text-sm sm:text-base text-slate-300 max-w-3xl leading-relaxed">
+        <p className="text-sm sm:text-base text-slate-600 max-w-3xl leading-relaxed">
           {intro}
         </p>
 
@@ -64,7 +64,7 @@ export default function CuratedLandingTemplate({
       {/* Featured Curated Products */}
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl sm:text-2xl font-bold text-white">
+          <h2 className="text-xl sm:text-2xl font-bold text-black">
             Các Thiết Bị Đề Xuất Phù Hợp Nhất
           </h2>
           <Link

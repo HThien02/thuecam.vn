@@ -63,11 +63,11 @@ export default async function UseCaseDetailPage({ params }: Props) {
           <span>Giải pháp thiết bị theo nhu cầu thực tế</span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-black tracking-tight">
           {useCase.h1}
         </h1>
 
-        <p className="text-sm text-slate-300 max-w-3xl leading-relaxed">
+        <p className="text-sm text-slate-600 max-w-3xl leading-relaxed">
           {useCase.content}
         </p>
 
@@ -77,11 +77,10 @@ export default async function UseCaseDetailPage({ params }: Props) {
             <Link
               key={uc.id}
               href={`/nhu-cau/${uc.slug}`}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${
-                uc.slug === useCase.slug
-                  ? 'bg-cyan-500 text-slate-950 font-bold'
-                  : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
-              }`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${uc.slug === useCase.slug
+                ? 'bg-cyan-500 text-slate-950 font-bold'
+                : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                }`}
             >
               {uc.name}
             </Link>
@@ -91,7 +90,7 @@ export default async function UseCaseDetailPage({ params }: Props) {
 
       {/* Recommended Products */}
       <div className="space-y-6">
-        <h2 className="text-xl font-bold text-white">
+        <h2 className="text-xl font-bold text-black">
           Combo Thiết Bị Tối Ưu Nhất Cho {useCase.name}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

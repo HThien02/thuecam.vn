@@ -70,7 +70,7 @@ export default function SettingsManagerClient({ initialSettings }: { initialSett
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Physical Showroom & Pickup Address */}
         <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 space-y-4">
-          <h2 className="text-sm font-black text-white flex items-center gap-2">
+          <h2 className="text-sm font-black text-black flex items-center gap-2">
             <MapPin className="size-4 text-sky-400" />
             Địa Điểm Bàn Giao & Nhận Máy Chính Thức
           </h2>
@@ -97,7 +97,7 @@ export default function SettingsManagerClient({ initialSettings }: { initialSett
 
         {/* Hotlines & Support */}
         <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 space-y-4">
-          <h2 className="text-sm font-black text-white flex items-center gap-2">
+          <h2 className="text-sm font-black text-black flex items-center gap-2">
             <Phone className="size-4 text-emerald-400" />
             Hotline & Kênh Liên Hệ
           </h2>
@@ -144,7 +144,7 @@ export default function SettingsManagerClient({ initialSettings }: { initialSett
         </div>
 
         <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 flex flex-col gap-4" aria-labelledby="manager-contact-heading">
-          <h2 id="manager-contact-heading" className="flex items-center gap-2 text-sm font-black text-white">
+          <h2 id="manager-contact-heading" className="flex items-center gap-2 text-sm font-black text-black">
             <Share2 className="size-4 text-sky-400" /> Người quản lý & liên kết liên hệ
           </h2>
           <div className="grid grid-cols-1 gap-4 text-xs sm:grid-cols-2">
@@ -170,7 +170,7 @@ export default function SettingsManagerClient({ initialSettings }: { initialSett
 
         {/* Promo Ribbon & Policies */}
         <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 space-y-4">
-          <h2 className="text-sm font-black text-white flex items-center gap-2">
+          <h2 className="text-sm font-black text-black flex items-center gap-2">
             <Gift className="size-4 text-amber-400" />
             Nội Dung Banner Khuyến Mãi & Quy Định Cọc
           </h2>
