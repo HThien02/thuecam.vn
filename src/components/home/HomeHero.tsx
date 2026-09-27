@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { MapPin, ShieldCheck, Sparkles, Store, Calendar, ArrowRight, Star } from 'lucide-react';
+import { MapPin, ShieldCheck, Store, Star } from 'lucide-react';
 
 const brands = [
   { name: 'SONY', slug: 'sony', className: 'bg-[#e0f2fe] border-[#0284c7] text-[#0c2340]' },
@@ -14,42 +14,7 @@ const brands = [
 export default function HomeHero() {
   return (
     <section className="bg-[#f0f7ff] px-4 pb-10 pt-5 sm:px-6 lg:px-8 lg:pt-6">
-      <div className="mx-auto grid max-w-[1260px] gap-5 lg:grid-cols-[0.95fr_1.35fr]">
-        <div className="relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-[38px] border-2 border-[#bae6fd] bg-gradient-to-br from-[#e0f2fe] to-white p-7 shadow-[0_18px_50px_rgba(2,132,199,0.12)] sm:p-10 lg:min-h-[550px]">
-          <div className="absolute -bottom-16 -left-10 size-64 rounded-full bg-[#bae6fd]/50" />
-          <div className="absolute -right-10 -top-10 size-40 rounded-full bg-[#fef9c3]" />
-          <div className="relative">
-            <span className="inline-flex -rotate-2 rounded-2xl bg-[#0284c7] px-5 py-3 text-sm font-black text-white shadow-[0_8px_18px_rgba(2,132,199,0.25)]">
-              ƯU ĐÃI CHIBI NHỎ XINH 🎒
-            </span>
-            <div className="mt-6 inline-flex -rotate-3 items-center gap-3 rounded-[26px] border-2 border-[#facc15] bg-[#fff7cc] px-5 py-3 shadow-[0_7px_0_rgba(202,138,4,0.2)] transition-transform duration-300 hover:rotate-2">
-              <p className="text-[76px] font-black leading-none tracking-[-0.08em] text-[#0284c7] sm:text-[92px]">
-                30<span className="text-[48px] align-top tracking-normal">%</span>
-              </p>
-              <span className="-rotate-3 rounded-2xl bg-white px-3 py-2 text-center text-xs font-black leading-tight text-[#b45309] shadow-sm">CUỐI<br />TUẦN</span>
-            </div>
-            <h2 className="mt-4 max-w-sm text-2xl font-black leading-tight text-[#0c2340] sm:text-3xl">
-              Thuê càng lâu càng hời
-            </h2>
-            <p className="mt-3 max-w-sm text-base font-extrabold leading-7 text-[#334e68]">
-              Giảm thêm cho lịch thuê cuối tuần<br />và nhóm bạn đi chơi cùng nhau! 🏖️
-            </p>
-          </div>
-          <div className="relative mt-8">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-black text-[#0c2340] shadow-[0_8px_25px_rgba(2,132,199,0.1)]">
-              <Sparkles className="size-4 text-[#0ea5e9]" /> Chọn máy, shop lo phần còn lại
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Link href="/dat-thue" className="inline-flex items-center gap-2 rounded-full bg-[#0284c7] px-7 py-4 text-sm font-black text-white shadow-[0_10px_24px_rgba(2,132,199,0.3)] transition hover:-translate-y-0.5 hover:bg-[#0369a1]">
-                <Calendar className="size-4" /> Xem lịch máy trống
-              </Link>
-              <Link href="/bang-gia" className="inline-flex items-center gap-2 rounded-full border-2 border-[#bae6fd] bg-white px-6 py-4 text-sm font-black text-[#0284c7] transition hover:bg-sky-50">
-                Bảng giá <ArrowRight className="size-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
-
+      <div className="mx-auto max-w-[1260px]">
         <div className="relative isolate overflow-hidden rounded-[38px] border-2 border-[#bae6fd] bg-gradient-to-br from-[#e5f8ff] via-[#f8fdff] to-[#fffdf2] p-7 shadow-[0_18px_50px_rgba(2,132,199,0.1)] sm:p-10 lg:min-h-[550px]">
           <div className="absolute -bottom-20 -right-10 size-80 rounded-full bg-[#bae6fd]/50" />
           <div className="absolute -left-16 top-28 size-48 rounded-full bg-[#fef9c3]/65" />
