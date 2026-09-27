@@ -235,7 +235,7 @@ export default async function HomePage() {
       </section>
 
       {/* 8. SEO FAQ SECTION */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="order-8 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <div className="p-8 sm:p-10 rounded-[32px] bg-white border-2 border-sky-100 shadow-cute space-y-6">
           <div className="text-center space-y-1">
             <span className="text-[#0284c7] text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1">
