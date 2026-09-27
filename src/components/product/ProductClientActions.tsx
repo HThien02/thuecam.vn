@@ -55,7 +55,7 @@ export default function ProductClientActions({ product }: ProductClientActionsPr
       <div className="grid grid-cols-2 gap-3 text-xs text-slate-600 font-medium">
         <div className="flex items-center gap-2 p-3 rounded-2xl bg-white border border-sky-100 shadow-sm">
           <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>Tặng thẻ SanDisk 128GB + Pin sạc đầy</span>
+          <span>Tặng thẻ nhớ 128GB + Pin sạc đầy</span>
         </div>
         <div className="flex items-center gap-2 p-3 rounded-2xl bg-white border border-sky-100 shadow-sm">
           <PhoneCall className="w-4 h-4 text-[#0284c7] shrink-0" />
