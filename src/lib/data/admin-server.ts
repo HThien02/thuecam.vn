@@ -13,6 +13,7 @@ export type AdminTable =
   | 'blocked_dates'
   | 'site_settings'
   | 'seo_settings'
+  | 'use_cases'
   | 'vouchers';
 
 const sortColumns: Record<AdminTable, string> = {
@@ -26,6 +27,7 @@ const sortColumns: Record<AdminTable, string> = {
   blocked_dates: 'date',
   site_settings: 'id',
   seo_settings: 'id',
+  use_cases: 'name',
   vouchers: 'created_at',
 };
 

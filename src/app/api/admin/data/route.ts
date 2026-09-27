@@ -14,6 +14,7 @@ const fields = {
   blocked_dates: ['id', 'date', 'reason', 'created_at'],
   site_settings: ['id', 'site_name', 'pickup_address', 'hotline', 'zalo', 'email', 'open_hours', 'promo_banner', 'deposit_policy', 'contact_manager_name', 'facebook_url', 'instagram_url', 'whatsapp_url', 'updated_at'],
   seo_settings: ['id', 'site_title', 'site_description', 'default_og_image', 'twitter_handle', 'business_name', 'hotline', 'email', 'address', 'opening_hours', 'google_verification_id', 'global_noindex_enabled', 'updated_at'],
+  use_cases: ['id', 'slug', 'name', 'h1', 'content', 'faq', 'seo_title', 'seo_description', 'og_image', 'indexable', 'created_at', 'updated_at'],
 } as const;
 
 type AdminTable = keyof typeof fields;
@@ -21,7 +22,7 @@ const tableNames = new Set<string>(Object.keys(fields));
 const sortColumns: Record<AdminTable, string> = {
   products: 'created_at', brands: 'name', categories: 'display_order', articles: 'published_at',
   reviews: 'created_at', redirects: 'created_at', bookings: 'created_at',
-  blocked_dates: 'date', site_settings: 'id', seo_settings: 'id',
+  blocked_dates: 'date', site_settings: 'id', seo_settings: 'id', use_cases: 'name',
 };
 
 function isAdminTable(value: string | null): value is AdminTable {

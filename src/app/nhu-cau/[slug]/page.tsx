@@ -2,7 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getUseCaseBySlug, getUseCases, getProducts } from '@/lib/data';
+import { getUseCaseBySlug, getUseCases, getProductsForUseCase } from '@/lib/data';
 import ProductCard from '@/components/product/ProductCard';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import { constructMetadata } from '@/lib/seo/metadata';
@@ -40,11 +40,10 @@ export default async function UseCaseDetailPage({ params }: Props) {
     notFound();
   }
 
-  const allProducts = await getProducts();
-  const allUseCases = await getUseCases();
-
-  // Pick suitable products depending on use case
-  const recommendedProducts = allProducts.slice(0, 4);
+  const [allUseCases, recommendedProducts] = await Promise.all([
+    getUseCases(),
+    getProductsForUseCase(useCase.id),
+  ]);
 
   const breadcrumbItems = [
     { name: 'Nhu cầu', url: '/thiet-bi' },
