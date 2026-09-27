@@ -296,12 +296,16 @@ export default async function ProductDetailPage({ params }: Props) {
               Thông Số Kỹ Thuật Chuẩn
             </h3>
             <div className="divide-y divide-sky-100 text-xs">
-              {Object.entries(product.specs).map(([key, val]) => (
-                <div key={key} className="py-2.5 flex justify-between gap-4">
-                  <span className="text-slate-500 font-medium">{key}:</span>
-                  <span className="text-slate-900 font-bold text-right">{val}</span>
-                </div>
-              ))}
+        {Object.entries(product.specs)
+          .filter(([key]) => key !== 'rental_price_tiers')
+          .map(([key, val]) => (
+            <div key={key} className="py-2.5 flex justify-between gap-4">
+              <span className="text-slate-500 font-medium">{key}:</span>
+              <span className="text-slate-900 font-bold text-right">
+                {typeof val === 'string' || typeof val === 'number' ? val : JSON.stringify(val)}
+              </span>
+            </div>
+          ))}
             </div>
           </div>
 

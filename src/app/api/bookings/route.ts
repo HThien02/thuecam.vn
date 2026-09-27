@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { enforceApiRateLimit } from '@/lib/security/rate-limit';
 import { sendBookingNotifications } from '@/lib/booking-email';
 import type { RentalAddon } from '@/types';
+import { getRentalBaseTotal, getRentalPriceTiers } from '@/lib/pricing';
 
 const activeBookingStatuses = ['PENDING', 'CONFIRMED', 'RENTING', 'PAID', 'ACTIVE'];
 const dayMs = 24 * 60 * 60 * 1000;
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
   const supabase = createAdminClient();
   const { data: product, error: productError } = await supabase
     .from('products')
-    .select('id,name,rental_price_per_day,rental_addons,deposit_amount,inventory_count,status')
+    .select('id,name,rental_price_per_day,rental_addons,specs,deposit_amount,inventory_count,status')
     .eq('id', productId)
     .eq('status', 'ACTIVE')
     .maybeSingle();
@@ -110,9 +111,9 @@ export async function POST(request: NextRequest) {
     return errorResponse('Một hoặc nhiều phụ kiện không còn khả dụng. Vui lòng tải lại và chọn lại.', 400);
   }
   const addonSubtotal = addonPrices.reduce((sum, price) => sum + price, 0);
-  const basePrice = (dailyPrice * days.length) + addonSubtotal;
-  const discountRate = days.length >= 7 ? 0.2 : days.length >= 3 ? 0.1 : 0;
-  const subtotal = Math.max(0, basePrice - Math.round(basePrice * discountRate));
+  const priceTiers = getRentalPriceTiers(product.specs);
+  const basePrice = getRentalBaseTotal(dailyPrice, priceTiers, days.length) + addonSubtotal;
+  const subtotal = Math.max(0, basePrice);
   const bookingCode = `TC${randomInt(10_000_000, 100_000_000)}`;
   const sanitizedName = sanitizeInput(customerName);
   const sanitizedAddress = pickupMethod === 'DELIVERY' ? sanitizeInput(deliveryAddress) : null;

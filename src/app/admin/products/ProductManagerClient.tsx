@@ -1,6 +1,7 @@
 'use client';
 import React, { useRef, useState } from 'react';
-import { Product, Category, Brand, RentalAddon } from '@/types';
+import { Product, Category, Brand, RentalAddon, RentalPriceTier } from '@/types';
+import { formatTierLabel, getRentalPriceTiers } from '@/lib/pricing';
 import {
   Plus,
   Edit,
@@ -59,6 +60,7 @@ export default function ProductManagerClient({
   const [categoryId, setCategoryId] = useState(categories[0]?.id || '');
   const [brandId, setBrandId] = useState(brands[0]?.id || '');
   const [rentalPrice, setRentalPrice] = useState<number>(250000);
+  const [rentalPriceTiers, setRentalPriceTiers] = useState<RentalPriceTier[]>([]);
   const [rentalAddonDrafts, setRentalAddonDrafts] = useState<RentalAddon[]>([]);
   const [uploadingAddonId, setUploadingAddonId] = useState<string | null>(null);
   const [depositAmount, setDepositAmount] = useState<number>(3000000);
@@ -91,6 +93,7 @@ export default function ProductManagerClient({
     setCategoryId(categories[0]?.id || '');
     setBrandId(brands[0]?.id || '');
     setRentalPrice(250000);
+    setRentalPriceTiers([]);
     setRentalAddonDrafts([]);
     setDepositAmount(3000000);
     setGalleryImages([]);
@@ -108,6 +111,8 @@ export default function ProductManagerClient({
     setCategoryId(prod.category_id || '');
     setBrandId(prod.brand_id || '');
     setRentalPrice(prod.rental_price_per_day);
+    const savedTiers = prod.rental_price_tiers?.length ? prod.rental_price_tiers : getRentalPriceTiers(prod.specs);
+    setRentalPriceTiers(savedTiers.filter((tier) => tier.min_days > 1));
     setRentalAddonDrafts((prod.rental_addons ?? []).map((addon) => ({
       ...addon,
       price_per_rental: Number(addon.price_per_rental ?? addon.price_per_day ?? 0),
@@ -198,6 +203,18 @@ export default function ProductManagerClient({
       setValidationError('Tiền cọc không được là số âm');
       return;
     }
+    const normalizedPriceTiers = rentalPriceTiers.map((tier) => ({
+      min_days: Number(tier.min_days),
+      price_per_day: Number(tier.price_per_day),
+    })).filter((tier) => tier.min_days > 1 || tier.price_per_day !== rentalPrice);
+    if (normalizedPriceTiers.some((tier) => !Number.isInteger(tier.min_days) || tier.min_days < 2 || !Number.isSafeInteger(tier.price_per_day) || tier.price_per_day <= 0)) {
+      setValidationError('Mỗi mức giá cần có số ngày tối thiểu từ 2 và giá/ngày là số nguyên lớn hơn 0 VNĐ.');
+      return;
+    }
+    if (new Set(normalizedPriceTiers.map((tier) => tier.min_days)).size !== normalizedPriceTiers.length) {
+      setValidationError('Số ngày tối thiểu của các mức giá không được trùng nhau.');
+      return;
+    }
     if (!primaryImage) {
       setValidationError('Vui lòng tải lên ảnh thiết bị từ máy tính để lưu vào CSDL');
       return;
@@ -237,6 +254,7 @@ export default function ProductManagerClient({
       category,
       brand,
       rental_price_per_day: Number(rentalPrice),
+      rental_price_tiers: normalizedPriceTiers,
       rental_addons: rentalAddons,
       deposit_amount: Number(depositAmount),
       primary_image: primaryImage,
@@ -247,7 +265,10 @@ export default function ProductManagerClient({
       accessories_included: editingProduct?.accessories_included || editingProduct?.included_accessories || ['Thẻ nhớ SanDisk Extreme 128GB', '2x Pin sạc đầy', 'Hộp chống sốc'],
       included_accessories: editingProduct?.included_accessories || ['Thẻ nhớ SanDisk Extreme 128GB', '2x Pin sạc đầy', 'Hộp chống sốc'],
       inventory_count: hasInventory ? Math.max(editingProduct?.inventory_count ?? 1, 1) : 0,
-      specs: editingProduct?.specs || { 'Độ phân giải': '4K/60fps', 'Cảm biến': '1 inch CMOS', 'Trọng lượng': '179g' },
+      specs: {
+        ...(editingProduct?.specs || { 'Độ phân giải': '4K/60fps', 'Cảm biến': '1 inch CMOS', 'Trọng lượng': '179g' }),
+        rental_price_tiers: normalizedPriceTiers,
+      } as unknown as Record<string, string>,
       status,
       indexable: true,
       seo_title: editingProduct?.seo_title || `Thuê ${name} Giá Rẻ Tại TP.HCM | THUECAM`,
@@ -458,7 +479,7 @@ export default function ProductManagerClient({
                 <th className="px-4 py-3.5">Danh mục</th>
                 <th className="px-4 py-3.5">Hãng</th>
                 <th className="px-4 py-3.5">Giá 1 ngày</th>
-                <th className="px-4 py-3.5">Giá 3 ngày (-10%)</th>
+                <th className="px-4 py-3.5">Mức giá dài ngày</th>
                 <th className="px-4 py-3.5">Tiền cọc</th>
                 <th className="px-4 py-3.5">Tình trạng máy</th>
                 <th className="px-4 py-3.5">Trạng thái</th>
@@ -503,9 +524,12 @@ export default function ProductManagerClient({
                       {p.rental_price_per_day.toLocaleString('vi-VN')}đ
                     </td>
 
-                    {/* Price 3 days */}
+                    {/* Configured long-stay prices */}
                     <td className="px-4 py-3 text-slate-400">
-                      {Math.round(p.rental_price_per_day * 0.9).toLocaleString('vi-VN')}đ
+                      {(() => {
+                        const tiers = p.rental_price_tiers?.length ? p.rental_price_tiers : getRentalPriceTiers(p.specs);
+                        return tiers.length ? tiers.map((tier) => `${tier.min_days}+ ngày: ${tier.price_per_day.toLocaleString('vi-VN')}đ`).join(' · ') : 'Chưa cấu hình';
+                      })()}
                     </td>
 
                     {/* Deposit */}
@@ -645,6 +669,33 @@ export default function ProductManagerClient({
                   />
                 </div>
               </div>
+
+              <section className="space-y-3 rounded-2xl border border-sky-500/20 bg-sky-500/5 p-4" aria-labelledby="rental-pricing-heading">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h4 id="rental-pricing-heading" className="font-black text-white">Bảng giá theo số ngày</h4>
+                    <p className="mt-1 text-[10px] text-slate-400">Hệ thống chọn một mức giá áp dụng cho toàn bộ số ngày thuê. Ví dụ: từ 3 ngày là 170.000đ/ngày.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setRentalPriceTiers((current) => [...current, { min_days: Math.max(2, (current.at(-1)?.min_days ?? 1) + 1), price_per_day: rentalPrice }])}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-sky-500/15 px-3 py-2 text-[11px] font-black text-sky-300 hover:bg-sky-500/25"
+                  >
+                    <Plus className="size-3.5" /> Thêm mức giá
+                  </button>
+                </div>
+                {rentalPriceTiers.length ? rentalPriceTiers.map((tier, index) => (
+                  <div key={`${tier.min_days}-${index}`} className="grid grid-cols-[1fr_1fr_auto] items-end gap-2 rounded-xl border border-slate-800 bg-slate-900 p-3">
+                    <label className="text-[10px] font-bold text-slate-400">Từ số ngày
+                      <input type="number" min={2} step={1} value={tier.min_days} onChange={(event) => setRentalPriceTiers((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, min_days: Number(event.target.value) } : item))} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs font-bold text-white outline-none focus:border-sky-500" />
+                    </label>
+                    <label className="text-[10px] font-bold text-slate-400">Giá/ngày (VNĐ)
+                      <input type="number" min={1} step={1} value={tier.price_per_day} onChange={(event) => setRentalPriceTiers((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, price_per_day: Number(event.target.value) } : item))} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs font-bold text-sky-300 outline-none focus:border-sky-500" />
+                    </label>
+                    <button type="button" onClick={() => setRentalPriceTiers((current) => current.filter((_, itemIndex) => itemIndex !== index))} className="rounded-lg p-2 text-rose-400 hover:bg-rose-500/10" aria-label={`Xóa mức giá ${formatTierLabel(tier)}`}><Trash2 className="size-4" /></button>
+                  </div>
+                )) : <p className="rounded-xl border border-dashed border-slate-800 px-3 py-4 text-center text-[11px] text-slate-500">Chưa có mức giá dài ngày. Giá cơ bản sẽ áp dụng cho mọi ngày thuê.</p>}
+              </section>
 
               <section className="space-y-3 rounded-2xl border border-slate-800 bg-slate-950/60 p-4" aria-labelledby="rental-accessories-heading">
                 <div className="flex items-start justify-between gap-3">
