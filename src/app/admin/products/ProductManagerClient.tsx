@@ -62,6 +62,7 @@ export default function ProductManagerClient({
   const [rentalPrice, setRentalPrice] = useState<number>(250000);
   const [rentalPriceTiers, setRentalPriceTiers] = useState<RentalPriceTier[]>([]);
   const [rentalAddonDrafts, setRentalAddonDrafts] = useState<RentalAddon[]>([]);
+  const [includedAccessories, setIncludedAccessories] = useState<string[]>([]);
   const [uploadingAddonId, setUploadingAddonId] = useState<string | null>(null);
   const [depositAmount, setDepositAmount] = useState<number>(3000000);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
@@ -95,6 +96,7 @@ export default function ProductManagerClient({
     setRentalPrice(250000);
     setRentalPriceTiers([]);
     setRentalAddonDrafts([]);
+    setIncludedAccessories(['Thân máy', 'Micro không dây', 'Mini tripod', 'Thẻ nhớ 128GB']);
     setDepositAmount(3000000);
     setGalleryImages([]);
     setExcerpt('Bộ máy quay nhỏ gọn kèm đầy đủ thẻ nhớ và phụ kiện, nhận máy tại ETown Tân Bình.');
@@ -117,6 +119,7 @@ export default function ProductManagerClient({
       ...addon,
       price_per_rental: Number(addon.price_per_rental ?? addon.price_per_day ?? 0),
     })));
+    setIncludedAccessories(prod.accessories_included ?? prod.included_accessories ?? []);
     setDepositAmount(prod.deposit_amount);
     setGalleryImages([
       prod.primary_image,
@@ -287,6 +290,8 @@ export default function ProductManagerClient({
       description: productData.description,
       rental_price_per_day: productData.rental_price_per_day,
       rental_addons: productData.rental_addons,
+      accessories_included: includedAccessories.filter(Boolean),
+      included_accessories: includedAccessories.filter(Boolean),
       deposit_amount: productData.deposit_amount,
       primary_image: productData.primary_image,
       gallery_images: productData.gallery_images,
@@ -695,6 +700,25 @@ export default function ProductManagerClient({
                     <button type="button" onClick={() => setRentalPriceTiers((current) => current.filter((_, itemIndex) => itemIndex !== index))} className="rounded-lg p-2 text-rose-400 hover:bg-rose-500/10" aria-label={`Xóa mức giá ${formatTierLabel(tier)}`}><Trash2 className="size-4" /></button>
                   </div>
                 )) : <p className="rounded-xl border border-dashed border-slate-800 px-3 py-4 text-center text-[11px] text-slate-500">Chưa có mức giá dài ngày. Giá cơ bản sẽ áp dụng cho mọi ngày thuê.</p>}
+              </section>
+
+              <section className="space-y-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4" aria-labelledby="included-accessories-heading">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h4 id="included-accessories-heading" className="font-black text-white">Trọn Bộ Phụ Kiện Tặng Kèm Khi Thuê</h4>
+                    <p className="mt-1 text-[10px] text-slate-400">Danh sách sẽ hiển thị trên trang chi tiết thiết bị.</p>
+                  </div>
+                  <button type="button" onClick={() => setIncludedAccessories((current) => [...current, ''])} className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-emerald-500/15 px-3 py-2 text-[11px] font-black text-emerald-300 hover:bg-emerald-500/25"><Plus className="size-3.5" /> Thêm phụ kiện</button>
+                </div>
+                <div className="space-y-2">
+                  {includedAccessories.length ? includedAccessories.map((accessory, index) => (
+                    <div key={`included-accessory-${index}`} className="flex items-center gap-2">
+                      <span className="w-6 text-center text-xs font-black text-emerald-400">{index + 1}</span>
+                      <input aria-label={`Phụ kiện tặng kèm ${index + 1}`} value={accessory} onChange={(event) => setIncludedAccessories((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))} placeholder="Ví dụ: Thân máy" className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-white outline-none focus:border-emerald-500" />
+                      <button type="button" onClick={() => setIncludedAccessories((current) => current.filter((_, itemIndex) => itemIndex !== index))} className="rounded-lg p-2 text-rose-400 hover:bg-rose-500/10" aria-label={`Xóa phụ kiện tặng kèm ${index + 1}`}><Trash2 className="size-4" /></button>
+                    </div>
+                  )) : <p className="rounded-xl border border-dashed border-slate-800 px-3 py-4 text-center text-[11px] text-slate-500">Chưa có phụ kiện tặng kèm.</p>}
+                </div>
               </section>
 
               <section className="space-y-3 rounded-2xl border border-slate-800 bg-slate-950/60 p-4" aria-labelledby="rental-accessories-heading">
