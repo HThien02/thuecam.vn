@@ -2,6 +2,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { Product } from '@/types';
+import { getRentalBaseTotal, getRentalDailyPrice, getRentalPriceTiers } from '@/lib/pricing';
 import { CheckCircle2, Clock3, CalendarDays, Send, MapPin, Truck } from 'lucide-react';
 import AvailabilityCalendarTable from './AvailabilityCalendarTable';
 import AccessoryImagePreview from './AccessoryImagePreview';
@@ -64,13 +65,12 @@ export default function RentalRequestForm({
     ? Math.max(1, Math.floor((Date.parse(`${endDate}T00:00:00Z`) - Date.parse(`${startDate}T00:00:00Z`)) / 86_400_000) + 1)
     : 1;
   const selectedAddons = (product?.rental_addons ?? []).filter((addon) => selectedAddonIds.includes(addon.id));
-  const baseRentalTotal = product ? rentalDays * product.rental_price_per_day : 0;
+  const priceTiers = product ? getRentalPriceTiers(product.specs) : [];
+  const baseRentalTotal = product ? getRentalBaseTotal(product.rental_price_per_day, priceTiers, rentalDays) : 0;
+  const appliedDailyPrice = product ? getRentalDailyPrice(product.rental_price_per_day, priceTiers, rentalDays) : 0;
   const addonTotal = selectedAddons.reduce((sum, addon) => sum + Number(addon.price_per_rental ?? addon.price_per_day ?? 0), 0);
   const rentalSubtotal = baseRentalTotal + addonTotal;
-  const rentalDiscountRate = rentalDays >= 7 ? 0.2 : rentalDays >= 3 ? 0.1 : 0;
-  const rentalDiscount = Math.round(rentalSubtotal * rentalDiscountRate);
-  const discountedSubtotal = Math.max(0, rentalSubtotal - rentalDiscount);
-  const estimatedTotal = Math.max(0, discountedSubtotal - (appliedVoucher?.discount ?? 0));
+  const estimatedTotal = Math.max(0, rentalSubtotal - (appliedVoucher?.discount ?? 0));
 
   const clearVoucher = () => {
     voucherRequestId.current += 1;
@@ -260,7 +260,7 @@ export default function RentalRequestForm({
           <AvailabilityCalendarTable
             productId={product?.id}
             productName={product?.name}
-            dailyPrice={product?.rental_price_per_day}
+            dailyPrice={appliedDailyPrice}
             depositAmount={product?.deposit_amount}
             startDate={startDate}
             endDate={endDate}
@@ -488,7 +488,7 @@ export default function RentalRequestForm({
         <section className="sm:col-span-2 rounded-2xl border border-sky-200 bg-sky-50/70 p-4 text-xs" aria-label="Tạm tính đơn thuê">
           <div className="flex justify-between gap-3 text-slate-600"><span>Tiền thuê thiết bị · {rentalDays} ngày</span><span className="font-bold text-slate-800">{baseRentalTotal.toLocaleString('vi-VN')}đ</span></div>
           {selectedAddons.map((addon) => <div key={addon.id} className="mt-1 flex justify-between gap-3 text-slate-600"><span>{addon.name} · tính một lần</span><span className="font-bold text-slate-800">{Number(addon.price_per_rental ?? addon.price_per_day ?? 0).toLocaleString('vi-VN')}đ</span></div>)}
-          {rentalDiscount > 0 && <div className="mt-1 flex justify-between gap-3 text-emerald-700"><span>Ưu đãi thuê dài ngày</span><span className="font-bold">−{rentalDiscount.toLocaleString('vi-VN')}đ</span></div>}
+          {priceTiers.length > 0 && <div className="mt-1 flex justify-between gap-3 text-emerald-700"><span>Đơn giá áp dụng · {appliedDailyPrice.toLocaleString('vi-VN')}đ/ngày</span><span className="font-bold">Theo bảng giá</span></div>}
           {appliedVoucher && <div className="mt-1 flex justify-between gap-3 text-emerald-700"><span>Voucher {appliedVoucher.code}</span><span className="font-bold">−{appliedVoucher.discount.toLocaleString('vi-VN')}đ</span></div>}
           <div className="mt-2 flex justify-between gap-3 border-t border-sky-200 pt-2 text-sm"><span className="font-black text-slate-900">Tổng tạm tính</span><span className="font-black text-sky-700">{estimatedTotal.toLocaleString('vi-VN')}đ</span></div>
         </section>
