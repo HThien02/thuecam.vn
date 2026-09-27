@@ -187,9 +187,16 @@ export default async function ProductDetailPage({ params }: Props) {
               <FileText className="w-5 h-5 text-[#0284c7]" />
               Chi Tiết Thiết Bị & Lý Do Nên Thuê {product.name}
             </h2>
-            <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-line space-y-4 font-medium">
-          {product.description.replace(/\\n/g, '\n')}
-        </div>
+            <div className="space-y-4 text-sm font-medium leading-relaxed text-slate-600">
+              {product.description
+                .replace(/\\r?\\n/g, '\n')
+                .split(/\n{2,}/)
+                .map((paragraph, index) => (
+                  <p key={index} className="whitespace-pre-line">
+                    {paragraph.trim()}
+                  </p>
+                ))}
+            </div>
           </div>
 
           {/* Internal Linking: Topic Cluster & Related Articles */}
