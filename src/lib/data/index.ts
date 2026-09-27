@@ -293,8 +293,15 @@ export async function getArticleRecommendations(article: Article) {
   return products.filter((product) => article.related_product_ids?.includes(product.id));
 }
 
-export async function getProductsForUseCase(_useCaseSlug: string) {
-  return getProducts();
+export async function getProductsForUseCase(useCaseId: string): Promise<Product[]> {
+  const supabase = await createClient();
+  const { data: links, error: linkError } = await supabase.from('product_use_cases').select('product_id').eq('use_case_id', useCaseId);
+  if (linkError) throw new Error(`Supabase use-case relation query failed: ${linkError.message}`);
+  const ids = (links ?? []).map((link) => link.product_id).filter(Boolean);
+  if (!ids.length) return [];
+  const { data, error } = await supabase.from('products').select('*').in('id', ids).eq('status', 'ACTIVE').order('name');
+  if (error) throw new Error(`Supabase use-case product query failed: ${error.message}`);
+  return (data ?? []) as Product[];
 }
 
 export async function getRelatedProducts(productId: string, categoryId?: string) {
