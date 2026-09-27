@@ -28,12 +28,39 @@ export default async function HomePage() {
   const featuredProducts = products.slice(0, 6);
 
   return (
-    <div className="space-y-20 pb-20 overflow-hidden bg-[#f0f7ff]/40">
+    <div className="flex flex-col gap-20 overflow-hidden bg-[#f0f7ff]/40 pb-20">
       {/* 1. HOMEPAGE HERO WITH ORIGINAL CHIBI CAMERA MASCOTS */}
-      <HomeHero />
+      <div className="order-1"><HomeHero /></div>
+
+      {/* 4. USE CASES SECTION */}
+      <section className="order-2 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="rounded-[34px] border-2 border-sky-100 bg-gradient-to-br from-sky-50 via-white to-blue-50 p-8 shadow-cute sm:p-12">
+          <div className="mb-8 max-w-2xl">
+            <span className="text-[#0284c7] text-xs font-black uppercase tracking-wider block">Gợi Ý Theo Mục Đích Sử Dụng</span>
+            <h2 className="mt-1 text-2xl font-black text-slate-900 sm:text-3xl">Bạn Cần Máy Để Đi Đâu, Quay Gì?</h2>
+            <p className="mt-2 text-xs font-medium text-slate-600 sm:text-sm">Đội ngũ kỹ thuật THUECAM đã cấu hình sẵn combo máy, thẻ nhớ và phụ kiện chuyên biệt cho bạn.</p>
+          </div>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+            {useCases.map((uc) => (
+              <Link key={uc.id} href={`/nhu-cau/${uc.slug}`} className="group flex flex-col justify-between rounded-[28px] border border-sky-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-sky-300 hover:shadow-cute">
+                <div><h3 className="text-base font-black text-slate-900 transition-colors group-hover:text-[#0284c7]">{uc.name}</h3><p className="mt-2 line-clamp-3 text-xs leading-relaxed text-slate-500">{uc.content}</p></div>
+                <div className="mt-6 flex items-center gap-1.5 text-xs font-black text-[#0284c7] transition-transform group-hover:translate-x-1">Xem combo máy phù hợp <ArrowRight className="h-3.5 w-3.5" /></div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 5. HOW IT WORKS (3 Simple Steps) */}
+      <section className="order-3 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto mb-12 max-w-2xl text-center"><span className="text-[#0284c7] text-xs font-black uppercase tracking-wider block">Thủ Tục Siêu Nhanh</span><h2 className="mt-1 text-2xl font-black text-slate-900 sm:text-3xl">Thuê Máy Dễ Dàng Chỉ Với 3 Bước Đơn Giản</h2></div>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          {[['1', 'Chọn Máy & Xem Lịch Trống', 'Kiểm tra trực tiếp lịch trống của máy online, chọn số ngày cần thuê từ 1 ngày đến dài hạn.'], ['2', 'Liên hệ & Cọc Linh Hoạt', 'Liên hệ shop để được tư vấn nhanh. Hỗ trợ cọc bằng CCCD gắn chip hoặc cọc tiền linh hoạt theo thiết bị.'], ['3', 'Nhận Máy Tại ETown & Đi Chill', 'Nhận máy tại điểm hẹn ETown Tân Bình hoặc nhận ship hỏa tốc 30 phút. Kèm đầy đủ thẻ nhớ, pin sạc, hướng dẫn sử dụng 1-1.']].map(([step, title, description]) => <div key={step} className="space-y-3 rounded-[28px] border-2 border-sky-100 bg-white p-7 text-center shadow-cute transition hover:-translate-y-1"><div className="mx-auto flex h-13 w-13 items-center justify-center rounded-2xl bg-gradient-candy text-lg font-black text-white shadow-cute">{step}</div><h3 className="text-base font-black text-slate-900">{title}</h3><p className="text-xs font-medium leading-relaxed text-slate-500">{description}</p></div>)}
+        </div>
+      </section>
 
       {/* 2. CATEGORIES OVERVIEW */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="order-4 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-end mb-8">
           <div>
             <span className="text-[#0284c7] text-xs font-black uppercase tracking-wider block">
@@ -72,7 +99,7 @@ export default async function HomePage() {
       </section>
 
       {/* 3. FEATURED PRODUCTS GRID */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="order-5 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-end mb-8">
           <div>
             <span className="text-[#0284c7] text-xs font-black uppercase tracking-wider flex items-center gap-1">
@@ -99,93 +126,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 4. USE CASES SECTION */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="p-8 sm:p-12 rounded-[34px] bg-gradient-to-br from-sky-50 via-white to-blue-50 border-2 border-sky-100 shadow-cute">
-          <div className="max-w-2xl mb-8">
-            <span className="text-[#0284c7] text-xs font-black uppercase tracking-wider block">
-              Gợi Ý Theo Mục Đích Sử Dụng
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
-              Bạn Cần Máy Để Đi Đâu, Quay Gì? 🏖️
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 mt-2 font-medium">
-              Đội ngũ kỹ thuật THUECAM đã cấu hình sẵn combo máy, thẻ nhớ và phụ kiện chuyên biệt cho bạn.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {useCases.map((uc) => (
-              <Link
-                key={uc.id}
-                href={`/nhu-cau/${uc.slug}`}
-                className="p-6 rounded-[28px] bg-white border border-sky-100 hover:border-sky-300 card-hover flex flex-col justify-between group shadow-sm hover:shadow-cute"
-              >
-                <div>
-                  <h3 className="text-base font-black text-slate-900 group-hover:text-[#0284c7] transition-colors">
-                    {uc.name}
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-2 line-clamp-3 leading-relaxed">
-                    {uc.content}
-                  </p>
-                </div>
-
-                <div className="mt-6 flex items-center gap-1.5 text-xs font-black text-[#0284c7] group-hover:translate-x-1 transition-transform">
-                  <span>Xem combo máy phù hợp</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 5. HOW IT WORKS (3 Simple Steps) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-[#0284c7] text-xs font-black uppercase tracking-wider block">
-            Thủ Tục Siêu Nhanh
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
-            Thuê Máy Dễ Dàng Chỉ Với 3 Bước Đơn Giản ✨
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="p-7 rounded-[28px] bg-white border-2 border-sky-100 text-center space-y-3 shadow-cute card-hover">
-            <div className="w-13 h-13 rounded-2xl bg-gradient-candy text-white font-black text-lg flex items-center justify-center mx-auto shadow-cute">
-              1
-            </div>
-            <h3 className="font-black text-slate-900 text-base">Chọn Máy & Xem Lịch Trống</h3>
-            <p className="text-xs text-slate-500 leading-relaxed font-medium">
-              Kiểm tra trực tiếp lịch trống của máy online, chọn số ngày cần thuê từ 1 ngày đến dài hạn.
-            </p>
-          </div>
-
-          <div className="p-7 rounded-[28px] bg-white border-2 border-sky-100 text-center space-y-3 shadow-cute card-hover">
-            <div className="w-13 h-13 rounded-2xl bg-gradient-candy text-white font-black text-lg flex items-center justify-center mx-auto shadow-cute">
-              2
-            </div>
-            <h3 className="font-black text-slate-900 text-base">Liên hệ & Cọc Linh Hoạt</h3>
-            <p className="text-xs text-slate-500 leading-relaxed font-medium">
-              Liên hệ shop để được tư vấn nhanh. Hỗ trợ cọc bằng CCCD gắn chip hoặc cọc tiền linh hoạt theo thiết bị.
-            </p>
-          </div>
-
-          <div className="p-7 rounded-[28px] bg-white border-2 border-sky-100 text-center space-y-3 shadow-cute card-hover">
-            <div className="w-13 h-13 rounded-2xl bg-gradient-candy text-white font-black text-lg flex items-center justify-center mx-auto shadow-cute">
-              3
-            </div>
-            <h3 className="font-black text-slate-900 text-base">Nhận Máy Tại ETown & Đi Chill</h3>
-            <p className="text-xs text-slate-500 leading-relaxed font-medium">
-              Nhận máy tại điểm hẹn ETown Tân Bình hoặc nhận ship hỏa tốc 30 phút. Kèm đầy đủ thẻ nhớ, pin sạc, hướng dẫn sử dụng 1-1.
-            </p>
-          </div>
-        </div>
-      </section>
-
       {/* 6. GENUINE REVIEWS */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="order-6 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-end mb-8">
           <div>
             <span className="text-[#0284c7] text-xs font-black uppercase tracking-wider block">
@@ -224,7 +166,7 @@ export default async function HomePage() {
       </section>
 
       {/* 7. TOPIC CLUSTER & BLOG ARTICLES HIGHLIGHT */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="order-7 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-end mb-8">
           <div>
             <span className="text-[#0284c7] text-xs font-black uppercase tracking-wider block">
@@ -293,7 +235,7 @@ export default async function HomePage() {
       </section>
 
       {/* 8. SEO FAQ SECTION */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="order-8 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <div className="p-8 sm:p-10 rounded-[32px] bg-white border-2 border-sky-100 shadow-cute space-y-6">
           <div className="text-center space-y-1">
             <span className="text-[#0284c7] text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1">
