@@ -188,8 +188,8 @@ export default async function ProductDetailPage({ params }: Props) {
               Chi Tiết Thiết Bị & Lý Do Nên Thuê {product.name}
             </h2>
             <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-line space-y-4 font-medium">
-              {product.description}
-            </div>
+          {product.description.replace(/\\n/g, '\n')}
+        </div>
           </div>
 
           {/* Internal Linking: Topic Cluster & Related Articles */}
