@@ -111,6 +111,14 @@ export default async function AdminDashboardPage() {
       btnText: 'Mở Bảng Danh Mục',
     },
     {
+      name: 'Quản Lý Kho Camera & Series',
+      records: `${products.length} sản phẩm`,
+      status: 'Hoạt động',
+      desc: 'Quản lý series, serial từng máy và gán máy cụ thể cho đơn thuê.',
+      href: '/admin/inventory',
+      btnText: 'Mở Kho Camera',
+    },
+    {
       name: 'Quản Lý Đơn Thuê & Lịch Máy',
       records: 'Đang đồng bộ',
       status: 'Hoạt động',

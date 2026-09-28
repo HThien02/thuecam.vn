@@ -15,6 +15,9 @@ const fields = {
   site_settings: ['id', 'site_name', 'pickup_address', 'hotline', 'zalo', 'email', 'open_hours', 'promo_banner', 'deposit_policy', 'contact_manager_name', 'facebook_url', 'instagram_url', 'whatsapp_url', 'updated_at'],
   seo_settings: ['id', 'site_title', 'site_description', 'default_og_image', 'twitter_handle', 'business_name', 'hotline', 'email', 'address', 'opening_hours', 'google_verification_id', 'global_noindex_enabled', 'updated_at'],
   use_cases: ['id', 'slug', 'name', 'h1', 'content', 'faq', 'seo_title', 'seo_description', 'og_image', 'indexable', 'created_at', 'updated_at'],
+  camera_series: ['id', 'name', 'slug', 'product_id', 'description', 'active', 'created_at'],
+  camera_units: ['id', 'series_id', 'serial_number', 'label', 'status', 'note', 'created_at', 'updated_at'],
+  booking_camera_assignments: ['id', 'booking_id', 'unit_id', 'assigned_by', 'created_at'],
 } as const;
 
 type AdminTable = keyof typeof fields;
@@ -22,7 +25,7 @@ const tableNames = new Set<string>(Object.keys(fields));
 const sortColumns: Record<AdminTable, string> = {
   products: 'created_at', brands: 'name', categories: 'display_order', articles: 'published_at',
   reviews: 'created_at', redirects: 'created_at', bookings: 'created_at',
-  blocked_dates: 'date', site_settings: 'id', seo_settings: 'id', use_cases: 'name',
+  blocked_dates: 'date', site_settings: 'id', seo_settings: 'id', use_cases: 'name', camera_series: 'name', camera_units: 'serial_number', booking_camera_assignments: 'created_at',
 };
 
 function isAdminTable(value: string | null): value is AdminTable {
