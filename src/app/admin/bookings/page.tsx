@@ -38,6 +38,9 @@ export default async function AdminBookingsPage() {
       daily_price: Number(row.daily_price),
       deposit_amount: Number(row.deposit_amount),
       total_price: Number(row.total_price),
+      subtotal: Number(row.subtotal ?? row.total_price),
+      voucher_code: typeof row.voucher_code === 'string' ? row.voucher_code : null,
+      voucher_discount: Number(row.voucher_discount ?? 0),
       selected_addons: Array.isArray(row.selected_addons)
         ? row.selected_addons.flatMap((addon) => {
             if (!addon || typeof addon !== 'object' || Array.isArray(addon)) return [];
