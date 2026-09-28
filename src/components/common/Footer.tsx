@@ -193,6 +193,11 @@ export default function Footer() {
                     Liên Hệ & Bản Đồ ETown
                   </Link>
                 </li>
+                <li>
+                  <Link href="/ky-gui" className="hover:text-[#0284c7] transition-colors font-bold text-[#0284c7]">
+                    Ký Gửi Thiết Bị Cho Thuê
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>

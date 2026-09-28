@@ -124,8 +124,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.5,
     },
-    {
-      url: `${SITE_URL}/lien-he`,
+  {
+    url: `${SITE_URL}/ky-gui`,
+    lastModified: now,
+    changeFrequency: 'monthly',
+    priority: 0.6,
+  },
+  {
+    url: `${SITE_URL}/lien-he`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.7,
