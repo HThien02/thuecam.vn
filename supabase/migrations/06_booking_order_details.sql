@@ -43,6 +43,7 @@ end;
 $$;
 
 drop trigger if exists booking_voucher_usage_status_change on public.bookings;
+drop trigger if exists restore_voucher_use_on_booking_status_change on public.bookings;
 create trigger booking_voucher_usage_status_change
 after update of status on public.bookings
 for each row
