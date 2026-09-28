@@ -45,27 +45,27 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex min-h-16 items-center justify-between gap-5 py-2">
           {/* Brand Logo */}
-          <Link href="/" className="group flex shrink-0 items-center gap-2.5">
-            {siteLogoUrl && customLogoAvailable ? (
-              <Image
-                src={siteLogoUrl}
-                alt="THUECAM.VN"
-                width={240}
-                height={80}
-                unoptimized
-                className="h-11 w-auto max-w-40 object-contain transition-transform group-hover:scale-[1.03]"
-                onError={() => setCustomLogoAvailable(false)}
-              />
-            ) : (
-              <>
-                <div className="flex size-11 items-center justify-center rounded-2xl bg-gradient-candy shadow-cute transition-transform group-hover:scale-105">
-                  <Camera className="size-6 text-white" aria-hidden="true" />
-                </div>
-                <span className="text-lg font-black leading-none tracking-tight text-slate-900 sm:text-xl">
-                  THUECAM<span className="text-[#0284c7]">.VN</span>
-                </span>
-              </>
-            )}
+          <Link href="/" className="group flex shrink-0 items-center gap-3" aria-label="Thuecam.vn - Trang chủ">
+            <span className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-gradient-to-br from-sky-500 via-blue-600 to-violet-600 p-0.5 shadow-[0_5px_16px_rgba(37,99,235,0.28)] transition duration-300 group-hover:scale-105 group-hover:rotate-2">
+              <span className="flex size-full items-center justify-center overflow-hidden rounded-full bg-white">
+                {siteLogoUrl && customLogoAvailable ? (
+                  <Image
+                    src={siteLogoUrl}
+                    alt=""
+                    width={96}
+                    height={96}
+                    unoptimized
+                    className="size-full object-cover"
+                    onError={() => setCustomLogoAvailable(false)}
+                  />
+                ) : (
+                  <Camera className="size-5 text-[#0284c7]" aria-hidden="true" />
+                )}
+              </span>
+            </span>
+            <span className="bg-gradient-to-r from-[#075985] via-[#2563eb] to-[#7c3aed] bg-clip-text text-lg font-black leading-none tracking-[-0.04em] text-transparent sm:text-xl">
+              Thuecam<span className="text-[#f59e0b]">.vn</span>
+            </span>
           </Link>
 
           {/* Desktop Nav */}
