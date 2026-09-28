@@ -57,8 +57,9 @@ export default function ConsignmentFormClient() {
           <input name="phone" required inputMode="tel" pattern="0[0-9\s.\-]{9,12}" className={inputClass} placeholder="0932501411" />
         </label>
         <label className={labelClass}>
-          Email
-          <input name="email" type="email" maxLength={200} className={inputClass} placeholder="ban@gmail.com" />
+          Email nhận thông báo *
+          <input name="email" type="email" required maxLength={200} autoComplete="email" className={inputClass} placeholder="ban@gmail.com" aria-describedby="consignment-email-hint" />
+          <span id="consignment-email-hint" className="block text-xs font-normal text-slate-500">Kết quả duyệt, lịch hẹn và tài khoản đối tác sẽ gửi qua email này.</span>
         </label>
         <label className={labelClass}>
           Khu vực
