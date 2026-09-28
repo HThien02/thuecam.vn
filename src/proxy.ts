@@ -66,7 +66,7 @@ export async function proxy(request: NextRequest) {
 
   // 1. Rate Limit all API endpoints (/api/*)
   if (pathname.startsWith('/api/')) {
-    const isLoginEndpoint = pathname.startsWith('/api/admin/auth/login');
+    const isLoginEndpoint = pathname.startsWith('/api/admin/auth/login') || pathname.startsWith('/api/partner/auth/login');
     const rateLimitResponse = enforceApiRateLimit(request, {
       limit: isLoginEndpoint ? 5 : 60,
       windowMs: 60_000,

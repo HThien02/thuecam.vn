@@ -18,6 +18,7 @@ import {
   LayoutDashboard,
   TicketPercent,
   Target,
+  Handshake,
 } from 'lucide-react';
 import SafeButton from '@/components/common/SafeButton';
 
@@ -110,6 +111,11 @@ export default function AdminLayout({
             <Link href="/admin/vouchers" className={navClass('/admin/vouchers')}>
               <TicketPercent className="w-4 h-4 text-amber-400 shrink-0" />
               <span>Voucher & Khuyến Mãi</span>
+            </Link>
+
+            <Link href="/admin/consignments" className={navClass('/admin/consignments')}>
+              <Handshake className="w-4 h-4 text-teal-500 shrink-0" />
+              <span>Ký Gửi Cho Thuê</span>
             </Link>
 
             <div className="pt-3 pb-1 px-3 text-[10px] font-black uppercase text-slate-500 tracking-wider">
