@@ -18,7 +18,7 @@ export const metadata: Metadata = constructMetadata({
   description:
     'Thuê camera, DJI Pocket, GoPro, Insta360, Flycam và thiết bị quay chất lượng tại Thuecam.vn. Đặt thuê nhanh chóng, tiện lợi.',
   canonicalPath: '/',
-  ogImage: '/og-image.jpg',
+  ogImage: '/images/og-default.jpg',
   siteName: 'Thuecam.vn',
 });
 
