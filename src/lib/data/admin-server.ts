@@ -14,6 +14,9 @@ export type AdminTable =
   | 'site_settings'
   | 'seo_settings'
   | 'use_cases'
+  | 'camera_series'
+  | 'camera_units'
+  | 'booking_camera_assignments'
   | 'vouchers';
 
 const sortColumns: Record<AdminTable, string> = {
@@ -28,6 +31,9 @@ const sortColumns: Record<AdminTable, string> = {
   site_settings: 'id',
   seo_settings: 'id',
   use_cases: 'name',
+  camera_series: 'name',
+  camera_units: 'serial_number',
+  booking_camera_assignments: 'created_at',
   vouchers: 'created_at',
 };
 
