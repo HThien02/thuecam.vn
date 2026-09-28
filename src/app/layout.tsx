@@ -14,10 +14,12 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = constructMetadata({
-  title: 'THUECAM - Thuê Máy Xịn, Chụp Chill Hết Ý | Cho Thuê Camera & Thiết Bị Quay Phim',
+  title: 'Thuecam.vn - Cho Thuê Camera & Thiết Bị Quay',
   description:
-    'Dịch vụ cho thuê camera du lịch, máy quay vlog DJI Pocket 4, GoPro 13, flycam, gimbal, micro thu âm giá từ 100K/ngày. Nhận máy ngay, đầy đủ phụ kiện tại TP.HCM & Hà Nội.',
+    'Thuê camera, DJI Pocket, GoPro, Insta360, Flycam và thiết bị quay chất lượng tại Thuecam.vn. Đặt thuê nhanh chóng, tiện lợi.',
   canonicalPath: '/',
+  ogImage: '/og-image.jpg',
+  siteName: 'Thuecam.vn',
 });
 
 export default function RootLayout({

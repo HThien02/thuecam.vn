@@ -7,6 +7,7 @@ interface ConstructMetadataParams {
   description?: string;
   canonicalPath?: string;
   ogImage?: string;
+  siteName?: string;
   noindex?: boolean;
   type?: 'website' | 'article';
   publishedTime?: string;
@@ -19,6 +20,7 @@ export function constructMetadata({
   description,
   canonicalPath = '',
   ogImage,
+  siteName,
   noindex = false,
   type = 'website',
   publishedTime,
@@ -33,6 +35,7 @@ export function constructMetadata({
   const finalTitle = title ? `${title}` : defaultTitle;
   const finalDescription = description || defaultDescription;
   const finalOgImage = ogImage || defaultOgImage;
+  const finalSiteName = siteName || 'THUECAM.VN';
 
   // Clean canonical URL
   const cleanPath = canonicalPath.startsWith('/') ? canonicalPath : `/${canonicalPath}`;
@@ -73,7 +76,7 @@ export function constructMetadata({
       url: canonicalUrl,
       title: finalTitle,
       description: finalDescription,
-      siteName: 'THUECAM.VN',
+      siteName: finalSiteName,
       images: [
         {
           url: finalOgImage,
