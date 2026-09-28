@@ -164,6 +164,10 @@ export default function BookingManagerClient({
           total_days: daysCount,
           daily_price: editingBooking?.daily_price ?? Math.round(Number(totalPrice) / daysCount),
           total_price: Number(totalPrice),
+          subtotal: editingBooking?.subtotal ?? Number(totalPrice),
+          voucher_code: editingBooking?.voucher_code ?? null,
+          voucher_discount: editingBooking?.voucher_discount ?? 0,
+          selected_addons: editingBooking?.selected_addons ?? [],
           deposit_amount: Number(depositAmount),
           pickup_method: delivery ? 'DELIVERY' : 'STORE',
           delivery_address: delivery ? pickupMethod : null,
@@ -187,7 +191,10 @@ export default function BookingManagerClient({
         total_days: Number(saved.total_days),
         daily_price: Number(saved.daily_price),
         total_price: Number(saved.total_price),
-        selected_addons: editingBooking?.selected_addons ?? [],
+        subtotal: Number(saved.subtotal ?? saved.total_price),
+        voucher_code: typeof saved.voucher_code === 'string' ? saved.voucher_code : null,
+        voucher_discount: Number(saved.voucher_discount ?? 0),
+        selected_addons: Array.isArray(saved.selected_addons) ? saved.selected_addons as BookingRecord['selected_addons'] : editingBooking?.selected_addons ?? [],
         deposit_amount: Number(saved.deposit_amount),
         pickup_method: saved.pickup_method === 'DELIVERY'
           ? String(saved.delivery_address ?? 'Giao tận nơi')
@@ -289,10 +296,11 @@ export default function BookingManagerClient({
         booking.voucher_code ?? '',
         booking.voucher_discount ?? 0,
         booking.total_price,
+        booking.deposit_amount ?? 0,
         booking.status,
       ]);
     });
-    const header = ['Mã đơn', 'Khách hàng', 'Số điện thoại', 'Sản phẩm', 'Hạng mục', 'Đơn giá', 'Số ngày', 'Tạm tính', 'Voucher', 'Giảm giá', 'Tổng tiền', 'Trạng thái'];
+    const header = ['Mã đơn', 'Khách hàng', 'Số điện thoại', 'Sản phẩm', 'Hạng mục', 'Đơn giá', 'Số ngày', 'Tạm tính', 'Voucher', 'Giảm giá', 'Tổng tiền', 'Tiền cọc', 'Trạng thái'];
     const worksheet = XLSX.utils.aoa_to_sheet([header, ...rows]);
     worksheet['!cols'] = header.map((title) => ({ wch: Math.max(14, title.length + 3) }));
     const workbook = XLSX.utils.book_new();
