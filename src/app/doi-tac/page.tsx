@@ -5,6 +5,7 @@ import { getPartnerSession } from '@/lib/security/partner-session';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { BOOKING_STATUS_LABELS, formatDate, formatVnd } from '@/lib/consignment';
 import PartnerLogoutButton from '@/components/consignment/PartnerLogoutButton';
+import PartnerStats, { type UnitStat, type MonthStat, type SeriesStat } from '@/components/consignment/PartnerStats';
 
 export const metadata: Metadata = { title: 'Máy ký gửi của tôi | THUECAM', robots: { index: false, follow: false } };
 export const dynamic = 'force-dynamic';
@@ -37,7 +38,7 @@ async function loadPartnerData(userId: string) {
   const supabase = createAdminClient();
   const [{ data: partner }, { data: units }] = await Promise.all([
     supabase.from('consignment_partners').select('full_name, revenue_share_percent').eq('user_id', userId).maybeSingle(),
-    supabase.from('camera_units').select('id, serial_number, label, status, camera_series(name)').eq('owner_partner_id', userId).order('serial_number'),
+    supabase.from('camera_units').select('id, serial_number, label, status, series_id, camera_series(name)').eq('owner_partner_id', userId).order('serial_number'),
   ]);
 
   const unitIds = (units ?? []).map((unit) => unit.id);
@@ -75,6 +76,58 @@ export default async function PartnerDashboardPage() {
   const unitLabel = new Map(units.map((u) => [u.id, u.serial_number]));
   const busyUnitIds = new Set(renting.map((b) => b.unit_id));
 
+  const activeBookings = bookings.filter((b) => b.status !== 'CANCELLED');
+  const unitStats: UnitStat[] = units.map((unit) => {
+    const series = unit.camera_series as { name?: string } | { name?: string }[] | null;
+    const name = (Array.isArray(series) ? series[0]?.name : series?.name) ?? 'Thiết bị';
+    const unitBookings = activeBookings.filter((b) => b.unit_id === unit.id);
+    const gross = unitBookings.reduce((sum, b) => sum + rentalValue(b), 0);
+    const earnedGross = unitBookings
+      .filter((b) => DONE_STATUSES.has(b.status))
+      .reduce((sum, b) => sum + rentalValue(b), 0);
+    return {
+      id: unit.id,
+      seriesId: (unit.series_id as string) ?? 'unknown',
+      name,
+      serial: unit.serial_number,
+      rentals: unitBookings.length,
+      days: unitBookings.reduce((sum, b) => sum + Number(b.total_days), 0),
+      gross,
+      yourShare: gross * share,
+      earned: earnedGross * share,
+    };
+  });
+
+  const seriesMap = new Map<string, SeriesStat>();
+  for (const u of unitStats) {
+    const current =
+      seriesMap.get(u.seriesId) ??
+      ({ id: u.seriesId, name: u.name, unitCount: 0, rentals: 0, days: 0, gross: 0, yourShare: 0, earned: 0, units: [] } as SeriesStat);
+    current.unitCount += 1;
+    current.rentals += u.rentals;
+    current.days += u.days;
+    current.gross += u.gross;
+    current.yourShare += u.yourShare;
+    current.earned += u.earned;
+    current.units.push(u);
+    seriesMap.set(u.seriesId, current);
+  }
+  const seriesStats = [...seriesMap.values()].sort((a, b) => b.gross - a.gross || a.name.localeCompare(b.name));
+
+  const monthlyMap = new Map<string, MonthStat>();
+  for (const b of activeBookings) {
+    const key = b.start_date.slice(0, 7);
+    const current = monthlyMap.get(key) ?? { month: key, count: 0, gross: 0, share: 0 };
+    current.count += 1;
+    current.gross += rentalValue(b);
+    current.share += rentalValue(b) * share;
+    monthlyMap.set(key, current);
+  }
+  const monthly = [...monthlyMap.values()].sort((a, b) => b.month.localeCompare(a.month)).slice(0, 12);
+
+  const totalGross = unitStats.reduce((sum, u) => sum + u.gross, 0);
+  const totalYourShare = totalGross * share;
+
   const stats = [
     { icon: Camera, label: 'Máy ký gửi', value: String(units.length) },
     { icon: CalendarClock, label: 'Đang cho thuê / sắp tới', value: `${renting.length} / ${upcoming.length}` },
@@ -104,6 +157,15 @@ export default async function PartnerDashboardPage() {
           </div>
         ))}
       </dl>
+
+      <PartnerStats
+        unitStats={unitStats}
+        seriesStats={seriesStats}
+        monthly={monthly}
+        sharePercent={Number(partner?.revenue_share_percent ?? 0)}
+        totalGross={totalGross}
+        totalYourShare={totalYourShare}
+      />
 
       <section aria-labelledby="units-heading" className="space-y-3">
         <h2 id="units-heading" className="text-lg font-bold text-slate-900">Máy của bạn</h2>
