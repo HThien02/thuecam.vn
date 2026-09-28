@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/security/admin-auth';
 import { isValidEmail, sanitizeInput } from '@/lib/security/validation';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { isEmailConfigured, sendPartnerEmail } from '@/lib/consignment-email';
 
 const APPLICATION_STATUSES = new Set(['PENDING', 'CONTACTED', 'APPROVED', 'REJECTED']);
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -41,6 +42,53 @@ export async function POST(request: NextRequest) {
       .update({ status, admin_note: str(body.adminNote, 2000), updated_at: new Date().toISOString() })
       .eq('id', id);
     if (error) return fail('Không thể cập nhật đơn ký gửi.', 500);
+    return NextResponse.json({ success: true });
+  }
+
+  if (action === 'send_email') {
+    if (!isEmailConfigured()) {
+      return fail('Chưa cấu hình email gửi đi. Hãy đặt biến môi trường GMAIL_APP_PASSWORD rồi thử lại.', 503);
+    }
+
+    const toEmail = str(body.to, 200).toLowerCase();
+    const subject = str(body.subject, 300);
+    const emailBody = typeof body.body === 'string' ? body.body.slice(0, 8000) : '';
+    const templateId = str(body.templateId, 50) || 'custom';
+    const applicationId = str(body.applicationId, 100) || null;
+    const partnerUserId = UUID_PATTERN.test(str(body.partnerUserId, 64)) ? str(body.partnerUserId, 64) : null;
+    const nextStatus = str(body.updateStatus, 20);
+
+    if (!isValidEmail(toEmail)) return fail('Email người nhận không hợp lệ.');
+    if (subject.trim().length < 3) return fail('Vui lòng nhập tiêu đề email (tối thiểu 3 ký tự).');
+    if (emailBody.trim().length < 10) return fail('Nội dung email quá ngắn.');
+
+    let sendError = '';
+    try {
+      await sendPartnerEmail({ to: toEmail, subject, body: emailBody });
+    } catch (error) {
+      sendError = error instanceof Error ? error.message : 'UNKNOWN';
+    }
+
+    await supabase.from('consignment_email_logs').insert({
+      application_id: applicationId,
+      partner_user_id: partnerUserId,
+      to_email: toEmail,
+      template_id: templateId,
+      subject,
+      body: emailBody,
+      status: sendError ? 'FAILED' : 'SENT',
+      error: sendError,
+    });
+
+    if (sendError) return fail('Không gửi được email. Kiểm tra lại cấu hình Gmail và thử lại.', 502);
+
+    if (applicationId && APPLICATION_STATUSES.has(nextStatus)) {
+      await supabase
+        .from('consignment_applications')
+        .update({ status: nextStatus, updated_at: new Date().toISOString() })
+        .eq('id', applicationId);
+    }
+
     return NextResponse.json({ success: true });
   }
 
