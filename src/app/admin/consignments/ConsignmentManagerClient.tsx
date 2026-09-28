@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { KeyRound, Phone, Mail, Trash2, UserPlus, Users, Inbox, Save, X } from 'lucide-react';
+import { KeyRound, Phone, Mail, Trash2, UserPlus, Users, Inbox, Save, X, Send } from 'lucide-react';
 import {
   APPLICATION_STATUS_LABELS,
   formatDate,
@@ -11,6 +11,26 @@ import {
   type ConsignmentPartner,
   type ConsignmentUnit,
 } from '@/lib/consignment';
+import {
+  CONSIGNMENT_EMAIL_TEMPLATES,
+  PARTNER_LOGIN_PATH,
+  PLACEHOLDER_PATTERN,
+  findTemplate,
+  type EmailTemplateContext,
+} from '@/lib/consignment-email-templates';
+
+interface EmailTarget {
+  email: string;
+  name: string;
+  deviceName: string;
+  applicationId?: string;
+  partnerUserId?: string;
+}
+
+function partnerLoginUrl() {
+  const base = process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://thuecam.vn');
+  return `${base.replace(/\/$/, '')}${PARTNER_LOGIN_PATH}`;
+}
 
 interface Props {
   applications: ConsignmentApplication[];
@@ -52,6 +72,7 @@ export default function ConsignmentManagerClient({ applications, partners, units
   const [busy, setBusy] = useState(false);
   const [accountFor, setAccountFor] = useState<ConsignmentApplication | 'manual' | null>(null);
   const [editingPartner, setEditingPartner] = useState<ConsignmentPartner | null>(null);
+  const [emailTarget, setEmailTarget] = useState<EmailTarget | null>(null);
 
   const pendingCount = applications.filter((app) => app.status === 'PENDING').length;
   const visibleApplications = useMemo(
@@ -140,6 +161,14 @@ export default function ConsignmentManagerClient({ applications, partners, units
                     if (confirm(`Xoá đơn ký gửi của ${app.full_name}?`)) run({ action: 'delete_application', id: app.id }, 'Đã xoá đơn.');
                   }}
                   onCreateAccount={() => setAccountFor(app)}
+                  onSendEmail={() =>
+                    setEmailTarget({
+                      email: app.email ?? '',
+                      name: app.full_name,
+                      deviceName: app.device_name,
+                      applicationId: app.id,
+                    })
+                  }
                 />
               ))}
             </ul>
@@ -183,6 +212,21 @@ export default function ConsignmentManagerClient({ applications, partners, units
                         </td>
                         <td className="px-4 py-3 text-right">
                           <div className="flex justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setEmailTarget({
+                                  email: partner.email,
+                                  name: partner.full_name,
+                                  deviceName: 'thiết bị ký gửi',
+                                  partnerUserId: partner.user_id,
+                                })
+                              }
+                              className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100"
+                            >
+                              <Send className="h-3.5 w-3.5" />
+                              Email
+                            </button>
                             <button type="button" onClick={() => setEditingPartner(partner)} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100">
                               Sửa & gán máy
                             </button>
@@ -225,6 +269,18 @@ export default function ConsignmentManagerClient({ applications, partners, units
         />
       )}
 
+      {emailTarget && (
+        <SendEmailDialog
+          target={emailTarget}
+          busy={busy}
+          onClose={() => setEmailTarget(null)}
+          onSubmit={async (payload) => {
+            const result = await run({ action: 'send_email', ...payload }, `Đã gửi email tới ${emailTarget.email}.`);
+            if (result) setEmailTarget(null);
+          }}
+        />
+      )}
+
       {editingPartner && (
         <EditPartnerDialog
           partner={editingPartner}
@@ -247,12 +303,14 @@ function ApplicationCard({
   onSave,
   onDelete,
   onCreateAccount,
+  onSendEmail,
 }: {
   application: ConsignmentApplication;
   busy: boolean;
   onSave: (status: ApplicationStatus, adminNote: string) => void;
   onDelete: () => void;
   onCreateAccount: () => void;
+  onSendEmail: () => void;
 }) {
   const [status, setStatus] = useState<ApplicationStatus>(application.status);
   const [adminNote, setAdminNote] = useState(application.admin_note);
@@ -285,7 +343,7 @@ function ApplicationCard({
 
       <dl className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-xl bg-slate-50 p-3 text-sm">
         <div className="col-span-2">
-          <dt className="text-xs text-slate-500">Thiết bị</dt>
+          <dt className="text-xs text-slate-500">Thi��t bị</dt>
           <dd className="font-bold text-slate-900">{application.device_name}{application.device_brand ? ` (${application.device_brand})` : ''}</dd>
         </div>
         <div>
@@ -323,6 +381,10 @@ function ApplicationCard({
         <button type="button" disabled={!dirty || busy} onClick={() => onSave(status, adminNote)} className="flex items-center gap-1.5 rounded-xl bg-slate-900 px-3 py-2 text-xs font-bold text-white disabled:opacity-40">
           <Save className="h-3.5 w-3.5" />
           Lưu
+        </button>
+        <button type="button" disabled={busy} onClick={onSendEmail} className="flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-800 hover:bg-slate-100 disabled:opacity-40">
+          <Send className="h-3.5 w-3.5" />
+          Gửi email
         </button>
         {application.partner_user_id ? (
           <span className="text-xs font-bold text-emerald-700">Đã cấp tài khoản</span>
@@ -505,6 +567,131 @@ function EditPartnerDialog({
           {busy ? 'Đang lưu...' : 'Lưu thay đổi'}
         </button>
       </form>
+    </Dialog>
+  );
+}
+
+function SendEmailDialog({
+  target,
+  busy,
+  onClose,
+  onSubmit,
+}: {
+  target: EmailTarget;
+  busy: boolean;
+  onClose: () => void;
+  onSubmit: (payload: Record<string, unknown>) => void;
+}) {
+  const ctx: EmailTemplateContext = useMemo(
+    () => ({
+      name: target.name,
+      deviceName: target.deviceName,
+      loginEmail: target.email,
+      loginUrl: partnerLoginUrl(),
+    }),
+    [target],
+  );
+
+  const [templateId, setTemplateId] = useState('contacted');
+  const [subject, setSubject] = useState('');
+  const [emailBody, setEmailBody] = useState('');
+  const [updateStatus, setUpdateStatus] = useState(true);
+
+  const template = findTemplate(templateId);
+  const suggestedStatus = template?.suggestedStatus;
+
+  function applyTemplate(id: string) {
+    setTemplateId(id);
+    const next = findTemplate(id);
+    if (!next) return;
+    setSubject(next.subject(ctx));
+    setEmailBody(next.body(ctx));
+    setUpdateStatus(true);
+  }
+
+  useEffect(() => {
+    applyTemplate('contacted');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const placeholdersLeft = emailBody.match(PLACEHOLDER_PATTERN)?.length ?? 0;
+  const canSend = !target.email ? false : subject.trim().length >= 3 && emailBody.trim().length >= 10;
+
+  return (
+    <Dialog title={`Gửi email cho ${target.name}`} onClose={onClose}>
+      {!target.email ? (
+        <p className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-800">
+          Đơn này chưa có email nên không thể gửi thông báo. Hãy liên hệ khách qua điện thoại để bổ sung email.
+        </p>
+      ) : (
+        <form
+          className="space-y-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (placeholdersLeft > 0 && !confirm(`Còn ${placeholdersLeft} chỗ [[...]] chưa điền. Vẫn gửi email?`)) return;
+            onSubmit({
+              to: target.email,
+              subject,
+              body: emailBody,
+              templateId,
+              applicationId: target.applicationId ?? null,
+              partnerUserId: target.partnerUserId ?? null,
+              updateStatus: target.applicationId && updateStatus && suggestedStatus ? suggestedStatus : '',
+            });
+          }}
+        >
+          <div className="rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
+            Gửi tới <span className="font-bold text-slate-900">{target.email}</span>
+          </div>
+
+          <label className="block space-y-1 text-xs font-bold text-slate-600">
+            Mẫu email
+            <select value={templateId} onChange={(e) => applyTemplate(e.target.value)} className={inputClass}>
+              {CONSIGNMENT_EMAIL_TEMPLATES.map((tpl) => (
+                <option key={tpl.id} value={tpl.id}>{tpl.label}</option>
+              ))}
+            </select>
+          </label>
+
+          <label className="block space-y-1 text-xs font-bold text-slate-600">
+            Tiêu đề
+            <input required value={subject} onChange={(e) => setSubject(e.target.value)} className={inputClass} />
+          </label>
+
+          <label className="block space-y-1 text-xs font-bold text-slate-600">
+            Nội dung
+            <textarea
+              required
+              rows={12}
+              value={emailBody}
+              onChange={(e) => setEmailBody(e.target.value)}
+              className={`${inputClass} font-mono leading-relaxed`}
+            />
+          </label>
+
+          {placeholdersLeft > 0 && (
+            <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
+              Còn {placeholdersLeft} chỗ cần điền: thay các đoạn trong <code className="font-mono">[[...]]</code> bằng nội dung thật trước khi gửi.
+            </p>
+          )}
+
+          {target.applicationId && suggestedStatus && (
+            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+              <input type="checkbox" checked={updateStatus} onChange={(e) => setUpdateStatus(e.target.checked)} className="h-4 w-4" />
+              Đồng thời cập nhật trạng thái đơn thành “{APPLICATION_STATUS_LABELS[suggestedStatus]}”
+            </label>
+          )}
+
+          <button
+            type="submit"
+            disabled={busy || !canSend}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-2.5 text-sm font-bold text-white hover:bg-blue-800 disabled:opacity-50"
+          >
+            <Send className="h-4 w-4" />
+            {busy ? 'Đang gửi...' : 'Gửi email'}
+          </button>
+        </form>
+      )}
     </Dialog>
   );
 }
