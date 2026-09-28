@@ -5,7 +5,7 @@ import { getPartnerSession } from '@/lib/security/partner-session';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { BOOKING_STATUS_LABELS, formatDate, formatVnd } from '@/lib/consignment';
 import PartnerLogoutButton from '@/components/consignment/PartnerLogoutButton';
-import PartnerStats, { type UnitStat, type MonthStat } from '@/components/consignment/PartnerStats';
+import PartnerStats, { type UnitStat, type MonthStat, type SeriesStat } from '@/components/consignment/PartnerStats';
 
 export const metadata: Metadata = { title: 'Máy ký gửi của tôi | THUECAM', robots: { index: false, follow: false } };
 export const dynamic = 'force-dynamic';
@@ -38,7 +38,7 @@ async function loadPartnerData(userId: string) {
   const supabase = createAdminClient();
   const [{ data: partner }, { data: units }] = await Promise.all([
     supabase.from('consignment_partners').select('full_name, revenue_share_percent').eq('user_id', userId).maybeSingle(),
-    supabase.from('camera_units').select('id, serial_number, label, status, camera_series(name)').eq('owner_partner_id', userId).order('serial_number'),
+    supabase.from('camera_units').select('id, serial_number, label, status, series_id, camera_series(name)').eq('owner_partner_id', userId).order('serial_number'),
   ]);
 
   const unitIds = (units ?? []).map((unit) => unit.id);
@@ -87,6 +87,7 @@ export default async function PartnerDashboardPage() {
       .reduce((sum, b) => sum + rentalValue(b), 0);
     return {
       id: unit.id,
+      seriesId: (unit.series_id as string) ?? 'unknown',
       name,
       serial: unit.serial_number,
       rentals: unitBookings.length,
@@ -96,6 +97,22 @@ export default async function PartnerDashboardPage() {
       earned: earnedGross * share,
     };
   });
+
+  const seriesMap = new Map<string, SeriesStat>();
+  for (const u of unitStats) {
+    const current =
+      seriesMap.get(u.seriesId) ??
+      ({ id: u.seriesId, name: u.name, unitCount: 0, rentals: 0, days: 0, gross: 0, yourShare: 0, earned: 0, units: [] } as SeriesStat);
+    current.unitCount += 1;
+    current.rentals += u.rentals;
+    current.days += u.days;
+    current.gross += u.gross;
+    current.yourShare += u.yourShare;
+    current.earned += u.earned;
+    current.units.push(u);
+    seriesMap.set(u.seriesId, current);
+  }
+  const seriesStats = [...seriesMap.values()].sort((a, b) => b.gross - a.gross || a.name.localeCompare(b.name));
 
   const monthlyMap = new Map<string, MonthStat>();
   for (const b of activeBookings) {
@@ -143,6 +160,7 @@ export default async function PartnerDashboardPage() {
 
       <PartnerStats
         unitStats={unitStats}
+        seriesStats={seriesStats}
         monthly={monthly}
         sharePercent={Number(partner?.revenue_share_percent ?? 0)}
         totalGross={totalGross}

@@ -2,6 +2,7 @@ import { formatVnd } from '@/lib/consignment';
 
 export interface UnitStat {
   id: string;
+  seriesId: string;
   name: string;
   serial: string;
   rentals: number;
@@ -9,6 +10,18 @@ export interface UnitStat {
   gross: number;
   yourShare: number;
   earned: number;
+}
+
+export interface SeriesStat {
+  id: string;
+  name: string;
+  unitCount: number;
+  rentals: number;
+  days: number;
+  gross: number;
+  yourShare: number;
+  earned: number;
+  units: UnitStat[];
 }
 
 export interface MonthStat {
@@ -25,12 +38,14 @@ const formatMonth = (month: string) => {
 
 export default function PartnerStats({
   unitStats,
+  seriesStats,
   monthly,
   sharePercent,
   totalGross,
   totalYourShare,
 }: {
   unitStats: UnitStat[];
+  seriesStats: SeriesStat[];
   monthly: MonthStat[];
   sharePercent: number;
   totalGross: number;
@@ -76,55 +91,95 @@ export default function PartnerStats({
         </div>
       </section>
 
-      <section aria-labelledby="per-unit-heading" className="space-y-3">
-        <h2 id="per-unit-heading" className="text-lg font-bold text-slate-900">
-          Thống kê theo từng máy
-        </h2>
-        {unitStats.length === 0 ? (
+      <section aria-labelledby="per-series-heading" className="space-y-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 id="per-series-heading" className="text-lg font-bold text-slate-900">
+            Thống kê theo dòng máy
+          </h2>
+          <p className="text-xs text-slate-500">
+            {seriesStats.length} dòng máy · {unitStats.length} máy (series)
+          </p>
+        </div>
+        {seriesStats.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">
             Chưa có máy nào để thống kê.
           </p>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-                <tr>
-                  <th className="px-4 py-3">Máy</th>
-                  <th className="px-4 py-3">Lượt thuê</th>
-                  <th className="px-4 py-3">Tổng ngày</th>
-                  <th className="px-4 py-3">Tổng giá thuê</th>
-                  <th className="px-4 py-3">Phần của bạn</th>
-                  <th className="px-4 py-3">Đã hoàn tất</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {unitStats.map((unit) => (
-                  <tr key={unit.id}>
-                    <td className="px-4 py-3 text-slate-700">
-                      {unit.name}
-                      <span className="block font-mono text-xs text-slate-500">{unit.serial}</span>
-                    </td>
-                    <td className="px-4 py-3 text-slate-700">{unit.rentals}</td>
-                    <td className="px-4 py-3 text-slate-700">{unit.days}</td>
-                    <td className="px-4 py-3 text-slate-700">{formatVnd(unit.gross)}</td>
-                    <td className="px-4 py-3 font-bold text-sky-700">{formatVnd(unit.yourShare)}</td>
-                    <td className="px-4 py-3 font-bold text-emerald-700">{formatVnd(unit.earned)}</td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot className="border-t border-slate-200 bg-slate-50 text-sm font-bold text-slate-900">
-                <tr>
-                  <td className="px-4 py-3">Tổng cộng</td>
-                  <td className="px-4 py-3">{unitStats.reduce((s, u) => s + u.rentals, 0)}</td>
-                  <td className="px-4 py-3">{unitStats.reduce((s, u) => s + u.days, 0)}</td>
-                  <td className="px-4 py-3">{formatVnd(totalGross)}</td>
-                  <td className="px-4 py-3 text-sky-700">{formatVnd(totalYourShare)}</td>
-                  <td className="px-4 py-3 text-emerald-700">
+          <div className="space-y-4">
+            {seriesStats.map((series) => (
+              <div key={series.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-slate-50 px-4 py-3">
+                  <div>
+                    <p className="font-bold text-slate-900">{series.name}</p>
+                    <p className="text-xs text-slate-500">
+                      {series.unitCount} máy · {series.rentals} lượt thuê · {series.days} ngày
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-5 text-right">
+                    <div>
+                      <p className="text-[11px] font-bold uppercase text-slate-500">Tổng giá thuê</p>
+                      <p className="text-sm font-extrabold text-slate-900">{formatVnd(series.gross)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-bold uppercase text-sky-600">Phần của bạn</p>
+                      <p className="text-sm font-extrabold text-sky-700">{formatVnd(series.yourShare)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-bold uppercase text-emerald-600">Đã hoàn tất</p>
+                      <p className="text-sm font-extrabold text-emerald-700">{formatVnd(series.earned)}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="text-xs uppercase text-slate-500">
+                      <tr>
+                        <th className="px-4 py-2.5 font-semibold">Series (serial)</th>
+                        <th className="px-4 py-2.5 font-semibold">Lượt thuê</th>
+                        <th className="px-4 py-2.5 font-semibold">Tổng ngày</th>
+                        <th className="px-4 py-2.5 font-semibold">Tổng giá thuê</th>
+                        <th className="px-4 py-2.5 font-semibold">Phần của bạn</th>
+                        <th className="px-4 py-2.5 font-semibold">Đã hoàn tất</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {series.units.map((unit) => (
+                        <tr key={unit.id}>
+                          <td className="px-4 py-2.5 font-mono text-xs text-slate-700">{unit.serial}</td>
+                          <td className="px-4 py-2.5 text-slate-700">{unit.rentals}</td>
+                          <td className="px-4 py-2.5 text-slate-700">{unit.days}</td>
+                          <td className="px-4 py-2.5 text-slate-700">{formatVnd(unit.gross)}</td>
+                          <td className="px-4 py-2.5 font-bold text-sky-700">{formatVnd(unit.yourShare)}</td>
+                          <td className="px-4 py-2.5 font-bold text-emerald-700">{formatVnd(unit.earned)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-900 px-4 py-3 text-white">
+              <p className="font-bold">
+                Tổng cộng · {unitStats.reduce((s, u) => s + u.rentals, 0)} lượt thuê ·{' '}
+                {unitStats.reduce((s, u) => s + u.days, 0)} ngày
+              </p>
+              <div className="flex items-center gap-5 text-right">
+                <div>
+                  <p className="text-[11px] font-bold uppercase text-slate-300">Tổng giá thuê</p>
+                  <p className="text-sm font-extrabold">{formatVnd(totalGross)}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold uppercase text-sky-300">Phần của bạn</p>
+                  <p className="text-sm font-extrabold text-sky-300">{formatVnd(totalYourShare)}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold uppercase text-emerald-300">Đã hoàn tất</p>
+                  <p className="text-sm font-extrabold text-emerald-300">
                     {formatVnd(unitStats.reduce((s, u) => s + u.earned, 0))}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </section>
