@@ -14,6 +14,7 @@ import {
   ArrowRight,
   ShieldCheck,
   MapPin,
+  Package,
   Sparkles,
 } from 'lucide-react';
 
@@ -181,6 +182,12 @@ export default async function AdminDashboardPage() {
             className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-4 py-2.5 text-xs shadow-md transition"
           >
             <Activity className="size-4" /> Đơn Thuê & Lịch
+          </Link>
+          <Link
+            href="/admin/inventory"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-violet-500 hover:bg-violet-400 text-white font-black px-4 py-2.5 text-xs shadow-md transition"
+          >
+            <Package className="size-4" /> Kho Camera
           </Link>
         </div>
       </div>
