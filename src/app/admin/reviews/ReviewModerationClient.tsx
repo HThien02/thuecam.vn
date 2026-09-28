@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Review, Product } from '@/types';
-import { Star, CheckCircle2, XCircle, ShieldCheck, Trash2, Filter } from 'lucide-react';
+import { Star, CheckCircle2, XCircle, ShieldCheck, Trash2, Edit, Plus, Save, X } from 'lucide-react';
 import { deleteAdminRecord, saveAdminRecord } from '@/lib/data/admin-api';
 
 interface Props {
@@ -43,6 +43,61 @@ export default function ReviewModerationClient({
       alert(error instanceof Error ? error.message : 'Không thể xóa đánh giá.');
     }
   };
+
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingReview, setEditingReview] = useState<Review | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    product_id: '',
+    user_name: '',
+    rating: 5,
+    comment: '',
+    rental_verified: true,
+    status: 'APPROVED' as Review['status'],
+  });
+
+  const openForm = (review: Review | null) => {
+    setEditingReview(review);
+    setForm({
+      product_id: review?.product_id ?? products[0]?.id ?? '',
+      user_name: review?.user_name ?? '',
+      rating: review?.rating ?? 5,
+      comment: review?.comment ?? '',
+      rental_verified: review?.rental_verified ?? true,
+      status: review?.status ?? 'APPROVED',
+    });
+    setFormOpen(true);
+  };
+
+  const handleSave = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const rating = Math.min(5, Math.max(1, Math.round(Number(form.rating))));
+    const record = {
+      id: editingReview?.id ?? crypto.randomUUID(),
+      product_id: form.product_id || null,
+      user_name: form.user_name.trim(),
+      rating,
+      comment: form.comment.trim(),
+      rental_verified: form.rental_verified,
+      status: form.status,
+    };
+    if (!record.user_name || !record.comment) return;
+    setSaving(true);
+    try {
+      const saved = await saveAdminRecord<Review>('reviews', record, editingReview ? 'update' : 'create');
+      setReviews((current) =>
+        editingReview ? current.map((review) => (review.id === saved.id ? saved : review)) : [saved, ...current],
+      );
+      setFormOpen(false);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Không thể lưu đánh giá.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const inputClass =
+    'w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white outline-none focus:border-cyan-400';
 
   const approvedCount = reviews.filter((r) => r.status === 'APPROVED').length;
   const avgRating =
@@ -103,6 +158,23 @@ export default function ReviewModerationClient({
             }`}
           >
             Chờ Duyệt ({reviews.filter((r) => r.status === 'PENDING').length})
+          </button>
+          <button
+            onClick={() => setStatusFilter('REJECTED')}
+            className={`px-3 py-1.5 rounded-lg transition-colors ${
+              statusFilter === 'REJECTED'
+                ? 'bg-rose-500 text-slate-950 font-bold'
+                : 'bg-slate-800 text-slate-600 hover:text-white'
+            }`}
+          >
+            Từ Chối ({reviews.filter((r) => r.status === 'REJECTED').length})
+          </button>
+          <button
+            onClick={() => openForm(null)}
+            className="ml-2 inline-flex items-center gap-1.5 rounded-lg bg-cyan-500 px-3 py-1.5 font-black text-slate-950"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Thêm đánh giá
           </button>
         </div>
       </div>
@@ -181,6 +253,14 @@ export default function ReviewModerationClient({
                   </button>
                 )}
                 <button
+                  onClick={() => openForm(rev)}
+                  className="p-1.5 rounded-lg text-sky-400 transition-colors"
+                  title="Sửa đánh giá"
+                  aria-label="Sửa đánh giá"
+                >
+                  <Edit className="w-3.5 h-3.5" />
+                </button>
+                <button
                   onClick={() => handleDelete(rev.id)}
                   className="p-1.5 rounded-lg hover:bg-rose-950/50 text-rose-400 transition-colors"
                   title="Xóa đánh giá"
@@ -191,7 +271,95 @@ export default function ReviewModerationClient({
             </div>
           );
         })}
+        {filteredReviews.length === 0 && (
+          <p className="rounded-2xl border border-slate-800 bg-slate-900/60 p-8 text-center text-xs text-slate-400">
+            Không có đánh giá nào trong mục này.
+          </p>
+        )}
       </div>
+
+      {formOpen && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4">
+          <form onSubmit={handleSave} className="my-8 w-full max-w-lg space-y-4 rounded-3xl border border-slate-800 bg-slate-900 p-6 text-xs">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-black text-white">{editingReview ? 'Sửa đánh giá' : 'Thêm đánh giá'}</h2>
+              <button type="button" onClick={() => setFormOpen(false)} aria-label="Đóng">
+                <X className="text-slate-400" />
+              </button>
+            </div>
+
+            <label className="block space-y-1.5 font-bold text-slate-300">
+              <span>Thiết bị được đánh giá</span>
+              <select
+                value={form.product_id}
+                onChange={(e) => setForm({ ...form, product_id: e.target.value })}
+                className={inputClass}
+              >
+                <option value="">Không gắn thiết bị</option>
+                {products.map((product) => (
+                  <option key={product.id} value={product.id}>{product.name}</option>
+                ))}
+              </select>
+            </label>
+
+            <label className="block space-y-1.5 font-bold text-slate-300">
+              <span>Tên khách hàng *</span>
+              <input required value={form.user_name} onChange={(e) => setForm({ ...form, user_name: e.target.value })} className={inputClass} />
+            </label>
+
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block space-y-1.5 font-bold text-slate-300">
+                <span>Số sao</span>
+                <select value={form.rating} onChange={(e) => setForm({ ...form, rating: Number(e.target.value) })} className={inputClass}>
+                  {[5, 4, 3, 2, 1].map((value) => (
+                    <option key={value} value={value}>{value} sao</option>
+                  ))}
+                </select>
+              </label>
+              <label className="block space-y-1.5 font-bold text-slate-300">
+                <span>Trạng thái</span>
+                <select
+                  value={form.status}
+                  onChange={(e) => setForm({ ...form, status: e.target.value as Review['status'] })}
+                  className={inputClass}
+                >
+                  <option value="APPROVED">Đã duyệt</option>
+                  <option value="PENDING">Chờ duyệt</option>
+                  <option value="REJECTED">Từ chối</option>
+                </select>
+              </label>
+            </div>
+
+            <label className="block space-y-1.5 font-bold text-slate-300">
+              <span>Nội dung đánh giá *</span>
+              <textarea required rows={4} value={form.comment} onChange={(e) => setForm({ ...form, comment: e.target.value })} className={inputClass} />
+            </label>
+
+            <label className="flex items-center gap-2 font-bold text-slate-300">
+              <input
+                type="checkbox"
+                checked={form.rental_verified}
+                onChange={(e) => setForm({ ...form, rental_verified: e.target.checked })}
+                className="size-4 accent-cyan-500"
+              />
+              Khách thuê đã xác minh
+            </label>
+
+            <div className="flex justify-end gap-2">
+              <button type="button" onClick={() => setFormOpen(false)} className="rounded-xl bg-slate-800 px-4 py-2.5 font-bold text-slate-300">
+                Hủy
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                className="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 font-black text-slate-950 disabled:opacity-60"
+              >
+                <Save className="w-4 h-4" /> {saving ? 'Đang lưu...' : 'Lưu đánh giá'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
