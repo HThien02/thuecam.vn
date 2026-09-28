@@ -86,8 +86,12 @@ export default async function HomePage() {
               href={`/danh-muc/${cat.slug}`}
               className="p-4 rounded-[28px] bg-white border-2 border-sky-100 hover:border-sky-300 card-hover text-center flex flex-col items-center group shadow-cute"
             >
-              <div className="w-13 h-13 rounded-2xl bg-sky-50 group-hover:bg-gradient-candy group-hover:text-white flex items-center justify-center text-[#0284c7] mb-3 transition-colors shadow-inner">
-                <Camera className="w-6 h-6" />
+              <div className="relative mb-3 flex size-14 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-gradient-to-br from-sky-100 via-blue-50 to-violet-100 text-[#0284c7] shadow-[0_6px_16px_rgba(14,165,233,0.18)] ring-1 ring-sky-100 transition duration-300 group-hover:-translate-y-0.5 group-hover:scale-105 group-hover:from-sky-500 group-hover:via-blue-600 group-hover:to-violet-600 group-hover:text-white">
+                {cat.icon?.startsWith('http') || cat.icon?.startsWith('/') ? (
+                  <Image src={cat.icon} alt="" fill sizes="56px" className="object-cover" />
+                ) : (
+                  <Camera className="size-6 transition-transform group-hover:scale-110" />
+                )}
               </div>
               <span className="font-extrabold text-xs text-slate-900 group-hover:text-[#0284c7] transition-colors">
                 {cat.name}
