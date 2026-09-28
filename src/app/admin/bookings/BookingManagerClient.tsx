@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import * as XLSX from 'xlsx';
 import {
   Plus,
   Trash2,
@@ -12,6 +13,7 @@ import {
   Save,
   Search,
   Filter,
+  Download,
 } from 'lucide-react';
 import { saveAdminRecord, deleteAdminRecord } from '@/lib/data/admin-api';
 import type { BookingRecord, BlockedDate } from '@/lib/data/admin-types';
@@ -27,6 +29,7 @@ export default function BookingManagerClient({
 }) {
   const [bookings, setBookings] = useState<BookingRecord[]>(initialBookings);
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
+  const [filterVoucher, setFilterVoucher] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBooking, setEditingBooking] = useState<BookingRecord | null>(null);
@@ -161,6 +164,10 @@ export default function BookingManagerClient({
           total_days: daysCount,
           daily_price: editingBooking?.daily_price ?? Math.round(Number(totalPrice) / daysCount),
           total_price: Number(totalPrice),
+          subtotal: editingBooking?.subtotal ?? Number(totalPrice),
+          voucher_code: editingBooking?.voucher_code ?? null,
+          voucher_discount: editingBooking?.voucher_discount ?? 0,
+          selected_addons: editingBooking?.selected_addons ?? [],
           deposit_amount: Number(depositAmount),
           pickup_method: delivery ? 'DELIVERY' : 'STORE',
           delivery_address: delivery ? pickupMethod : null,
@@ -184,7 +191,10 @@ export default function BookingManagerClient({
         total_days: Number(saved.total_days),
         daily_price: Number(saved.daily_price),
         total_price: Number(saved.total_price),
-        selected_addons: editingBooking?.selected_addons ?? [],
+        subtotal: Number(saved.subtotal ?? saved.total_price),
+        voucher_code: typeof saved.voucher_code === 'string' ? saved.voucher_code : null,
+        voucher_discount: Number(saved.voucher_discount ?? 0),
+        selected_addons: Array.isArray(saved.selected_addons) ? saved.selected_addons as BookingRecord['selected_addons'] : editingBooking?.selected_addons ?? [],
         deposit_amount: Number(saved.deposit_amount),
         pickup_method: saved.pickup_method === 'DELIVERY'
           ? String(saved.delivery_address ?? 'Giao tận nơi')
@@ -261,14 +271,42 @@ export default function BookingManagerClient({
 
   const filteredBookings = bookings.filter((b) => {
     const matchStatus = filterStatus === 'ALL' || b.status === filterStatus;
+    const matchVoucher = filterVoucher === 'ALL' || (filterVoucher === 'USED' ? Boolean(b.voucher_code) : !b.voucher_code);
     const matchSearch =
       b.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       b.customer_phone.includes(searchTerm) ||
       (b.customer_cccd ?? '').includes(searchTerm) ||
       b.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       b.product_name.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchStatus && matchSearch;
+    return matchStatus && matchVoucher && matchSearch;
   });
+
+  const exportBookings = () => {
+    const rows = filteredBookings.flatMap((booking) => {
+      const lines = booking.selected_addons?.length ? booking.selected_addons : [null];
+      return lines.map((addon) => [
+        booking.id,
+        booking.customer_name,
+        booking.customer_phone,
+        booking.product_name,
+        addon?.name ?? 'Thiết bị chính',
+        addon ? addon.price_per_rental : booking.daily_price,
+        booking.total_days,
+        booking.subtotal ?? booking.total_price,
+        booking.voucher_code ?? '',
+        booking.voucher_discount ?? 0,
+        booking.total_price,
+        booking.deposit_amount ?? 0,
+        booking.status,
+      ]);
+    });
+    const header = ['Mã đơn', 'Khách hàng', 'Số điện thoại', 'Sản phẩm', 'Hạng mục', 'Đơn giá', 'Số ngày', 'Tạm tính', 'Voucher', 'Giảm giá', 'Tổng tiền', 'Tiền cọc', 'Trạng thái'];
+    const worksheet = XLSX.utils.aoa_to_sheet([header, ...rows]);
+    worksheet['!cols'] = header.map((title) => ({ wch: Math.max(14, title.length + 3) }));
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Don thue');
+    XLSX.writeFile(workbook, `don-thue-${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
 
   return (
     <div className="space-y-6">
@@ -308,6 +346,21 @@ export default function BookingManagerClient({
               <option value="CANCELLED" className="bg-slate-900 text-white">Đã hủy (CANCELLED)</option>
             </select>
           </div>
+
+          <select
+            value={filterVoucher}
+            onChange={(event) => setFilterVoucher(event.target.value)}
+            className="rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-xs text-white outline-none focus:border-sky-500"
+            aria-label="Lọc voucher"
+          >
+            <option value="ALL">Tất cả voucher</option>
+            <option value="USED">Có dùng voucher</option>
+            <option value="NONE">Không dùng voucher</option>
+          </select>
+
+          <button type="button" onClick={exportBookings} className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs font-black text-emerald-300 hover:bg-emerald-500/20">
+            <Download className="size-3.5" /> Xuất XLSX
+          </button>
         </div>
 
         <button
@@ -328,7 +381,7 @@ export default function BookingManagerClient({
                 <th className="px-4 py-3.5">Khách hàng</th>
                 <th className="px-4 py-3.5">Thiết bị</th>
                 <th className="px-4 py-3.5">Lịch thuê (Nhận - Trả)</th>
-                <th className="px-4 py-3.5">Tổng tiền</th>
+                <th className="px-4 py-3.5">Chi tiết giá & voucher</th>
                 <th className="px-4 py-3.5">Điểm nhận</th>
                 <th className="px-4 py-3.5">Trạng thái</th>
                 <th className="px-4 py-3.5 text-right">Thao tác</th>
@@ -371,8 +424,10 @@ export default function BookingManagerClient({
                         ({b.total_days} ngày) · nhận lúc {b.pickup_time?.slice(0, 5) ?? '—'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-black text-sky-400">
-                      {b.total_price.toLocaleString('vi-VN')}đ
+                    <td className="px-4 py-3 min-w-48">
+                      <p className="font-bold text-slate-200">Tạm tính: {(b.subtotal ?? b.total_price).toLocaleString('vi-VN')}đ</p>
+                      {b.voucher_code ? <p className="mt-1 text-[10px] font-black text-amber-300">Voucher: {b.voucher_code} · -{(b.voucher_discount ?? 0).toLocaleString('vi-VN')}đ</p> : <p className="mt-1 text-[10px] text-slate-500">Không dùng voucher</p>}
+                      <p className="mt-1 font-black text-sky-400">Tổng: {b.total_price.toLocaleString('vi-VN')}đ</p>
                     </td>
                     <td className="px-4 py-3 text-slate-600 max-w-xs truncate">
                       {b.pickup_method}

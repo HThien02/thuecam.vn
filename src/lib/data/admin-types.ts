@@ -19,6 +19,9 @@ export interface BookingRecord {
   end_date: string;
   total_days: number;
   total_price: number;
+  subtotal?: number;
+  voucher_code?: string | null;
+  voucher_discount?: number;
   selected_addons?: BookingAddonLineItem[];
   daily_price?: number;
   deposit_amount?: number;
