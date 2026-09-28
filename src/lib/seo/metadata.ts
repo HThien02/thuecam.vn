@@ -35,6 +35,7 @@ export function constructMetadata({
   const finalTitle = title ? `${title}` : defaultTitle;
   const finalDescription = description || defaultDescription;
   const finalOgImage = ogImage || defaultOgImage;
+  const resolvedOgImage = finalOgImage.startsWith('http') ? finalOgImage : `${SITE_URL}${finalOgImage.startsWith('/') ? '' : '/'}${finalOgImage}`;
   const finalSiteName = siteName || 'THUECAM.VN';
 
   // Clean canonical URL
@@ -79,7 +80,7 @@ export function constructMetadata({
       siteName: finalSiteName,
       images: [
         {
-          url: finalOgImage,
+          url: resolvedOgImage,
           width: 1200,
           height: 630,
           alt: finalTitle,
@@ -93,7 +94,7 @@ export function constructMetadata({
       card: 'summary_large_image',
       title: finalTitle,
       description: finalDescription,
-      images: [finalOgImage],
+      images: [resolvedOgImage],
       creator: '@thuecamvn',
       site: '@thuecamvn',
     },
